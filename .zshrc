@@ -1,8 +1,8 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
-
 # Path to your oh-my-zsh installation.
-export ZSH="$HOME/.oh-my-zsh"
+
+export ZSH="/Users/quangdinhnguyenpham/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -70,24 +70,7 @@ ZSH_THEME="spaceship"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(
-	aws
-	command-not-found
-	docker
-	fasd
-	git
-	npm
-	react-native
-	sudo
-	systemd
-	ubuntu
-	vscode
-	web-search
-	yarn
-	zsh-autosuggestions
-	zsh-completions
-    fast-syntax-highlighting
-)
+plugins=(git zsh-autosuggestions fast-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -116,17 +99,16 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-[[ $TERM != "screen"  ]] && exec tmux
-if [ ! "$TMUX" = ""  ]; then export TERM=xterm-256color; fi
-alias neofetch='neofetch --ascii_colors 2 7 --colors 2 7 2 2 7 7 2
-
-'
 alias g="git"
-alias ls="exa --icons --git"
-alias la="exa -a --icons --git"
-alias lt="exa -a -T -L=2 --icons --git"
-export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+alias ls="exa --icons"
+alias la="exa -la --icons"
+alias t="tmux"
+alias ta="t a -t"
+alias tls="t ls"
+alias tn="t new -t"
+eval "$(fnm env --use-on-cd)"
 
-# fnm
-export PATH=/home/destnguyxn/.fnm:$PATH
-eval "`fnm env`"
+# pnpm
+export PNPM_HOME="/Users/quangdinhnguyenpham/Library/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+# pnpm end
