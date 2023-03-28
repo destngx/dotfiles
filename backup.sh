@@ -21,9 +21,5 @@ cp ~/.zshrc .
 
 cp /Users/quangdinhnguyenpham/Documents/ANNE\ PRO\ 2.json .
 
-# vim awesome config
-
-cp /Users/quangdinhnguyenpham/.vim_runtime/my_configs.vim .
-
 # vimium_c
 echo "please copy vimium c config manually"
