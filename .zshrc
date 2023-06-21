@@ -127,8 +127,10 @@ for key ('k') bindkey -M vicmd ${key} history-substring-search-up
 for key ('j') bindkey -M vicmd ${key} history-substring-search-down
 unset key
 # }}} End configuration added by Zim install
-
+########################################
+# User configurations
 alias g="git"
+alias l="exa"
 alias ls="exa --icons"
 alias la="exa -la --icons"
 alias lt="ls --tree --level=4"
@@ -138,23 +140,48 @@ alias tls="t ls"
 alias tn="t new -t"
 alias v="nvim"
 alias vf='nvim $(fzf)'
-alias py=python
+alias py=python3
+alias cat=batcat
+alias python=python3
+alias setkey="sh ~/.config/autostart/capsToCtrlOrEsc.sh"
+alias pn=pnpm
+alias px=pnpx
 
-export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-eval "$(fnm env --use-on-cd)"
+# export PYENV_ROOT="$HOME/.pyenv"
+# command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+# eval "$(pyenv init -)"
+# eval "$(fnm env --use-on-cd)"
 export MANPATH=$HOME/tools/ripgrep/doc/man:$MANPATH
 export FPATH=$HOME/tools/ripgrep/complete:$FPATH
-# https://egeek.me/2020/04/18/enabling-locate-on-osx/
-if which glocate > /dev/null; then
-  alias locate="glocate -d $HOME/locatedb"
-
-  # Using cache_list requires `LOCATE_PATH` environment var to exist in session.
-  # trouble shoot: `echo $LOCATE_PATH` needs to return db path.
-  [[ -f "$HOME/locatedb" ]] && export LOCATE_PATH="$HOME/locatedb"
-fi
-
+# # https://egeek.me/2020/04/18/enabling-locate-on-osx/
+# if which glocate > /dev/null; then
+#   alias locate="glocate -d $HOME/locatedb"
+#
+#   # Using cache_list requires `LOCATE_PATH` environment var to exist in session.
+#   # trouble shoot: `echo $LOCATE_PATH` needs to return db path.
+#   [[ -f "$HOME/locatedb" ]] && export LOCATE_PATH="$HOME/locatedb"
+# fi
+#
 alias loaddb="gupdatedb --localpaths=$HOME --prunepaths=/Volumes --output=$HOME/locatedb"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+#Virtualenvwrapper settings:
+export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
+export WORKON_HOME=$HOME/.virtualenvs
+export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
+source /usr/local/bin/virtualenvwrapper.sh
+
+# export PATH=/usr/local/cuda-11.8/bin${PATH:+:${PATH}}
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.virtualenvs/badimagetrain/lib/python3.10/site-packages/tensorrt/
+
+export PATH="$HOME/.local/DataGrip-2023.1.1/bin:$PATH"
+
+# pnpm
+export PNPM_HOME="/home/destnguyxn/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+export VOLTA_HOME="$HOME/.volta"
+export PATH="$VOLTA_HOME/bin:$PATH"
