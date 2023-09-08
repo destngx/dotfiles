@@ -1,11 +1,11 @@
 {
 	"name": "Vimium C",
-	"@time": "7/24/2022, 6:42:06 PM",
-	"time": 1658662926317,
+	"@time": "6/30/2023, 3:07:43 PM",
+	"time": 1688112463680,
 	"environment": {
-		"extension": "1.98.3",
+		"extension": "1.99.992",
 		"platform": "mac",
-		"chromium": "103"
+		"chromium": 114
 	},
 	"allBrowserUrls": true,
 	"exclusionRules": [
@@ -14,15 +14,11 @@
 			"pattern": ":https://mail.google.com/"
 		},
 		{
-			"passKeys": "f ",
-			"pattern": ":https://www.youtube.com/"
-		},
-		{
 			"passKeys": "0 ",
 			"pattern": ":https://www.youtube.com/"
 		}
 	],
-	"ignoreKeyboardLayout": 1,
+	"keyLayout": 268,
 	"searchEngines": [
 		"bi|bing: https://www.bing.com/search?q=%s ",
 		"g|go|gg|google|Google: https://www.google.com/search?q=%s \\",
@@ -64,5 +60,6 @@
 		"js\\:|Js: javascript:\\ $S; JavaScript",
 		""
 	],
-	"vimSync": true
+	"vimSync": true,
+	"ignoreKeyboardLayout": 1
 }

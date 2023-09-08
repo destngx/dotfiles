@@ -1,0 +1,138 @@
+" Base configuration
+set scrolloff=10
+set linenumber
+set showmode
+set showcmd
+set visualbell
+set clipboard+=unnamed
+syntax enable
+set foldmethod=syntax
+set wildmenu
+
+""" Idea specific settings ------------------
+set ideastatusicon=gray
+" Smart join for <J>
+set ideajoin
+" Map vim marks to IDEA global marks
+set ideamarks
+
+" Search improvement
+set ignorecase
+set smartcase
+set incsearch
+set hlsearch
+
+" Leader
+let mapleader = " "
+
+" Plugins
+set surround
+set highlightedyank
+set sneak
+set nerdtree
+set easymotion
+set which-key
+set commentary
+set quickscope
+set argtextobj
+set matchit
+set multicursor
+""" Plugin settings ------------------------
+set notimeout " which-key
+let g:argtextobj_pairs="[:],(:),<:>"
+let g:highlightedyank_highlight_color = "rgba(255,126,0,80)"
+
+" Keybindings -----------------------------
+" Navigating in editor
+vmap L g_
+vmap H ^
+nmap L g_
+nmap H ^
+imap <C-a> <HOME>
+imap <C-e> <END>
+" Move between block
+nnoremap ] }
+nnoremap [ {
+" Use very magic mode when searching
+map / /\v
+" Saving file with Ctrl+S
+imap <C-s> <Esc>:w<CR>
+nmap <C-s> :w<CR>
+" Utilities
+nnoremap ; :
+inoremap jj <Esc>
+inoremap jk <Esc>
+inoremap kj <Esc>
+nnoremap vv V
+nnoremap J mzJ`z
+" Open Terminal
+nmap <leader>t <Action>(Terminal.OpenInTerminal)
+" Select last paste "text
+nnoremap gp `[v`]
+" Tab navigation
+nnoremap <Tab> :tabnext<CR>
+nnoremap <A-p> :tabprev<CR>\
+" Pane navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-l> <C-w>l
+nnoremap <C-k> <C-w>k
+nnoremap <C-j> <C-w>j
+" Easy visual indentation
+vnoremap < <gv
+vnoremap > >gv
+" Jump around with easymotion
+map <leader>j <Plug>(easymotion-s)
+" Open NERDTree (use q to exit)
+map <C-e> :NERDTreeToggle<CR>
+" Folding
+map <leader>zc :action CollapseAllRegions<CR>
+map <leader>zo :action ExpandAllRegions<CR>
+" Window splits
+map <leader>v <Action>(SplitVertically)
+map <leader>V <Action>(SplitHorizontally)
+map <leader>wu <Action>(Unsplit)
+map <leader>wm <Action>(MoveEditorToOppositeTabGroup)
+" Actions
+map <leader>ca <action>(ShowIntentionActions)
+map P <action>(SearchEverywhere)
+" File navigation
+map <C-p> <action>(GotoFile)
+map <leader>fc <action>(FindInPath)
+map <leader>fr <action>(ReplaceInPath)
+map <leader><leader> <Action>(RecentFiles)
+map <leader>fl <action>(RecentLocations)
+map <leader>fs <action>(NewScratchFile)
+" Close active tab
+map <leader>q <Action>(CloseContent)
+" Refactoring
+nmap <leader>ff <action>(ReformatCode)
+" optimize import
+map <leader>fi <Action>(OptimizeImports)
+map <leader>rn <Action>(RenameElement)
+map <leader>rm <Action>(ExtractMethod)
+map <leader>rv <Action>(IntroduceVariable)
+map <leader>rf <Action>(IntroduceField)
+map <leader>rs <Action>(ChangeSignature)
+map <leader>rr <Action>(Refactorings.QuickListPopupAction)
+" Go to code
+nmap <leader>gd <Action>(GotoDeclaration)
+nmap <leader>gy <Action>(GotoTypeDeclaration)
+nmap <leader>gi <Action>(GotoImplementation)
+nmap <leader>gu <Action>(ShowUsages)
+nmap <leader>gt <Action>(GotoTest)
+nmap <leader>gf <Action>(Back)
+nmap <leader>gb <Action>(Forward)
+" Display options
+map <leader>dd <action>(ToggleDistractionFreeMode)
+map <leader>dz <action>(ToggleZenMode)
+map <leader>df <action>(ToggleFullScreen)
+" Gi windows
+map <leader>gc <Action>(CheckinProject)
+map <leader>gs <Action>(ActivateVersionControlToolWindow)
+map <leader>co <Action>(Gi.Branches)
+" Errors
+map <leader>en <Action>(ReSharperGotoNextErrorInSolution)
+map <leader>ep <Action>(ReSharperGotoPrevErrorInSolution)
+" Redo
+map U <C-R>
+" Multicursor
