@@ -13,6 +13,7 @@ set wildmenu
 set ideastatusicon=gray
 " Smart join for <J>
 set ideajoin
+nmap <leader>j <Action>(EditorJoinLines)
 " Map vim marks to IDEA global marks
 set ideamarks
 
@@ -71,7 +72,7 @@ nmap <leader>t <Action>(Terminal.OpenInTerminal)
 nnoremap gp `[v`]
 " Tab navigation
 nnoremap <Tab> :tabnext<CR>
-nnoremap <A-p> :tabprev<CR>\
+nnoremap <A-p> :tabprev<CR>
 " Pane navigation
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
@@ -81,7 +82,7 @@ nnoremap <C-j> <C-w>j
 vnoremap < <gv
 vnoremap > >gv
 " Jump around with easymotion
-map <leader>j <Plug>(easymotion-s)
+" map <leader>j <Plug>(easymotion-s)
 " Open NERDTree (use q to exit)
 map <C-e> :NERDTreeToggle<CR>
 " Folding
@@ -89,10 +90,11 @@ map <leader>zc :action CollapseAllRegions<CR>
 map <leader>zo :action ExpandAllRegions<CR>
 " Window splits
 map <leader>v <Action>(SplitVertically)
-map <leader>V <Action>(SplitHorizontally)
+map <leader>h <Action>(SplitHorizontally)
 map <leader>wu <Action>(Unsplit)
 map <leader>wm <Action>(MoveEditorToOppositeTabGroup)
 " Actions
+map <leader><a-n> <Action>(SelectAllOccurrences)
 map <leader>ca <action>(ShowIntentionActions)
 map P <action>(SearchEverywhere)
 " File navigation
@@ -105,7 +107,7 @@ map <leader>fs <action>(NewScratchFile)
 " Close active tab
 map <leader>q <Action>(CloseContent)
 " Refactoring
-nmap <leader>ff <action>(ReformatCode)
+nmap <leader>cf <action>(ReformatCode)
 " optimize import
 map <leader>fi <Action>(OptimizeImports)
 map <leader>rn <Action>(RenameElement)
@@ -120,19 +122,38 @@ nmap <leader>gy <Action>(GotoTypeDeclaration)
 nmap <leader>gi <Action>(GotoImplementation)
 nmap <leader>gu <Action>(ShowUsages)
 nmap <leader>gt <Action>(GotoTest)
-nmap <leader>gf <Action>(Back)
-nmap <leader>gb <Action>(Forward)
+nmap <leader>gf <Action>(Forward)
 " Display options
 map <leader>dd <action>(ToggleDistractionFreeMode)
 map <leader>dz <action>(ToggleZenMode)
 map <leader>df <action>(ToggleFullScreen)
-" Gi windows
+" Git windows
 map <leader>gc <Action>(CheckinProject)
 map <leader>gs <Action>(ActivateVersionControlToolWindow)
-map <leader>co <Action>(Gi.Branches)
+map <leader>co <Action>(Git.Branches)
 " Errors
-map <leader>en <Action>(ReSharperGotoNextErrorInSolution)
-map <leader>ep <Action>(ReSharperGotoPrevErrorInSolution)
+nmap <Leader>cd <Action>(ActivateProblemsViewToolWindow)
+map <leader>cl <Action>(ShowErrorDescription)
+map <leader>en <Action>(GotoNextError)
+map <leader>ep <Action>(GotoPreviousError)
 " Redo
 map U <C-R>
-" Multicursor
+" Debug keymaps
+nmap <Leader>db <Action>(ToggleLineBreakpoint)
+nmap <Leader>de <Action>(EditBreakpoint)
+" Tests keymaps
+nmap <Leader>rt <Action>(RunClass)
+nmap <Leader>dt <Action>(DebugClass)
+" Keymaps to move lines of code up and down
+nmap <S-j> :m .+1<CR>==
+nmap <S-k> :m .-2<CR>==
+vmap <S-j> :m '>+1<CR>gv=gv
+vmap <S-k> :m '<-2<CR>gv=gv
+" Selects all editor content
+nnoremap <C-A> gg<S-v>G
+" Other windows access
+nmap <Leader>wr <Action>(ActivateRunToolWindow)
+nmap <Leader>wd <Action>(ActivateDatabaseToolWindow)
+nmap <Leader>wn <Action>(ActivateNotificationsToolWindow)
+nmap <Leader>wnc <Action>(ClearAllNotifications)
+
