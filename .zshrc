@@ -47,7 +47,7 @@ WORDCHARS=${WORDCHARS//[\/]}
 
 # Set a custom prefix for the generated aliases. The default prefix is 'G'.
 #zstyle ':zim:git' aliases-prefix 'g'
-source ~/.zim/modules/fzf-tab/fzf-tab.plugin.zsh
+
 #
 # input
 #
@@ -129,6 +129,8 @@ unset key
 # }}} End configuration added by Zim install
 ########################################
 # User configurations
+# Useful aliases
+
 alias g="git"
 alias l="exa"
 alias ls="exa --icons"
@@ -141,12 +143,17 @@ alias tn="t new -t"
 alias v="nvim"
 alias vf='nvim $(fzf)'
 alias py=python3
-alias cat=batcat
+alias cat=bat
 alias python=python3
 alias pn=pnpm
 alias px=pnpx
 alias k=kubectl
+alias ...='cd ../../'
+alias ....='cd ../../../'
+alias n=nnn
 
+# User variables
+export EDITOR=nvim
 # export PYENV_ROOT="$HOME/.pyenv"
 # command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 # eval "$(pyenv init -)"
@@ -174,7 +181,7 @@ alias loaddb="gupdatedb --localpaths=$HOME --prunepaths=/Volumes --output=$HOME/
 # export PATH=/usr/local/cuda-11.8/bin${PATH:+:${PATH}}
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.virtualenvs/badimagetrain/lib/python3.10/site-packages/tensorrt/
 
-export PATH="$HOME/.local/DataGrip-2023.1.1/bin:$PATH"
+# export PATH="$HOME/.local/DataGrip-2023.1.1/bin:$PATH"
 
 # pnpm
 export PNPM_HOME="/home/destnguyxn/.local/share/pnpm"
@@ -186,5 +193,5 @@ esac
 export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
-
+export PATH="/Applications/IntelliJ IDEA.app/Contents/MacOS:$PATH"
 export OPENAI_API_KEY=

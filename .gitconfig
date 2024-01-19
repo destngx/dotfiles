@@ -19,7 +19,8 @@
 	helper = store
 [core]
 	editor = nvim
-	autocrlf = true
+	autocrlf = input
+	eol = lf
 [init]
 	defaultBranch = main
 [filter "lfs"]

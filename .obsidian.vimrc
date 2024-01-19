@@ -1,7 +1,14 @@
 nmap j gj
 nmap k gk
+nmap 0 :g0
+nmap [[ :pHead
+nmap ]] :nHead
+vmap j gj
+vmap k gk
 nmap H ^
 nmap L $
+vmap L $
+vmap H ^
 " Yank to system clipboard
 set clipboard=unnamed
 imap jj <Esc>
@@ -22,7 +29,7 @@ exmap surround_square_brackets surround [ ]
 exmap surround_curly_brackets surround { }
 
 " NOTE: must use 'map' and not 'nmap'
-map [[ :surround_wiki
+map s[ :surround_wiki
 nunmap s
 vunmap s
 map s" :surround_double_quotes
