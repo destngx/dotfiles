@@ -428,7 +428,8 @@ set -g @plugin 'tmux-plugins/tmux-continuum'
 
 # Plugin settings
 set -g @continuum-restore 'on'
-
+# open tmux-fzf-url in a tmux v3.2+ popup
+set -g @fzf-url-fzf-options '-w 50% -h 50% --multi -0 --no-preview --no-border'
 
 # -- custom variables ----------------------------------------------------------
 
