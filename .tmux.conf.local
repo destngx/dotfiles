@@ -257,8 +257,7 @@ tmux_conf_theme_right_separator_sub="|"
 #     - #{username}
 #     - #{username_ssh}
 tmux_conf_theme_status_left=" ❐ #S "
-tmux_conf_theme_status_right=" #{prefix}#{mouse}#{pairing}#{synchronized}#{?battery_status,#{battery_status},}#{?battery_bar, #{battery_bar},}#{?battery_percentage, #{battery_percentage},} , %R , %d %b | #{hostname} "
-
+tmux_conf_theme_status_right=" #{prefix}#{mouse}#{pairing}#{synchronized}#{?battery_status,#{battery_status},}#{?battery_bar, #{battery_bar},}#{?battery_percentage, #{battery_percentage},}#{pomodoro_status} , %R , %d %b | #{hostname} "
 # status left style
 tmux_conf_theme_status_left_fg="$tmux_conf_theme_colour_6,$tmux_conf_theme_colour_7,$tmux_conf_theme_colour_8"
 tmux_conf_theme_status_left_bg="$tmux_conf_theme_colour_19,$tmux_conf_theme_colour_10,$tmux_conf_theme_colour_11"
@@ -300,10 +299,10 @@ tmux_conf_theme_synchronized_bg="none"
 tmux_conf_theme_synchronized_attr="none"
 
 # battery bar symbols
-# tmux_conf_battery_bar_symbol_full="◼"
-# tmux_conf_battery_bar_symbol_empty="◻"
-tmux_conf_battery_bar_symbol_full="♥"
-tmux_conf_battery_bar_symbol_empty=""
+tmux_conf_battery_bar_symbol_full="◼"
+tmux_conf_battery_bar_symbol_empty="◻"
+# tmux_conf_battery_bar_symbol_full="♥"
+# tmux_conf_battery_bar_symbol_empty="·"
 
 # battery bar length (in number of symbols), possible values are:
 #   - auto
@@ -332,8 +331,8 @@ tmux_conf_battery_vbar_palette="gradient"
 #tmux_conf_battery_vbar_palette="#d70000,#ff5f00,#5fff00"  # red, orange, green
 
 # symbols used to indicate whether battery is charging or discharging
-tmux_conf_battery_status_charging="↑"       # U+2191
-tmux_conf_battery_status_discharging="↓"    # U+2193
+# tmux_conf_battery_status_charging="↑"       # U+2191
+# tmux_conf_battery_status_discharging="↓"    # U+2193
 tmux_conf_battery_status_charging="🔌"     # U+1F50C
 tmux_conf_battery_status_discharging="🔋"  # U+1F50B
 
@@ -350,7 +349,7 @@ tmux_conf_theme_clock_style="24"
 #   - false (default)
 #   - disabled
 # on Linux, this requires xsel, xclip or wl-copy
-tmux_conf_copy_to_os_clipboard=false
+tmux_conf_copy_to_os_clipboard=true
 
 
 # -- user customizations -------------------------------------------------------
@@ -381,7 +380,7 @@ tmux_conf_copy_to_os_clipboard=false
 # move status line to top
 #set -g status-position top
 
-
+set -g @pomodoro_skip '|'
 # -- tpm -----------------------------------------------------------------------
 
 # while I don't use tpm myself, many people requested official support so here
@@ -417,11 +416,16 @@ tmux_conf_uninstall_plugins_on_reload=true
 
 # to enable a plugin, use the 'set -g @plugin' syntax:
 # visit https://github.com/tmux-plugins for available plugins
+set -g @plugin 'sainnhe/tmux-fzf'
+# set -g @plugin 'Morantron/tmux-fingers'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @plugin 'olimorris/tmux-pomodoro-plus'
 set -g @plugin 'tmux-plugins/tmux-sensible'
 set -g @plugin 'tmux-plugins/tmux-copycat'
-set -g @plugin 'tmux-plugins/tmux-cpu'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
+
+# Plugin settings
 set -g @continuum-restore 'on'
 
 
