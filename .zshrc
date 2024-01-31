@@ -132,6 +132,10 @@ unset key
 # Useful aliases
 
 alias g="git"
+alias gst="g st"
+alias ghist="g hist"
+alias gca="g ca -m"
+
 alias l="exa"
 alias ls="exa --icons"
 alias la="exa -la --icons"
