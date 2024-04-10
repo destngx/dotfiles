@@ -134,27 +134,32 @@ unset key
 alias g="git"
 alias gst="g st"
 alias ghist="g hist"
-alias gca="g ca -m"
 
+alias ...='cd ../../'
+alias ....='cd ../../../'
+alias n=nnn
+alias rf="rm -rf"
 alias l="exa"
 alias ls="exa --icons"
 alias la="exa -la --icons"
 alias lt="ls --tree --level=4"
+
 alias t="tmux"
 alias ta="t a -t"
 alias tls="t ls"
 alias tn="t new -t"
+
 alias v="nvim"
 alias vf='nvim $(fzf)'
-alias py=python3
+
 alias cat=bat
 alias python=python3
+alias py=python3
+
 alias pn=pnpm
 alias px=pnpx
+
 alias k=kubectl
-alias ...='cd ../../'
-alias ....='cd ../../../'
-alias n=nnn
 
 # User variables
 export BROWSER=''
@@ -199,4 +204,5 @@ export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/Applications/IntelliJ IDEA.app/Contents/MacOS:$PATH"
-export OPENAI_API_KEY=
+export OPENAI_API_KEY=example
+export ANTHROPIC_API_KEY=example
