@@ -60,3 +60,4 @@ zmodule https://github.com/agkozak/zsh-z
 zmodule https://github.com/grigorii-zander/zsh-npm-scripts-autocomplete
 zmodule https://github.com/Aloxaf/fzf-tab
 zmodule https://github.com/joshskidmore/zsh-fzf-history-search
+zmodule https://github.com/wfxr/forgit
