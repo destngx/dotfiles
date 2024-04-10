@@ -3,20 +3,26 @@
 	name = destnguyxn
 [includeIf "gitdir:~/projects/others/"]
   path = .gitconfig-personal
+[branch]
+  sort = -committerdate
 [alias]
   a = "!git status --short | peco | awk '{print $2}' | xargs git add"
   d = diff
   f = fetch --all
   co = checkout
-  ci = commit
-  ca = commit -a
+  ci = commit -m
+  ca = commit -am
   ps = "!git push origin $(git rev-parse --abbrev-ref HEAD)"
+  pf = push --force-with-lease
   pl = "!git pull origin $(git rev-parse --abbrev-ref HEAD)"
   st = status
+  ms = maintenance start
   br = branch
   df = "!git hist | peco | awk '{print $2}' | xargs -I {} git diff {}^ {}"
   hist = log --pretty=format:\"%Cgreen%h %Creset%cd %Cblue[%cn] %Creset%s%C(yellow)%d%C(reset)\" --graph --date=relative --decorate --all
   llog = log --graph --name-status --pretty=format:\"%C(red)%h %C(reset)(%cd) %C(green)%an %Creset%s %C(yellow)%d%Creset\" --date=relative
+  ; Delete local branches that no longer exist on the remote
+  gone = !git fetch -p && git branch -vv | grep 'origin/.*: gone]' | awk '{print $1}' | xargs git branch -D
 [credential]
 	helper = store
 [core]
@@ -25,11 +31,17 @@
 	eol = lf
   pager = delta
 [delta]
+  syntax-theme = tokyonight_night
   navigate = true
+  dark = true
+  side-by-side = false
+  file-modified-label = modified:
+  features = unobtrusive-line-numbers decorations
 [merge]
   conflictstyle = diff3
 [diff]
   colorMoved = default
+  algorithm = histogram
 [init]
 	defaultBranch = main
 [filter "lfs"]
