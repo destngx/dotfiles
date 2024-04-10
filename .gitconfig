@@ -21,6 +21,13 @@
 	editor = nvim
 	autocrlf = input
 	eol = lf
+  pager = delta
+[delta]
+  navigate = true
+[merge]
+  conflictstyle = diff3
+[diff]
+  colorMoved = default
 [init]
 	defaultBranch = main
 [filter "lfs"]
