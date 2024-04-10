@@ -4,22 +4,26 @@
 # git configurations
 
 cp ~/.gitconfig .
+cp ~/.gitconfig-personal .
 
 # obsidian configurations
 
-cp /Users/quangdinhnguyenpham/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Persona/.obsidian.vimrc .
+echo "Please open comment to backup obsidian config"
+# cp /Users/quangdinhnguyenpham/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Persona/.obsidian.vimrc .
 
 # tmux configurations
 
-cp ~/.tmux.conf .
+cp ~/.tmux.conf.local .
 
 # zsh config
 
 cp ~/.zshrc .
+cp ~/.zshenv .
 
 # ANNE PRO 2 Obinslab config
 
-cp /Users/quangdinhnguyenpham/Documents/ANNE\ PRO\ 2.json .
+echo "Please open comment to backup ANNE PRO 2 config"
+# cp /Users/quangdinhnguyenpham/Documents/ANNE\ PRO\ 2.json .
 
 # vimium_c
 echo "please copy vimium c config manually"
