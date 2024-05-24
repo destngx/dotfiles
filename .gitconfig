@@ -39,6 +39,8 @@
   features = unobtrusive-line-numbers decorations
 [merge]
   conflictstyle = diff3
+[pull]
+  rebase = true
 [diff]
   colorMoved = default
   algorithm = histogram
