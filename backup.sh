@@ -12,13 +12,19 @@ echo "Please open comment to backup obsidian config"
 # cp /Users/quangdinhnguyenpham/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Persona/.obsidian.vimrc .
 
 # tmux configurations
-
+echo "backup tmux config"
 cp ~/.tmux.conf.local .
 
 # zsh config
 
+echo "backup zsh config"
 cp ~/.zshrc .
 cp ~/.zshenv .
+cp ~/.zimrc .
+
+# wezterm
+echo "backup wezterm config"
+cp -r ~/.config/wezterm/ .
 
 # ANNE PRO 2 Obinslab config
 
