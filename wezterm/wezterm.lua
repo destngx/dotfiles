@@ -18,10 +18,41 @@ config.window_padding = { left = 8, right = 8, top = 8, bottom = "0.0cell" }
 config.adjust_window_size_when_changing_font_size = false
 config.force_reverse_video_cursor = true
 config.hide_tab_bar_if_only_one_tab = true
-config.font = wezterm.font 'OperatorMonoNerdFontComplete Nerd Font Light'
+config.font = wezterm.font 'JetBrains Mono'
+config.font_size = 16.0
+config.font_rules = {
+  {
+    intensity = 'Bold',
+    italic = true,
+    font = wezterm.font {
+      family = 'OperatorMonoNerdFontComplete Nerd Font',
+      weight = 'Bold',
+      style = 'Italic',
+      font_size = 18.0,
+    },
+  },
+  {
+    italic = true,
+    intensity = 'Half',
+    font = wezterm.font {
+      family = 'OperatorMonoNerdFontComplete Nerd Font',
+      weight = 'DemiBold',
+      style = 'Italic',
+      font_size = 18.0,
+    },
+  },
+  {
+    italic = true,
+    intensity = 'Normal',
+    font = wezterm.font {
+      family = 'OperatorMonoNerdFontComplete Nerd Font',
+      style = 'Italic',
+      font_size = 18.0,
+    },
+  },
+}
 config.harfbuzz_features = { "zero", "cv05", "cv02", "ss05", "ss04" }
-config.font_size = 18.0
-config.color_scheme = 'Tokyo Night (Gogh)'
+config.color_scheme = 'Kanagawa (Gogh)'
 config.leader = { key = 'a', mods = 'CTRL', timeout_milliseconds = 1000 }
 config.window_background_opacity = 0.96
 config.enable_kitty_keyboard = true

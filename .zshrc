@@ -195,11 +195,14 @@ alias loaddb="gupdatedb --localpaths=$HOME --prunepaths=/Volumes --output=$HOME/
 
 # pnpm
 export PNPM_HOME="/home/destnguyxn/.local/share/pnpm"
+# export PNPM_HOME="/Users/destnguyxn/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+DYLD_LIBRARY_PATH="$(brew --prefix)/lib" 
+export DYLD_LIBRARY_PATH="$(brew --prefix)/lib:$DYLD_LIBRARY_PATH"
 export VOLTA_HOME="$HOME/.volta"
 export PATH="$VOLTA_HOME/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
