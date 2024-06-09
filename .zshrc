@@ -133,36 +133,34 @@ unset key
 
 alias g="git"
 alias gst="g st"
+alias gpl="g pl"
+alias gps="g pl && g ps"
 alias ghist="g hist"
+alias gca="g ca -m"
+alias gci="g ci"
 
-alias ...='cd ../../'
-alias ....='cd ../../../'
-alias n=nnn
-alias rf="rm -rf"
-alias l="exa"
-alias ls="exa --icons"
-alias la="exa -la --icons"
-alias lt="ls --tree --level=4"
-
+alias l="eza"
+alias ls="eza --icons"
+alias la="eza -la --icons"
+alias lt="ls --tree --level=3"
 alias t="tmux"
 alias ta="t a -t"
 alias tls="t ls"
 alias tn="t new -t"
-
 alias v="nvim"
 alias vf='nvim $(fzf)'
-
+alias cf='cd $(fd . --type d | fzf)'
+alias py=python3
 alias cat=bat
 alias python=python3
-alias py=python3
-
 alias pn=pnpm
 alias px=pnpx
-
 alias k=kubectl
+alias ...='cd ../../'
+alias ....='cd ../../../'
+alias n=nnn
 
 # User variables
-export BROWSER=''
 export EDITOR=nvim
 # export PYENV_ROOT="$HOME/.pyenv"
 # command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
@@ -171,15 +169,15 @@ export EDITOR=nvim
 export MANPATH=$HOME/tools/ripgrep/doc/man:$MANPATH
 export FPATH=$HOME/tools/ripgrep/complete:$FPATH
 # # https://egeek.me/2020/04/18/enabling-locate-on-osx/
-if which glocate > /dev/null; then
-  alias locate="glocate -d $HOME/locatedb"
+# if which glocate > /dev/null; then
+#   alias locate="glocate -d $HOME/locatedb"
+#
+#   # Using cache_list requires `LOCATE_PATH` environment var to exist in session.
+#   # trouble shoot: `echo $LOCATE_PATH` needs to return db path.
+#   [[ -f "$HOME/locatedb" ]] && export LOCATE_PATH="$HOME/locatedb"
+# fi
 
-  # Using cache_list requires `LOCATE_PATH` environment var to exist in session.
-  # trouble shoot: `echo $LOCATE_PATH` needs to return db path.
-  [[ -f "$HOME/locatedb" ]] && export LOCATE_PATH="$HOME/locatedb"
-fi
-
-alias loaddb="gupdatedb --localpaths=$HOME --prunepaths=/Volumes --output=$HOME/locatedb"
+# alias loaddb="gupdatedb --localpaths=$HOME --prunepaths=/Volumes --output=$HOME/locatedb"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 #Virtualenvwrapper settings:
@@ -193,19 +191,27 @@ alias loaddb="gupdatedb --localpaths=$HOME --prunepaths=/Volumes --output=$HOME/
 
 # export PATH="$HOME/.local/DataGrip-2023.1.1/bin:$PATH"
 
+# Update PATH
+#
+DYLD_LIBRARY_PATH="$(brew --prefix)/lib" 
+export DYLD_LIBRARY_PATH="$(brew --prefix)/lib:$DYLD_LIBRARY_PATH"
+export VOLTA_HOME="$HOME/.volta"
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+export PATH="$VOLTA_HOME/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="/Applications/IntelliJ IDEA.app/Contents/MacOS:$PATH"
 # pnpm
-export PNPM_HOME="/home/destnguyxn/.local/share/pnpm"
-# export PNPM_HOME="/Users/destnguyxn/.local/share/pnpm"
+export PNPM_HOME="/Users/destnguyxn/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
-DYLD_LIBRARY_PATH="$(brew --prefix)/lib" 
-export DYLD_LIBRARY_PATH="$(brew --prefix)/lib:$DYLD_LIBRARY_PATH"
-export VOLTA_HOME="$HOME/.volta"
-export PATH="$VOLTA_HOME/bin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="/Applications/IntelliJ IDEA.app/Contents/MacOS:$PATH"
-export OPENAI_API_KEY=example
-export ANTHROPIC_API_KEY=example
+# global variables
+export OPENAI_API_KEY=
+export ANTHROPIC_API_KEY=
+export COPILOT=true
+export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git"'
+export FZF_DEFAULT_OPTS='-i --height=50%'
