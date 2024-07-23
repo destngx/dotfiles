@@ -1,6 +1,7 @@
 [user]
-	email = chromevi123@gmail.com
-	name = destnguyxn
+  email = chromevi123@gmail.com
+  name = destngx
+  signingkey = ~/.ssh/id_rsa.pub
 [includeIf "gitdir:~/projects/others/"]
   path = .gitconfig-personal
 [branch]
@@ -10,8 +11,8 @@
   d = diff
   f = fetch --all
   co = checkout
-  ci = commit -m
-  ca = commit -am
+  ci = commit -S -m
+  ca = commit -S -am
   ps = "!git push origin $(git rev-parse --abbrev-ref HEAD)"
   pf = push --force-with-lease
   pl = "!git pull origin $(git rev-parse --abbrev-ref HEAD)"
@@ -24,11 +25,15 @@
   ; Delete local branches that no longer exist on the remote
   gone = !git fetch -p && git branch -vv | grep 'origin/.*: gone]' | awk '{print $1}' | xargs git branch -D
 [credential]
-	helper = store
+  helper = store
+[gpg]
+  format = ssh
+[commit]
+  gpgsign = true
 [core]
-	editor = nvim
-	autocrlf = input
-	eol = lf
+  editor = nvim
+  autocrlf = input
+  eol = lf
   pager = delta
 [delta]
   syntax-theme = tokyonight_night
@@ -45,9 +50,11 @@
   colorMoved = default
   algorithm = histogram
 [init]
-	defaultBranch = main
+  defaultBranch = main
 [filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+[maintenance]
+  repo = /Users/destnguyxn/projects/obsidian-vaults
