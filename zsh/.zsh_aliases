@@ -1,0 +1,75 @@
+# use nvim, but don't make me think about it
+if [[ -n "$(command -v nvim)" ]]; then
+  alias vim="nvim"
+  alias v="nvim"
+  if [[ -n "$(command -v fzf)" ]]; then
+    alias vf='nvim $(fzf)'
+  fi
+fi
+
+if [[ -n "$(command -v microk8s)" ]]; then
+    alias m="microk8s"
+    alias mk="microk8s.kubectl"
+fi
+
+if [[ -n "$(command -v eza)" ]]; then
+  alias l="eza"
+  alias ls="eza --icons"
+  alias la="eza -la --icons"
+  alias lt="ls --tree --level=3"
+fi
+
+if [[ -n "$(command -v tmux)" ]]; then
+  alias t="tmux"
+  alias ta="t a -t"
+  alias tls="t ls"
+  alias tn="t new -t"
+fi
+
+
+
+if [[ -n "$(command -v bat)" ]]; then
+  alias cat=bat
+fi
+if [[ -n "$(command -v batcat)" ]]; then
+  alias cat=batcat
+fi
+
+if [[ -n "$(command -v pnpm)" ]]; then
+  alias pn=pnpm
+  alias px=pnpx
+fi
+
+if [[ -n "$(command -v kubectl)" ]]; then
+  alias k=kubectl
+fi
+
+if [[ -n "$(command -v bun)" ]]; then
+  alias b=bun
+fi
+
+if [[ -n "$(command -v nnn)" ]]; then
+  alias n=nnn
+fi
+
+if [[ -n "$(command -v fzf)" ]]; then
+  alias cf='cd $(fd . --type d | fzf)'
+fi
+
+# Useful aliases
+
+alias py=python3
+alias python=python3
+alias ...='cd ../../'
+alias ....='cd ../../../'
+
+# Git aliases
+
+alias g="git"
+alias gst="g st"
+alias gpl="g pl"
+alias gps="g pl && g ps"
+alias ghist="g hist"
+alias gca="g ca"
+alias gci="g ci"
+

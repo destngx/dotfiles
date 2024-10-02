@@ -129,45 +129,25 @@ unset key
 # }}} End configuration added by Zim install
 ########################################
 # User configurations
-# Useful aliases
-
-alias g="git"
-alias gst="g st"
-alias gpl="g pl"
-alias gps="g pl && g ps"
-alias ghist="g hist"
-alias gca="g ca -m"
-alias gci="g ci"
-
-alias l="eza"
-alias ls="eza --icons"
-alias la="eza -la --icons"
-alias lt="ls --tree --level=3"
-alias t="tmux"
-alias ta="t a -t"
-alias tls="t ls"
-alias tn="t new -t"
-alias v="nvim"
-alias vf='nvim $(fzf)'
-alias cf='cd $(fd . --type d | fzf)'
-alias py=python3
-alias cat=bat
-alias python=python3
-alias pn=pnpm
-alias px=pnpx
-alias k=kubectl
-alias ...='cd ../../'
-alias ....='cd ../../../'
-alias n=nnn
-
+#
+# # add color to man pages
+export MANROFFOPT='-c'
+export LESS_TERMCAP_mb=$(tput bold; tput setaf 2)
+export LESS_TERMCAP_md=$(tput bold; tput setaf 6)
+export LESS_TERMCAP_me=$(tput sgr0)
+export LESS_TERMCAP_so=$(tput bold; tput setaf 3; tput setab 4)
+export LESS_TERMCAP_se=$(tput rmso; tput sgr0)
+export LESS_TERMCAP_us=$(tput smul; tput bold; tput setaf 7)
+export LESS_TERMCAP_ue=$(tput rmul; tput sgr0)
+export LESS_TERMCAP_mr=$(tput rev)
+export LESS_TERMCAP_mh=$(tput dim)
 # User variables
-export EDITOR=nvim
 # export PYENV_ROOT="$HOME/.pyenv"
 # command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 # eval "$(pyenv init -)"
 # eval "$(fnm env --use-on-cd)"
-export MANPATH=$HOME/tools/ripgrep/doc/man:$MANPATH
-export FPATH=$HOME/tools/ripgrep/complete:$FPATH
+# export MANPATH=$HOME/tools/ripgrep/doc/man:$MANPATH
+# export FPATH=$HOME/tools/ripgrep/complete:$FPATH
 # # https://egeek.me/2020/04/18/enabling-locate-on-osx/
 # if which glocate > /dev/null; then
 #   alias locate="glocate -d $HOME/locatedb"
@@ -179,7 +159,12 @@ export FPATH=$HOME/tools/ripgrep/complete:$FPATH
 
 # alias loaddb="gupdatedb --localpaths=$HOME --prunepaths=/Volumes --output=$HOME/locatedb"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+if [ -f $HOME/.fzf.zsh ]; then
+  source $HOME/.fzf.zsh
+  export FZF_DEFAULT_COMMAND='fd --type f'
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+  export FZF_DEFAULT_OPTS="--color bg:-1,bg+:-1,fg:-1,fg+:#feffff,hl:#993f84,hl+:#d256b5,info:#676767,prompt:#676767,pointer:#676767"
+fi
 #Virtualenvwrapper settings:
 # export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
 # export WORKON_HOME=$HOME/.virtualenvs
@@ -191,27 +176,12 @@ export FPATH=$HOME/tools/ripgrep/complete:$FPATH
 
 # export PATH="$HOME/.local/DataGrip-2023.1.1/bin:$PATH"
 
-# Update PATH
-#
-DYLD_LIBRARY_PATH="$(brew --prefix)/lib" 
-export DYLD_LIBRARY_PATH="$(brew --prefix)/lib:$DYLD_LIBRARY_PATH"
-export VOLTA_HOME="$HOME/.volta"
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
-export PATH="$VOLTA_HOME/bin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="/Applications/IntelliJ IDEA.app/Contents/MacOS:$PATH"
-# pnpm
-export PNPM_HOME="/Users/destnguyxn/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
-# global variables
-export OPENAI_API_KEY=
-export ANTHROPIC_API_KEY=
-export COPILOT=true
-export FZF_DEFAULT_COMMAND='rg --files --hidden --glob "!.git"'
-export FZF_DEFAULT_OPTS='-i --height=50%'
+
+
+# look for all .zsh files and source them
+for file in "$ZDOTDIR/.zsh_prompt" "$ZDOTDIR/.zsh_aliases"; do
+    if [ -f $file ]; then
+        source $file
+    fi
+done
+

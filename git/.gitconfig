@@ -4,26 +4,28 @@
   signingkey = ~/.ssh/id_rsa.pub
 [includeIf "gitdir:~/projects/others/"]
   path = .gitconfig-personal
-[branch]
-  sort = -committerdate
 [alias]
   a = "!git status --short | peco | awk '{print $2}' | xargs git add"
   d = diff
   f = fetch --all
   co = checkout
   ci = commit -S -m
-  ca = commit -S -am
+  ca = commit --amend
   ps = "!git push origin $(git rev-parse --abbrev-ref HEAD)"
   pf = push --force-with-lease
   pl = "!git pull origin $(git rev-parse --abbrev-ref HEAD)"
   st = status
   ms = maintenance start
-  br = branch
+  br = branch -v
   df = "!git hist | peco | awk '{print $2}' | xargs -I {} git diff {}^ {}"
   hist = log --pretty=format:\"%Cgreen%h %Creset%cd %Cblue[%cn] %Creset%s%C(yellow)%d%C(reset)\" --graph --date=relative --decorate --all
   llog = log --graph --name-status --pretty=format:\"%C(red)%h %C(reset)(%cd) %C(green)%an %Creset%s %C(yellow)%d%Creset\" --date=relative
   ; Delete local branches that no longer exist on the remote
   gone = !git fetch -p && git branch -vv | grep 'origin/.*: gone]' | awk '{print $1}' | xargs git branch -D
+   # show the last tag
+  lt = describe --tags --abbrev=0
+[branch]
+  sort = -committerdate
 [credential]
   helper = store
 [gpg]
@@ -36,7 +38,6 @@
   eol = lf
   pager = delta
 [delta]
-  syntax-theme = tokyonight_night
   navigate = true
   dark = true
   side-by-side = false
