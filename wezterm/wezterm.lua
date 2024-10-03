@@ -94,7 +94,7 @@ config.keys = {
   -- Go to beginning of line
   {
     key = 'a',
-    mods = 'LEADER',
+    mods = 'LEADER|CTRL',
     action = wezterm.action.SendKey({
       key = 'a',
       mods = 'CTRL',
