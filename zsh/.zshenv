@@ -4,16 +4,20 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 
-
-DYLD_LIBRARY_PATH="$(brew --prefix)/lib" 
-export DYLD_LIBRARY_PATH="$(brew --prefix)/lib:$DYLD_LIBRARY_PATH"
 export VOLTA_HOME="$HOME/.volta"
+export PATH="$VOLTA_HOME/bin:$PATH"
+
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
 export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
-export PATH="$VOLTA_HOME/bin:$PATH"
+
+export PATH="/opt/homebrew/bin:$PATH"
+
 export PATH="$HOME/.local/bin:$PATH"
+
 export PATH="/Applications/IntelliJ IDEA.app/Contents/MacOS:$PATH"
+
 # pnpm
 export PNPM_HOME="/Users/destnguyxn/.local/share/pnpm"
 case ":$PATH:" in
@@ -31,6 +35,8 @@ fpath=(
 typeset -aU path
 
 export EDITOR=nvim
+export MANPATH=$HOME/tools/ripgrep/doc/man:$MANPATH
+export FPATH=$HOME/tools/ripgrep/complete:$FPATH
 export OPENAI_API_KEY=
 export ANTHROPIC_API_KEY=
 export COPILOT=true

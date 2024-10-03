@@ -67,3 +67,8 @@ elif type compctl &>/dev/null; then
   compctl -K _npm_completion npm
 fi
 ###-end-npm-completion-###
+#
+## bun completions
+[ -s "/Users/destnguyxn/.bun/_bun" ] && source "/Users/destnguyxn/.bun/_bun"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
