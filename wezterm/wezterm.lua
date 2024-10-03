@@ -50,7 +50,7 @@ config.font_rules = {
   },
 }
 config.harfbuzz_features = { "zero", "cv05", "cv02", "ss05", "ss04" }
-config.color_scheme = 'Kanagawa Dragon (Gogh)'
+config.color_scheme = 'Kanagawa (Gogh)'
 config.leader = { key = 'a', mods = 'CTRL', timeout_milliseconds = 1000 }
 config.window_background_opacity = 0.96
 config.enable_kitty_keyboard = true
