@@ -86,7 +86,6 @@ cmd-alt-h = [] # Disable "hide others"
 # You can uncomment the following lines to open up wezterm with alt + enter shortcut (like in i3)
 alt-backtick = '''exec-and-forget osascript -e '
 tell application "wezterm"
-    do script
     activate
 end tell'
 '''
@@ -203,9 +202,9 @@ run = 'move-node-to-workspace 2'
 if.app-id = 'com.apple.Safari'
 run = 'move-node-to-workspace 3'
 
-# [[on-window-detected]]
-# if.app-id = 'com.google.Chrome'
-# run = 'move-node-to-workspace B'
+[[on-window-detected]]
+if.app-id = 'company.thebrowser.Browser'
+run = 'move-node-to-workspace 3'
 
 # ## Development
 #

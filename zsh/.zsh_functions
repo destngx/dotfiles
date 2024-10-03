@@ -2,6 +2,6 @@ git() {
   if [[ $# -gt 0 ]]; then
     command git "$@"
   else
-    command git status
+    command git status -sb
   fi
 }

@@ -14,7 +14,7 @@
   ps = "!git push origin $(git rev-parse --abbrev-ref HEAD)"
   pf = push --force-with-lease
   pl = "!git pull origin $(git rev-parse --abbrev-ref HEAD)"
-  st = status
+  st = status -sb
   ms = maintenance start
   br = branch -v
   unstage = reset HEAD --
