@@ -1,4 +1,13 @@
+local wezterm = require('wezterm')
 local M = {}
+
+function M.is_linux()
+  return wezterm.target_triple:find("linux") ~= nil
+end
+
+function M.is_darwin()
+  return wezterm.target_triple:find("darwin") ~= nil
+end
 
 local function is_vim(pane)
   local process_name = string.gsub(pane:get_foreground_process_name(), '(.*[/\\])(.*)', '%2')
