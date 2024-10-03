@@ -20,16 +20,20 @@ cp ~/.tmux.conf.local .
 echo "backup zsh config"
 cp ~/.zshrc .
 cp ~/.zshenv .
-cp ~/.zimrc .
+cp ~/.config/zsh/.zimrc .
 
 # wezterm
 echo "backup wezterm config"
 cp -r ~/.config/wezterm/ .
 
+# aerospace
+echo "backup aerospace config"
+cp -r ~/.config/aerospace/ .
+
 # ANNE PRO 2 Obinslab config
 
 echo "Please open comment to backup ANNE PRO 2 config"
-# cp /Users/quangdinhnguyenpham/Documents/ANNE\ PRO\ 2.json .
+# cp /Users/destnguyxn/Documents/ANNE\ PRO\ 2.json .
 
 # vimium_c
 echo "please copy vimium c config manually"
