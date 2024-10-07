@@ -5,3 +5,12 @@ git() {
     command git status -sb
   fi
 }
+
+perp() {
+    search=""
+    echo "Perplexity lookup for: $@"
+    for term in $@; do
+        search="$search%20$term"
+    done
+    xdg-open "https://www.perplexity.ai/search?s=o&q=$search" &
+}
