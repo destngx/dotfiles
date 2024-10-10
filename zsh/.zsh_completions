@@ -73,3 +73,6 @@ fi
 [ -s "/Users/destnguyxn/.bun/_bun" ] && source "/Users/destnguyxn/.bun/_bun"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+## kubectl completions
+source <(kubectl completion zsh)
