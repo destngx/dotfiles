@@ -17,6 +17,8 @@ theme='style-4'
 ## Run
 rofi \
     -show combi \
-    -combi-modes window,drun\
-    -kb-cancel 'Super+space' \
+    -modi power-menu:rofi-power-menu \
+    -font 'JetBrains Mono 16'\
+    -combi-modes power-menu,window,drun\
+    -kb-cancel 'Escape,Super+space' \
     -theme ${dir}/${theme}.rasi
