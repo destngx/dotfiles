@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if pgrep -x rofi > /dev/null; then
+    killall rofi
+else
+    /home/destnguyxn/.config/rofi/launchers/type-2/launcher.sh
+fi
