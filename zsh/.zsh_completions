@@ -76,3 +76,6 @@ fi
 
 ## kubectl completions
 source <(kubectl completion zsh)
+
+## docker completions
+source <(docker completion zsh)
