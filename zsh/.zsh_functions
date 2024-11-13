@@ -6,6 +6,14 @@ git() {
   fi
 }
 
+bun() {
+  if [[ $# -gt 0 ]]; then
+    command bun "$@"
+  else
+    command bun install
+  fi
+}
+
 perp() {
     search=""
     echo "Perplexity lookup for: $@"
