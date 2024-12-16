@@ -12,6 +12,7 @@ end
 config.enable_kitty_graphics = true
 config.warn_about_missing_glyphs = false
 config.front_end = "WebGpu"
+config.max_fps = 120
 config.window_decorations = utils.is_darwin() and "RESIZE" or "NONE"
 config.use_fancy_tab_bar = false
 config.window_padding = { left = 8, right = 8, top = 8, bottom = "0.0cell" }
