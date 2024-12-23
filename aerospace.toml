@@ -190,12 +190,6 @@ q = ['enable toggle'] # Disable window management
 #
 # Event listeners
 
-[[on-window-detected]]
-if.app-id = 'com.github.wez.wezterm'
-run = 'move-node-to-workspace 2'
-
-## Chat apps
-#
 ## Browsers
 
 [[on-window-detected]]
@@ -203,9 +197,19 @@ if.app-id = 'com.apple.Safari'
 run = 'move-node-to-workspace 3'
 
 [[on-window-detected]]
-if.app-id = 'company.thebrowser.Browser'
-run = 'move-node-to-workspace 3'
+if.app-name-regex-substring = 'Zen Browser'
+run = 'move-node-to-workspace 1'
 
+[[on-window-detected]]
+if.app-name-regex-substring = 'Zen Browser'
+if.window-title-regex-substring = 'Picture-in-Picture'
+run = 'layout floating'
+
+# [[on-window-detected]]
+# if.app-id = 'com.google.Chrome'
+# if.window-title-regex-substring = 'Picture in Picture'
+# run = 'layout floating'
+# check-further-callbacks = true
 # ## Development
 #
 
@@ -217,7 +221,16 @@ run = 'move-node-to-workspace 3'
 #
 
 ## Productivity
+[[on-window-detected]]
+if.app-id = 'com.github.wez.wezterm'
+run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'Obsidian'
-run = 'move-node-to-workspace 3'
+run = 'move-node-to-workspace 4'
+
+## Entertainment
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Spotify'
+run = 'move-node-to-workspace 4'
