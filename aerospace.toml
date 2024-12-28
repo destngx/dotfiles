@@ -196,14 +196,15 @@ q = ['enable toggle'] # Disable window management
 if.app-id = 'com.apple.Safari'
 run = 'move-node-to-workspace 3'
 
-[[on-window-detected]]
-if.app-name-regex-substring = 'Zen Browser'
-run = 'move-node-to-workspace 1'
-
+### Keep Pip detect before window move
 [[on-window-detected]]
 if.app-name-regex-substring = 'Zen Browser'
 if.window-title-regex-substring = 'Picture-in-Picture'
 run = 'layout floating'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Zen Browser'
+run = 'move-node-to-workspace 1'
 
 # [[on-window-detected]]
 # if.app-id = 'com.google.Chrome'
