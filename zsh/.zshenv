@@ -15,6 +15,9 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 # Install nvim using bob is recommend
 export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
 
+# Mason executable path from nvim
+export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
+
 # User recommend bin folder
 export PATH="$HOME/.local/bin:$PATH"
 
@@ -23,7 +26,7 @@ export PATH="/opt/homebrew/bin:$PATH"
 export PATH="/Applications/IntelliJ IDEA.app/Contents/MacOS:$PATH"
 
 # pnpm
-export PNPM_HOME="/Users/destnguyxn/.local/share/pnpm"
+export PNPM_HOME="$HOME/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
