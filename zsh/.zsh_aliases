@@ -26,8 +26,6 @@ if [[ -n "$(command -v tmux)" ]]; then
   alias tn="t new -t"
 fi
 
-
-
 if [[ -n "$(command -v bat)" ]]; then
   alias cat=bat
 fi
@@ -44,6 +42,18 @@ if [[ -n "$(command -v kubectl)" ]]; then
   alias k=kubectl
 fi
 
+if [[ -n "$(command -v helm)" ]]; then
+  alias h=helm
+fi
+
+if [[ -n "$(command -v terraform)" ]]; then
+  alias t=terraform
+fi
+
+if [[ -n "$(command -v tofu)" ]]; then
+  alias t=tofu
+fi
+
 if [[ -n "$(command -v bun)" ]]; then
   alias b=bun
 fi
@@ -58,6 +68,7 @@ fi
 
 # Useful aliases
 
+alias redo='sudo !!'
 alias py=python3
 alias python=python3
 alias ...='cd ../../'

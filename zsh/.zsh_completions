@@ -79,3 +79,6 @@ source <(kubectl completion zsh)
 
 ## docker completions
 source <(docker completion zsh)
+
+## helm completions
+source <(helm completion zsh)

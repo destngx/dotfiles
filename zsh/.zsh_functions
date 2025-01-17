@@ -22,3 +22,27 @@ perp() {
     done
     xdg-open "https://www.perplexity.ai/search?s=o&q=$search" &
 }
+
+ls-port() {
+  echo "User processes:"
+  lsof -nP -iTCP -sTCP:LISTEN
+  
+  if command -v sudo >/dev/null 2>&1; then
+    echo "\nSystem processes:"
+    sudo lsof -nP -iTCP -sTCP:LISTEN | grep -v "$(whoami)"
+  else
+    echo "\nNote: 'sudo' command not found. System processes cannot be shown."
+  fi
+}
+ 
+is-port-open() {
+  local port=$1
+  local result=$(lsof -nP -i:$port)
+  
+  if [[ -n "$result" ]]; then
+    echo "Port $port is in use by:"
+    echo "$result" | awk 'NR>1 {print "- " $1 " (PID: " $2 ")"}'
+  else
+    echo "Port $port is available for use"
+  fi
+}
