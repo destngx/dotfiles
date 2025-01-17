@@ -56,6 +56,7 @@ fi
 
 if [[ -n "$(command -v bun)" ]]; then
   alias b=bun
+  alias bi=bun install
 fi
 
 if [[ -n "$(command -v nnn)" ]]; then
