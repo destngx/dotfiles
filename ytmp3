@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+set -e
+
+function is_valid_youtube_url() {
+    local url="$1"
+    local regex="^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$"
+    [[ $url =~ $regex ]]
+}
+
+function extract_youtube_id() {
+    local url="$1"
+    local video_id=""
+    
+    # Handle youtu.be format
+    if [[ $url =~ youtu\.be\/([a-zA-Z0-9_-]+) ]]; then
+        video_id="${BASH_REMATCH[1]}"
+    # Handle youtube.com format
+    elif [[ $url =~ youtube\.com\/watch\?v=([a-zA-Z0-9_-]+) ]]; then
+        video_id="${BASH_REMATCH[1]}"
+    fi
+    
+    echo "$video_id"
+}
+
+function download_mp3() {
+    local link="$1"
+    local title="$2"
+    local download_path="$3"
+
+    # Create directory if it doesn't exist
+    mkdir -p "$download_path"
+
+    echo "Downloading: $title"
+    curl -L -o "${download_path}/${title}.mp3" "$link"
+    echo "Download completed: ${download_path}/${title}.mp3"
+}
+
+function main() {
+    if [ -z "$1" ]; then
+        echo "Error: Please provide a YouTube URL"
+        exit 1
+    fi
+
+    # Set default download path
+    local download_path="${2:-$HOME/Downloads}"
+
+    if ! is_valid_youtube_url "$1"; then
+        echo "Error: Invalid YouTube URL"
+        exit 1
+    fi
+
+    local video_id=$(extract_youtube_id "$1")
+    echo "Video ID: $video_id"
+    if [ -z "$video_id" ]; then
+        echo "Error: Could not extract video ID"
+        exit 1
+    fi
+
+    local response=$(curl -s --request GET \
+      --url "https://youtube-mp36.p.rapidapi.com/dl?id=$video_id" \
+      --header "x-rapidapi-host: youtube-mp36.p.rapidapi.com" \
+      --header "x-rapidapi-key: e05f2e82fbmsh521814293fd8497p1c37eejsn41455443ccca")
+    
+    local link=$(echo "$response" | jq -r '.link')
+    local title=$(echo "$response" | jq -r '.title')
+    
+    if [ "$link" = "null" ] || [ -z "$link" ]; then
+        echo "Error: Could not get download link"
+        echo "API Response: $response"
+        exit 1
+    fi
+
+    download_mp3 "$link" "$title" "$download_path"
+}
+
+main "$1" "$2"

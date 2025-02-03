@@ -212,6 +212,9 @@ run = 'layout floating'
 if.app-name-regex-substring = 'Zen Browser'
 run = 'move-node-to-workspace 1'
 
+[[on-window-detected]]
+if.app-name-regex-substring = 'IINA'
+run = 'layout floating'
 # [[on-window-detected]]
 # if.app-id = 'com.google.Chrome'
 # if.window-title-regex-substring = 'Picture in Picture'
