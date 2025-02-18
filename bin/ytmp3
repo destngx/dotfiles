@@ -71,7 +71,7 @@ function main() {
     local response=$(curl -s --request GET \
       --url "https://youtube-mp36.p.rapidapi.com/dl?id=$video_id" \
       --header "x-rapidapi-host: youtube-mp36.p.rapidapi.com" \
-      --header "x-rapidapi-key: e05f2e82fbmsh521814293fd8497p1c37eejsn41455443ccca")
+      --header "x-rapidapi-key: $RAPIDAPI_KEY")
     
     local link=$(echo "$response" | jq -r '.link')
     echo "Download link: $link"

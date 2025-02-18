@@ -57,3 +57,5 @@ export ANTHROPIC_API_KEY=
 export COPILOT=true
 
 export IS_WSL=false
+
+export RAPIDAPI_KEY=
