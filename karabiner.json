@@ -5,9 +5,16 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "Trackball scroll mode: hold button5 to scroll",
+                        "description": "Trackball scroll toggle with button 5",
                         "manipulators": [
                             {
+                                "conditions": [
+                                    {
+                                        "name": "enable_mouse_motion_to_scroll",
+                                        "type": "variable_unless",
+                                        "value": 1
+                                    }
+                                ],
                                 "from": { "pointing_button": "button5" },
                                 "to": [
                                     {
@@ -17,7 +24,18 @@
                                         }
                                     }
                                 ],
-                                "to_after_key_up": [
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "enable_mouse_motion_to_scroll",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": { "pointing_button": "button5" },
+                                "to": [
                                     {
                                         "set_variable": {
                                             "name": "enable_mouse_motion_to_scroll",
