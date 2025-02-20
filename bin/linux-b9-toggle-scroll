@@ -1,0 +1,30 @@
+#!/bin/bash
+
+DEVICE="Nordic 2.4G Wireless Receiver Mouse"
+SCROLL_PROP="libinput Button Scrolling Button"
+LOCK_PROP="libinput Button Scrolling Button Lock Enabled"
+
+# Get current scroll mode status
+CURRENT_STATE=$(xinput --list-props "$DEVICE" | grep "$SCROLL_PROP" | awk 'NR==1 {print $NF}')
+
+if [ "$CURRENT_STATE" -eq 9 ]; then
+   # Enable scrolling mode
+   xinput --set-prop "$DEVICE" "$SCROLL_PROP" 0
+   xinput --set-prop "$DEVICE" "$LOCK_PROP" 0
+else
+   # Disable scrolling mode
+   xinput --set-prop "$DEVICE" "$SCROLL_PROP" 9
+   xinput --set-prop "$DEVICE" "$LOCK_PROP" 1
+fi
+
+ 
+# Add the below lines to the following files
+# .xbindkeysrc
+#  
+#  "bash ~/.local/bin/linux-b9-toggle-scroll"
+# b:9
+#
+# .xprofile
+#  
+#  
+#  xbindkeys &
