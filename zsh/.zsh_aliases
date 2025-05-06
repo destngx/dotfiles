@@ -48,10 +48,17 @@ fi
 
 if [[ -n "$(command -v terraform)" ]]; then
   alias t=terraform
+  alias ti="terraform init"
+  alias tp="terraform plan"
+  alias ta="terraform apply"
+  alias ts="terraform show"
 fi
 
 if [[ -n "$(command -v tofu)" ]]; then
   alias t=tofu
+  alias ti="tofu init"
+  alias tp="tofu plan"
+  alias ta="tofu apply"
 fi
 
 if [[ -n "$(command -v bun)" ]]; then
