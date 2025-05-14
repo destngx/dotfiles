@@ -33,7 +33,7 @@ ls-port() {
     return 1
   }
 }
-is-port-open() {
+is-port-available() {
   local port="$1"
   
   if [ -z "$port" ]; then
