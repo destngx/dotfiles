@@ -50,3 +50,11 @@ is-port-available() {
     echo "Port $port is available for use"
   fi
 }
+
+lich-am() {
+  curl -s lich.day
+}
+lich-duong() {
+  local today=$(date +%Y%m%d)
+  curl -s lich.day/$today
+}
