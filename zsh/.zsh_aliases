@@ -92,5 +92,35 @@ alias ghist="g hist"
 alias gca="g ca"
 alias gci="g ci"
 
-# Copy my public key to my clipboard
-alias pubkey="more ~/.ssh/id_rsa.pub | pbcopy | echo '=> Public key copied to pasteboard.'"
+# Copy my public key to my clipboard - interactive selection for multiple keys
+pubkey() {
+  local ssh_dir="$HOME/.ssh"
+  local selected_key
+  
+  # Check if fzf is available
+  if [[ -z "$(command -v fzf)" ]]; then
+    echo "Error: fzf is not installed. Please install fzf for key selection."
+    return 1
+  fi
+  
+  # Find all .pub files in ~/.ssh
+  if [[ -n "$(command -v fd)" ]]; then
+    selected_key=$(fd -e pub . "$ssh_dir" --type f | fzf --prompt="Select SSH public key: " --height=40% --border)
+  else
+    selected_key=$(find "$ssh_dir" -maxdepth 1 -name "*.pub" -type f | fzf --prompt="Select SSH public key: " --height=40% --border)
+  fi
+  
+  # Check if a key was selected
+  if [[ -z "$selected_key" ]]; then
+    echo "No key selected."
+    return 1
+  fi
+  
+  # Copy the selected key to clipboard
+  if cat "$selected_key" | pbcopy; then
+    echo "=> Public key '$(basename "$selected_key")' copied to pasteboard."
+  else
+    echo "Error: Failed to copy key to clipboard."
+    return 1
+  fi
+}
