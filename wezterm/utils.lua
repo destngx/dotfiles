@@ -12,8 +12,8 @@ end
 -- Check if pane is running inside tmux (local or via ssh)
 local function is_tmux(pane)
   local process_name = string.gsub(pane:get_foreground_process_name(), '(.*[/\\])(.*)', '%2')
-  -- Check for tmux directly or ssh (which likely connects to tmux)
-  if process_name == 'tmux' then
+  -- Check for tmux directly or ssh (assume SSH = tmux for remote sessions)
+  if process_name == 'tmux' or process_name == 'ssh' then
     return true
   end
   -- Also check user vars set by smart-splits.nvim if available

@@ -58,7 +58,7 @@ config.enable_kitty_keyboard = true
 
 local function is_tmux(pane)
   local process_name = string.gsub(pane:get_foreground_process_name(), '(.*[/\\])(.*)', '%2')
-  return process_name == 'tmux'
+  return process_name == 'tmux' or process_name == 'ssh'
 end
 
 local function send_tmux_prefix_and_key(win, pane, key, shift)
