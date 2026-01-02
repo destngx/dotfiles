@@ -384,6 +384,12 @@ bind-key -n C-j if -F "#{@pane-is-vim}" 'send-keys C-j'  'select-pane -D' #!impo
 bind-key -n C-k if -F "#{@pane-is-vim}" 'send-keys C-k'  'select-pane -U' #!important
 bind-key -n C-l if -F "#{@pane-is-vim}" 'send-keys C-l'  'select-pane -R' #!important
 
+# Smart pane resizing with awareness of Neovim splits
+bind-key -n M-h if -F "#{@pane-is-vim}" 'send-keys M-h' 'resize-pane -L 3' #!important
+bind-key -n M-j if -F "#{@pane-is-vim}" 'send-keys M-j' 'resize-pane -D 3' #!important
+bind-key -n M-k if -F "#{@pane-is-vim}" 'send-keys M-k' 'resize-pane -U 3' #!important
+bind-key -n M-l if -F "#{@pane-is-vim}" 'send-keys M-l' 'resize-pane -R 3' #!important
+
 # image nvim
 set -gq allow-passthrough on
 # move status line to top

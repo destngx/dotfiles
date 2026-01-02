@@ -56,19 +56,29 @@ config.leader = { key = 'a', mods = 'CTRL', timeout_milliseconds = 1000 }
 config.window_background_opacity = 0.96
 config.enable_kitty_keyboard = true
 
+local function is_tmux(pane)
+  local process_name = string.gsub(pane:get_foreground_process_name(), '(.*[/\\])(.*)', '%2')
+  return process_name == 'tmux'
+end
+
+local function send_tmux_prefix_and_key(win, pane, key, shift)
+  win:perform_action(wezterm.action.SendKey({ key = 'a', mods = 'CTRL' }), pane)
+  if shift then
+    win:perform_action(wezterm.action.SendKey({ key = key, mods = 'SHIFT' }), pane)
+  else
+    win:perform_action(wezterm.action.SendKey({ key = key }), pane)
+  end
+end
+
 config.keys = {
-  -- map delete to default
-  -- move between split panes
   utils.split_nav(wezterm, "move", "h"),
   utils.split_nav(wezterm, "move", "j"),
   utils.split_nav(wezterm, "move", "k"),
   utils.split_nav(wezterm, "move", "l"),
-  -- resize panes
   utils.split_nav(wezterm, "resize", "h"),
   utils.split_nav(wezterm, "resize", "j"),
   utils.split_nav(wezterm, "resize", "k"),
   utils.split_nav(wezterm, "resize", "l"),
-  -- Launcher
   {
     mods = "CMD",
     key = "Backspace",
@@ -79,35 +89,52 @@ config.keys = {
   {
     key = 'Tab',
     mods = 'LEADER',
-    action = act.ActivatePaneDirection 'Prev',
+    action = wezterm.action_callback(function(win, pane)
+      if is_tmux(pane) then
+        send_tmux_prefix_and_key(win, pane, 'Tab', false)
+      else
+        win:perform_action(act.ActivatePaneDirection 'Prev', pane)
+      end
+    end),
   },
-  -- Switch between tabs
   {
     key = 'h',
     mods = 'LEADER',
-    action = act.ActivateTabRelative(-1),
+    action = wezterm.action_callback(function(win, pane)
+      if is_tmux(pane) then
+        send_tmux_prefix_and_key(win, pane, 'h', false)
+      else
+        win:perform_action(act.ActivateTabRelative(-1), pane)
+      end
+    end),
   },
   {
     key = 'l',
     mods = 'LEADER',
-    action = act.ActivateTabRelative(1),
+    action = wezterm.action_callback(function(win, pane)
+      if is_tmux(pane) then
+        send_tmux_prefix_and_key(win, pane, 'l', false)
+      else
+        win:perform_action(act.ActivateTabRelative(1), pane)
+      end
+    end),
   },
-  -- Go to beginning of line
   {
     key = 'a',
     mods = 'LEADER|CTRL',
-    action = wezterm.action.SendKey({
-      key = 'a',
-      mods = 'CTRL',
-    }),
+    action = wezterm.action.SendKey({ key = 'a', mods = 'CTRL' }),
   },
   {
-    -- Create a new tab in the same domain as the current pane
     key = 'c',
     mods = 'LEADER',
-    action = act.SpawnTab 'CurrentPaneDomain',
+    action = wezterm.action_callback(function(win, pane)
+      if is_tmux(pane) then
+        send_tmux_prefix_and_key(win, pane, 'c', false)
+      else
+        win:perform_action(act.SpawnTab 'CurrentPaneDomain', pane)
+      end
+    end),
   },
-  -- Go to end of line
   {
     key = 'e',
     mods = 'CTRL',
@@ -116,95 +143,108 @@ config.keys = {
   {
     mods = "LEADER",
     key = "x",
-    action = act.CloseCurrentPane({ confirm = true })
+    action = wezterm.action_callback(function(win, pane)
+      if is_tmux(pane) then
+        send_tmux_prefix_and_key(win, pane, 'x', false)
+      else
+        win:perform_action(act.CloseCurrentPane({ confirm = true }), pane)
+      end
+    end),
   },
-  -- Rename tab
   {
     mods = "LEADER",
     key = ",",
-    action = act.PromptInputLine({
-      description = "Enter new name for tab",
----@diagnostic disable-next-line: unused-local
-      action = wezterm.action_callback(function(window, _pane, line)
-        -- line will be `nil` if they hit escape without entering anything
-        -- An empty string if they just hit enter
-        -- Or the actual line of text they wrote
-        if line then
-          window:active_tab():set_title(line)
-        end
-      end),
-    }),
+    action = wezterm.action_callback(function(win, pane)
+      if is_tmux(pane) then
+        send_tmux_prefix_and_key(win, pane, ',', false)
+      else
+        win:perform_action(act.PromptInputLine({
+          description = "Enter new name for tab",
+          action = wezterm.action_callback(function(window, _pane, line)
+            if line then
+              window:active_tab():set_title(line)
+            end
+          end),
+        }), pane)
+      end
+    end),
   },
-  -- Make Option-Left equivalent to Alt-b which many line editors interpret as backward-word
   {
     key = "LeftArrow",
     mods = "OPT",
     action = wezterm.action { SendString = "\x1bb" }
   },
-  -- Make Option-Right equivalent to Alt-f; forward-word
   {
     key = "RightArrow",
     mods = "OPT",
     action = wezterm.action { SendString = "\x1bf" }
   },
-  -- splitting
   {
     mods   = "LEADER",
     key    = "-",
-    action = wezterm.action.SplitVertical { domain = 'CurrentPaneDomain' }
+    action = wezterm.action_callback(function(win, pane)
+      if is_tmux(pane) then
+        send_tmux_prefix_and_key(win, pane, '-', false)
+      else
+        win:perform_action(wezterm.action.SplitVertical { domain = 'CurrentPaneDomain' }, pane)
+      end
+    end),
   },
   {
     mods   = "LEADER|SHIFT",
     key    = "_",
-    action = wezterm.action.SplitHorizontal { domain = 'CurrentPaneDomain' }
+    action = wezterm.action_callback(function(win, pane)
+      if is_tmux(pane) then
+        send_tmux_prefix_and_key(win, pane, '_', true)
+      else
+        win:perform_action(wezterm.action.SplitHorizontal { domain = 'CurrentPaneDomain' }, pane)
+      end
+    end),
   },
-  -- maximize one pane
   {
     mods = 'LEADER',
     key = 'z',
-    action = wezterm.action.TogglePaneZoomState
+    action = wezterm.action_callback(function(win, pane)
+      if is_tmux(pane) then
+        send_tmux_prefix_and_key(win, pane, 'z', false)
+      else
+        win:perform_action(wezterm.action.TogglePaneZoomState, pane)
+      end
+    end),
   },
-  -- rotate panes
   {
     mods = "LEADER",
     key = "Space",
-    action = wezterm.action.RotatePanes "Clockwise"
+    action = wezterm.action_callback(function(win, pane)
+      if is_tmux(pane) then
+        send_tmux_prefix_and_key(win, pane, 'Space', false)
+      else
+        win:perform_action(wezterm.action.RotatePanes "Clockwise", pane)
+      end
+    end),
   },
-  -- show the pane selection mode, but have it swap the active and selected panes
   {
     mods = 'LEADER',
     key = 's',
-    action = wezterm.action.PaneSelect {
-      alphabet = "asdfghjkl;",
-      mode = 'SwapWithActive',
-    },
+    action = wezterm.action_callback(function(win, pane)
+      if is_tmux(pane) then
+        send_tmux_prefix_and_key(win, pane, 's', false)
+      else
+        win:perform_action(wezterm.action.PaneSelect { alphabet = "asdfghjkl;", mode = 'SwapWithActive' }, pane)
+      end
+    end),
   },
-  -- activate copy mode or vim mode
   {
     key = 'Enter',
     mods = 'LEADER',
-    action = wezterm.action.ActivateCopyMode
+    action = wezterm.action_callback(function(win, pane)
+      if is_tmux(pane) then
+        send_tmux_prefix_and_key(win, pane, 'Enter', false)
+      else
+        win:perform_action(wezterm.action.ActivateCopyMode, pane)
+      end
+    end),
   },
-  -- {
-  --   mods = 'CTRL',
-  --   key = 'k',
-  --   action = { ActivatePaneDirection = 'Up' }
-  -- },
-  -- {
-  --   mods = 'CTRL',
-  --   key = 'h',
-  --   action = { ActivatePaneDirection = 'Down' }
-  -- },
-  -- {
-  --   mods = 'CTRL',
-  --   key = 'h',
-  --   action = { ActivatePaneDirection = 'Left' }
-  -- },
-  -- {
-  --   mods = 'CTRL',
-  --   key = 'l',
-  --   action = { ActivatePaneDirection = 'Right' }
-  -- },
 }
 config.mouse_bindings = {
   {
