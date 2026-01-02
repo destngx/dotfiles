@@ -9,14 +9,11 @@ function M.is_darwin()
   return wezterm.target_triple:find("darwin") ~= nil
 end
 
--- Check if pane is running inside tmux (local or via ssh)
-local function is_tmux(pane)
+local function is_remote_session(pane)
   local process_name = string.gsub(pane:get_foreground_process_name(), '(.*[/\\])(.*)', '%2')
-  -- Check for tmux directly or ssh (assume SSH = tmux for remote sessions)
-  if process_name == 'tmux' or process_name == 'ssh' then
+  if process_name == 'tmux' or process_name == 'ssh' or process_name:find('mosh') ~= nil then
     return true
   end
-  -- Also check user vars set by smart-splits.nvim if available
   local user_vars = pane:get_user_vars() or {}
   if user_vars.IS_TMUX == 'true' then
     return true
@@ -52,18 +49,14 @@ function M.split_nav(wezterm_ref, resize_or_move, key)
     key = key,
     mods = resize_or_move == "resize" and "META" or "CTRL",
     action = wezterm_ref.action_callback(function(win, pane)
-      -- If inside tmux, pass ALL keys through - let tmux handle navigation
-      -- This is critical for SSH sessions where tmux manages panes
-      if is_tmux(pane) then
+      if is_remote_session(pane) then
         win:perform_action({
           SendKey = { key = key, mods = resize_or_move == "resize" and "META" or "CTRL" },
         }, pane)
         return
       end
 
-      -- Not in tmux: use WezTerm's native pane management with vim awareness
       if is_vim(pane) then
-        -- pass the keys through to vim/nvim
         win:perform_action({
           SendKey = { key = key, mods = resize_or_move == "resize" and "META" or "CTRL" },
         }, pane)
