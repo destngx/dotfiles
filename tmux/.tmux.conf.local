@@ -89,7 +89,7 @@ tmux_conf_theme_colour_17="#e4e4e4"   # white
 tmux_conf_theme_colour_18="#ECCECE"   # light pink red
 tmux_conf_theme_colour_19="#EAAC86"   # light orange red
 tmux_conf_theme_colour_20="#C86562"   # light orange red
-tmux_conf_theme_colour_21="#86EEB3"   # light orange red
+tmux_conf_theme_colour_21="#86EEB3"   # mint green
 
 # default theme (ansi)
 #tmux_conf_theme_colour_1="colour0"
@@ -357,7 +357,7 @@ tmux_conf_copy_to_os_clipboard=true
 # this is the place to override or undo settings
 
 # increase history size
-#set -g history-limit 10000
+set -g history-limit 50000
 
 # start with mouse mode enabled
 #set -g mouse on
@@ -439,7 +439,6 @@ set -g @plugin 'olimorris/tmux-pomodoro-plus'
 set -g @plugin 'tmux-plugins/tmux-sensible'
 set -g @plugin 'tmux-plugins/tmux-copycat'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
-set -g @plugin 'tmux-plugins/tmux-continuum'
 # set -g @plugin 'Morantron/tmux-fingers'
 
 # Plugin settings
