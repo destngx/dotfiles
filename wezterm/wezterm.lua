@@ -79,6 +79,8 @@ config.keys = {
   utils.split_nav(wezterm, "resize", "j"),
   utils.split_nav(wezterm, "resize", "k"),
   utils.split_nav(wezterm, "resize", "l"),
+  { key = 'H', mods = 'LEADER|SHIFT', action = act.ActivateTabRelative(-1) },
+  { key = 'L', mods = 'LEADER|SHIFT', action = act.ActivateTabRelative(1) },
   {
     mods = "CMD",
     key = "Backspace",
