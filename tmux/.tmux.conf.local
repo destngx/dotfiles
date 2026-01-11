@@ -393,6 +393,7 @@ bind-key -n M-l if -F "#{@pane-is-vim}" 'send-keys M-l' 'resize-pane -R 3' #!imp
 # OSC 52 clipboard support (for SSH yank to host)
 set -gq allow-passthrough on
 set -g set-clipboard on
+set -ag terminal-overrides ',*:Ms=\E]52;c;%p2%s\7'
 # move status line to top
 #set -g status-position top
 
