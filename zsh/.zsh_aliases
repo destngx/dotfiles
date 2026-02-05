@@ -60,6 +60,7 @@ if [[ -n "$(command -v tofu)" ]]; then
   alias ti="tofu init"
   alias tp="tofu plan"
   alias ta="tofu apply"
+  alias terraform-ls=tofu-ls
 fi
 
 if [[ -n "$(command -v bun)" ]]; then
