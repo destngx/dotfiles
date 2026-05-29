@@ -37,6 +37,8 @@ fi
 if [[ -n "$(command -v pnpm)" ]]; then
   alias pn=pnpm
   alias px=pnpx
+  alias npm=pnpm
+  alias npx=pnpx
 fi
 
 if [[ -n "$(command -v kubectl)" ]]; then
