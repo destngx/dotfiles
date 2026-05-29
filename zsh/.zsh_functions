@@ -117,3 +117,23 @@ lich-duong() {
   local today=$(date +%Y%m%d)
   curl -s lich.day/$today
 }
+# Reusable confirm function for zsh
+confirm() {
+  echo -n "$1 [y/N] -> "
+  read REPLY
+  case $REPLY in
+    [Yy]) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# rm always asks for confirmation
+rm() {
+  if confirm "⚠️  DELETE: $*"; then
+    /bin/rm "$@"
+    echo "✅ Deleted: $*"
+  else
+    echo "❌ Aborted"
+    return 1
+  fi
+}
