@@ -13,11 +13,11 @@ if [[ -n "$(command -v microk8s)" ]]; then
 fi
 
 if [[ -n "$(command -v eza)" ]]; then
-  alias l="eza"
-  alias ls="eza --icons"
-  alias la="eza -la --icons"
-  alias lt="ls --tree --level=3"
-  alias tree='eza --tree --icons --git-ignore'
+  alias l="eza --"
+  alias ls="eza --icons --"
+  alias la="eza -la --icons --"
+  alias lt="ls --tree --level=3 --"
+  alias tree='eza --tree --icons --git-ignore --'
 fi
 
 if [[ -n "$(command -v tmux)" ]]; then
