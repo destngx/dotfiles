@@ -7,6 +7,10 @@ if [[ -n "$(command -v nvim)" ]]; then
   fi
 fi
 
+if [[ -n "$(command -v claude)" ]]; then
+  alias c="claude"
+fi
+
 if [[ -n "$(command -v microk8s)" ]]; then
     alias m="microk8s"
     alias mk="microk8s.kubectl"
