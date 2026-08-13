@@ -1,0 +1,35 @@
+{
+  "theme": "dark",
+  "model": "haiku",
+  "autoDreamedEnabled": true,
+  "env": {
+    "DISABLE_TELEMETRY": 1,
+    "DISABLE_ERROR_REPORTING": 1,
+    "DISABLE_BUG_COMMAND": 1,
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": 1
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "terminal-notifier -message \"Claude needs your input\" -title \"Claude Code Alert\" -group \"$(pwd):notification\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "terminal-notifier -message \"Claude has completed its task in $(basename $(pwd))\" -title \"Claude Code Finished\" -group \"$(pwd):completion\""
+          }
+        ]
+      }
+    ]
+  }
+}
