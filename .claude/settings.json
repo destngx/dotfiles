@@ -2,31 +2,43 @@
   "theme": "dark",
   "model": "haiku",
   "autoDreamedEnabled": true,
+  "askUserQuestionTimeout": "60s",
+  "preferredNotifChannel": "auto",
+  "editorMode": "vim",
   "env": {
     "DISABLE_TELEMETRY": 1,
     "DISABLE_ERROR_REPORTING": 1,
     "DISABLE_BUG_COMMAND": 1,
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": 1
   },
-  "hooks": {
-    "Notification": [
+    "hooks": {
+    "UserPromptSubmit": [
       {
-        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "terminal-notifier -message \"Claude needs your input\" -title \"Claude Code Alert\" -group \"$(pwd):notification\""
+            "command": "$HOME/.claude/hooks/notify.sh capture"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/notify.sh notify"
           }
         ]
       }
     ],
     "Stop": [
       {
-        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "terminal-notifier -message \"Claude has completed its task in $(basename $(pwd))\" -title \"Claude Code Finished\" -group \"$(pwd):completion\""
+            "command": "$HOME/.claude/hooks/notify.sh notify"
           }
         ]
       }
