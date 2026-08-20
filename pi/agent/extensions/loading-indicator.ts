@@ -124,7 +124,7 @@ export default function (pi: any) {
         setPhrase(activeUi, nextPhrase);
         phraseIndex++;
       }
-    }, 3000);
+    }, 8000);
   }
 
   function stopPhraseRotation() {

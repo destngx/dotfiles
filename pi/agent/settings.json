@@ -11,7 +11,7 @@
   "quietStartup": true,
   "enableInstallTelemetry": false,
   "doubleEscapeAction": "tree",
-  "defaultThinkingLevel": "medium",
+  "defaultThinkingLevel": "off",
   "tuiMode": "regular",
   "warnings": {
     "anthropicExtraUsage": true
@@ -29,5 +29,6 @@
     "npm:@juicesharp/rpiv-todo",
     "npm:@juicesharp/rpiv-ask-user-question",
     "npm:pi-subagents"
-  ]
+  ],
+  "hideThinkingBlock": true
 }
