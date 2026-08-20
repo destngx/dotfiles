@@ -7,6 +7,14 @@ if [[ -n "$(command -v nvim)" ]]; then
   fi
 fi
 
+if [[ -n "$(command -v pi)" ]]; then
+  if [[ -n "$(command -v omp)" ]]; then
+    alias p="omp"
+  else
+    alias p="pi"
+  fi
+fi
+
 if [[ -n "$(command -v claude)" ]]; then
   alias c="claude"
 fi

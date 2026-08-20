@@ -20,3 +20,5 @@ done
 
 # Add this line to your ~/.zshrc file
 # [ -f $XDG_CONFIG_HOME/zsh/.zshrc ] && source $XDG_CONFIG_HOME/zsh/.zshrc
+export VOLTA_HOME="$HOME/.volta"
+export PATH="$VOLTA_HOME/bin:$PATH"
