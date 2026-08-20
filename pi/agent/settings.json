@@ -11,7 +11,7 @@
   "quietStartup": true,
   "enableInstallTelemetry": false,
   "doubleEscapeAction": "tree",
-  "defaultThinkingLevel": "low",
+  "defaultThinkingLevel": "medium",
   "tuiMode": "regular",
   "warnings": {
     "anthropicExtraUsage": true
@@ -21,5 +21,13 @@
     "anthropic/claude-fable-5",
     "anthropic/claude-opus-5",
     "anthropic/claude-sonnet-5"
+  ],
+  "packages": [
+    "npm:pi-context-view",
+    "npm:@piotr-oles/pi-reflag",
+    "npm:@narumitw/pi-btw",
+    "npm:@juicesharp/rpiv-todo",
+    "npm:@juicesharp/rpiv-ask-user-question",
+    "npm:pi-subagents"
   ]
 }

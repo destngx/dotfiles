@@ -178,27 +178,21 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
   const { repo, branch, isDirty } = getGitInfo(state.cwd);
   const parts: string[] = [];
 
-  // 1. Git Repository & Branch
+  // 1. Git Repository & Branch (Nerd Font: \uF07B folder, \uE725 branch)
   if (repo) {
-    let repoPart = `${BOLD}${YELLOW}${repo}${RESET}`;
+    let repoPart = `${BOLD}${YELLOW}\uF07B ${repo}${RESET}`;
     if (branch) {
       const dirty = isDirty ? `${RED}*${RESET}` : "";
       const velocity = !isUltraSmall
         ? ` ${GREEN}+${state.linesAdd || 0}${RESET} ${RED}-${state.linesDel || 0}${RESET}`
         : "";
-      if (isSmall) {
-        // Small size: strip 🌿 icon
-        repoPart += ` ${BOLD}${CYAN}(${branch}${dirty}${velocity})${RESET}`;
-      } else {
-        repoPart += ` ${BOLD}${CYAN}🌿 (${branch}${dirty}${velocity})${RESET}`;
-      }
+      repoPart += ` ${BOLD}${CYAN}\uE725 (${branch}${dirty}${velocity})${RESET}`;
     }
     parts.push(repoPart);
   }
 
-  // 2. Context Window
+  // 2. Context Window (No icon, colored percent text)
   const used = state.usedPct ?? null;
-  let statusEmoji = "🟢";
   let pctColor = GREEN;
   let pctText = "--%";
 
@@ -209,55 +203,41 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
       pctText += `/${formatTokens(state.contextWindow)}`;
     }
     if (used >= 90) {
-      statusEmoji = "🚨";
       pctColor = RED;
     } else if (used >= 70) {
-      statusEmoji = "🔥";
       pctColor = YELLOW;
-    } else if (used >= 20) {
-      statusEmoji = "⚡";
-      pctColor = GREEN;
     } else {
-      statusEmoji = "🟢";
       pctColor = GREEN;
     }
   }
 
   if (isSmall) {
-    // Small size: strip emoji icon and bar progress, ONLY keep text & number
+    // Small size: strip bar progress, keep clean colored status text & number
     parts.push(`${pctColor}${pctText}${RESET}`);
   } else {
-    // Wide size: show emoji + full RGB gradient bar + percentage
+    // Wide size: show full RGB gradient bar + colored percentage
     const bar = renderBar(used, 12);
-    parts.push(`${statusEmoji} ${bar} ${pctColor}${pctText}${RESET}`);
+    parts.push(`${bar} ${pctColor}${pctText}${RESET}`);
   }
 
-  // 3. Tokens Breakdown (↑in ↓out 💭reason) - Shown on wide screens
+  // 3. Tokens Breakdown (\uF062 in, \uF063 out, \uF0EB reason) - Shown on wide screens
   if (!isSmall) {
     const tokenParts: string[] = [];
-    if (state.inputTokens) tokenParts.push(`${CYAN}↑${formatTokens(state.inputTokens)}${RESET}`);
-    if (state.outputTokens) tokenParts.push(`${GREEN}↓${formatTokens(state.outputTokens)}${RESET}`);
-    if (state.reasoningTokens) tokenParts.push(`${MAGENTA}💭${formatTokens(state.reasoningTokens)}${RESET}`);
+    if (state.inputTokens) tokenParts.push(`${CYAN}\uF062 ${formatTokens(state.inputTokens)}${RESET}`);
+    if (state.outputTokens) tokenParts.push(`${GREEN}\uF063 ${formatTokens(state.outputTokens)}${RESET}`);
+    if (state.reasoningTokens) tokenParts.push(`${MAGENTA}\uF0EB ${formatTokens(state.reasoningTokens)}${RESET}`);
     if (tokenParts.length > 0) {
       parts.push(tokenParts.join(" "));
     }
   }
 
-  // 4. Cache Hit Rate (CH24.5%) - Shown on wide screens
-  if (!isSmall && state.cacheHitRate !== undefined && state.cacheHitRate > 0) {
-    const ch = state.cacheHitRate < 10 ? state.cacheHitRate.toFixed(1) : String(Math.round(state.cacheHitRate));
-    parts.push(`${BLUE}CH${ch}%${RESET}`);
-  }
-
-  // 5. Total Cost ($0.012)
+  // 4. Total Cost ($0.012)
   const costPart = `${YELLOW}$${Number(state.cost || 0).toFixed(3)}${RESET}`;
   parts.push(costPart);
 
-  // 6. Model & Thinking Level (strip 🤖 icon on small size)
+  // 5. Model & Thinking Level (Clean text, no icon)
   const modelName = formatModelName(state.model);
-  let modelPart = isSmall
-    ? `${MAGENTA}${modelName}${RESET}`
-    : `${MAGENTA}🤖 ${modelName}${RESET}`;
+  let modelPart = `${MAGENTA}${modelName}${RESET}`;
 
   if (!isUltraSmall && state.thinking) {
     modelPart += ` ${DIM}• ${state.thinking}${RESET}`;

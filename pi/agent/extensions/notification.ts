@@ -103,11 +103,9 @@ export default function (pi: any) {
     turnStartTime = Date.now();
   });
 
-  pi.on("turn_end", async (_event: any, ctx: any) => {
-    triggerCompletionNotification(ctx, "turn_end", "completed");
-  });
-
-  pi.on("agent_end", async (_event: any, ctx: any) => {
-    triggerCompletionNotification(ctx, "agent_end", "completed");
+  // agent_settled fires ONLY when Pi has truly finished all automated tools,
+  // retries, and compaction, and is completely ready for the next user input.
+  pi.on("agent_settled", async (_event: any, ctx: any) => {
+    triggerCompletionNotification(ctx, "agent_settled", "completed");
   });
 }

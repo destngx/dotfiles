@@ -12,6 +12,7 @@ if [[ -n "$(command -v pi)" ]]; then
     alias p="omp"
   else
     alias p="pi"
+    alias pr="pi -r"
   fi
 fi
 

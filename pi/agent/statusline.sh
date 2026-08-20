@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Claude Code status line: adaptive text & numbers
+# Claude Code status line: Minimal Clean edition
 
 input=$(cat)
 
@@ -34,7 +34,7 @@ if [ -n "$cwd" ]; then
   fi
 fi
 
-# ── Context (pure text & numbers) ──
+# ── Context (colored percent text, no icon) ──
 if [ -n "$used" ]; then
   used_int=$(printf '%.1f' "$used")
   if (( $(echo "$used >= 90" | bc -l 2>/dev/null || echo 0) )); then pct_color="$RED"
@@ -51,12 +51,12 @@ cost_part="${YELLOW}$(printf '$%.3f' "$cost")${RESET}"
 # ── Code velocity inside branch ──
 velocity="${GREEN}+${lines_add}${RESET} ${RED}-${lines_del}${RESET}"
 
-# ── Single line (clean, no icons) ──
+# ── Single line with clean formatting ──
 out=""
 if [ -n "$repo" ]; then
-  out="${BOLD}${YELLOW}${repo}${RESET}"
+  out="${BOLD}${YELLOW} ${repo}${RESET}"
   if [ -n "$branch" ]; then
-    out="${out} ${BOLD}${CYAN}(${branch}${dirty} ${velocity})${RESET}"
+    out="${out} ${BOLD}${CYAN} (${branch}${dirty} ${velocity})${RESET}"
   fi
 fi
 
