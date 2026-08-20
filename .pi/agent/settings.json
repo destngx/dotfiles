@@ -1,0 +1,25 @@
+{
+  "lastChangelogVersion": "0.84.2",
+  "theme": "dark",
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-haiku-4-5",
+  "terminal": {
+    "showTerminalProgress": true
+  },
+  "transport": "auto",
+  "httpIdleTimeoutMs": 120000,
+  "quietStartup": true,
+  "enableInstallTelemetry": false,
+  "doubleEscapeAction": "tree",
+  "defaultThinkingLevel": "low",
+  "tuiMode": "regular",
+  "warnings": {
+    "anthropicExtraUsage": true
+  },
+  "enabledModels": [
+    "anthropic/claude-haiku-4-5",
+    "anthropic/claude-fable-5",
+    "anthropic/claude-opus-5",
+    "anthropic/claude-sonnet-5"
+  ]
+}
