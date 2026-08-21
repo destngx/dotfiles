@@ -11,6 +11,7 @@
                     {
                         "description": "HRM: Home Row Mods hold s or l for ⌥, d or k for ⇧, f or j for ⌘",
                         "manipulators": [
+   
                             {
                                 "conditions": [
                                     {
@@ -19732,6 +19733,48 @@
                                 ],
                                 "type": "basic"
                             },
+                            {
+                              "conditions": [
+                                  {
+                                      "name": "__layer",
+                                      "type": "variable_unless",
+                                      "value": 1
+                                  }
+                              ],
+                              "from": {
+                                  "modifiers": {
+                                      "mandatory": [],
+                                      "optional": ["any"]
+                                  },
+                                  "simultaneous": [
+                                      { "key_code": "j" },
+                                      { "key_code": "s" }
+                                  ],
+                                  "simultaneous_options": {
+                                      "key_down_order": "insensitive"
+                                  }
+                              },
+                              "to": [
+                                  {
+                                      "key_code": "left_command",
+                                      "lazy": true,
+                                      "modifiers": ["left_option"]
+                                  }
+                              ],
+                              "to_if_alone": [
+                                  {
+                                      "halt": true,
+                                      "key_code": "j"
+                                  },
+                                  {
+                                      "key_code": "s"
+                                  }
+                              ],
+                          "parameters": {
+                              "basic.simultaneous_threshold_milliseconds": 300
+                          },
+                              "type": "basic"
+                          },
                             {
                                 "conditions": [
                                     {
