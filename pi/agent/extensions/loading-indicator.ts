@@ -39,16 +39,18 @@ const SPINNER_VERBS = [
 // ── Braille Spinner Frames ──
 const SPINNER_DOTS = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
-// ── Scanning / Shimmer Highlight Beam Generator with Spinner ──
-function generateShimmerFrames(text: string): string[] {
+// ── Scanning / Shimmer Highlight Beam Generator with Spinner & Tip ──
+function generateShimmerFrames(verb: string, customTip?: string): string[] {
   const frames: string[] = [];
-  const len = text.length;
+  const len = verb.length;
   const positions: number[] = [];
 
   // Forward sweep
   for (let p = 0; p < len; p++) positions.push(p);
   // Backward sweep
   for (let p = len - 2; p > 0; p--) positions.push(p);
+
+  const tipText = customTip !== undefined ? customTip : ` \x1b[2;38;2;120;125;135m(use \x1b[36m/btw\x1b[38;2;120;125;135m to ask questions while waiting)\x1b[0m`;
 
   for (let k = 0; k < positions.length; k++) {
     const pos = positions[k];
@@ -57,7 +59,7 @@ function generateShimmerFrames(text: string): string[] {
 
     let textFrame = "";
     for (let i = 0; i < len; i++) {
-      const char = text[i];
+      const char = verb[i];
       const dist = Math.abs(i - pos);
 
       if (dist === 0) {
@@ -71,10 +73,10 @@ function generateShimmerFrames(text: string): string[] {
         textFrame += `\x1b[38;2;90;155;215m${char}${RESET}`;
       } else {
         // Dim base text
-        textFrame += `\x1b[38;2;100;105;115m${char}${RESET}`;
+        textFrame += `\x1b[38;2;140;150;165m${char}${RESET}`;
       }
     }
-    frames.push(`${coloredDot} ${textFrame}`);
+    frames.push(`${coloredDot} ${textFrame}${tipText}`);
   }
   return frames;
 }

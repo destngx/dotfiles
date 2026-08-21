@@ -1,4 +1,19 @@
 import { Type } from "@sinclair/typebox";
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
+
+function getProviderBaseUrl(): string {
+  try {
+    const globalModels = path.join(os.homedir(), ".pi/agent/models.json");
+    if (fs.existsSync(globalModels)) {
+      const json = JSON.parse(fs.readFileSync(globalModels, "utf8"));
+      const base = json.providers?.["anthropic"]?.baseUrl || json.providers?.["openai"]?.baseUrl;
+      if (base) return base.replace(/\/v1\/?$/, "");
+    }
+  } catch {}
+  return process.env.ANTHROPIC_BASE_URL || process.env.OPENAI_BASE_URL || process.env.AI_GATEWAY_URL || "http://localhost:8080";
+}
 
 export default function (pi: any) {
   // Registers web_search in Pi's tool schema.
@@ -13,7 +28,8 @@ export default function (pi: any) {
     }),
     async execute(_toolCallId: string, params: { query: string }) {
       try {
-        const response = await fetch("http://ezmacmini:8080/v1/responses", {
+        const baseUrl = getProviderBaseUrl();
+        const response = await fetch(`${baseUrl}/v1/responses`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

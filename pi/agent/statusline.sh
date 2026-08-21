@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Claude Code status line: Minimal Clean edition
+# Claude Code status line: Minimal Clean edition with AI Gateway Weekly Usage
 
 input=$(cat)
 
@@ -48,10 +48,52 @@ fi
 # ── Cost ──
 cost_part="${YELLOW}$(printf '$%.3f' "$cost")${RESET}"
 
+# ── Resolve Provider Host ──
+provider_host=""
+if [ -f "$HOME/.pi/agent/models.json" ]; then
+  provider_host=$(jq -r '.providers.anthropic.baseUrl // .providers.openai.baseUrl // empty' "$HOME/.pi/agent/models.json" 2>/dev/null || true)
+fi
+if [ -z "$provider_host" ] && [ -n "$cwd" ] && [ -f "$cwd/.pi/models.json" ]; then
+  provider_host=$(jq -r '.providers.anthropic.baseUrl // .providers.openai.baseUrl // empty' "$cwd/.pi/models.json" 2>/dev/null || true)
+fi
+provider_host="${provider_host:-${ANTHROPIC_BASE_URL:-${OPENAI_BASE_URL:-${AI_GATEWAY_URL:-http://localhost:8080}}}}"
+provider_host="${provider_host%/v1}"
+provider_host="${provider_host%/}"
+
+# ── Gateway Usage: Primary as Weekly Remaining + Reset Priority in Local Time ──
+usage_part=""
+usage_json=$(curl -s --max-time 1 -X 'GET' "${provider_host}/v1/usage" -H 'accept: application/json' -H 'X-AI-Provider: openai' 2>/dev/null || true)
+if [ -n "$usage_json" ] && [ "$usage_json" != "null" ]; then
+  pri_used=$(echo "$usage_json" | jq -r '.rate_limits.primary.used_percent // empty' 2>/dev/null || true)
+  r5h=$(echo "$usage_json" | jq -r '.display["5h_reset_at"] // empty' 2>/dev/null || true)
+  rWeekly=$(echo "$usage_json" | jq -r '.display["weekly_reset_at"] // empty' 2>/dev/null || true)
+
+  if [ -n "$pri_used" ]; then
+    remains_weekly=$((100 - pri_used))
+    [ "$remains_weekly" -lt 0 ] && remains_weekly=0
+
+    # Reset priority: weekly if non-empty, else 5h if non-empty
+    raw_reset="${rWeekly:-$r5h}"
+    reset_str=""
+    if [ -n "$raw_reset" ] && [ "$raw_reset" != "null" ]; then
+      local_time=$(date -jf "%Y-%m-%d %H:%M %Z" "$raw_reset" "+%-d %B %H:%M" 2>/dev/null || echo "")
+      if [ -n "$local_time" ]; then
+        reset_str=" ${DIM}↻${local_time}${RESET}"
+      fi
+    fi
+
+    weekly_col="$GREEN"
+    if [ "$remains_weekly" -le 10 ] 2>/dev/null; then weekly_col="$RED"
+    elif [ "$remains_weekly" -le 30 ] 2>/dev/null; then weekly_col="$YELLOW"; fi
+
+    usage_part="${weekly_col}${remains_weekly}% weekly${RESET}${reset_str}"
+  fi
+fi
+
 # ── Code velocity inside branch ──
 velocity="${GREEN}+${lines_add}${RESET} ${RED}-${lines_del}${RESET}"
 
-# ── Single line with clean formatting ──
+# ── Assemble Single Line ──
 out=""
 if [ -n "$repo" ]; then
   out="${BOLD}${YELLOW} ${repo}${RESET}"
@@ -61,6 +103,9 @@ if [ -n "$repo" ]; then
 fi
 
 out="${out:+$out ${DIM}|${RESET} }${ctx_part}"
+if [ -n "$usage_part" ]; then
+  out="${out} ${DIM}|${RESET} ${usage_part}"
+fi
 out="${out} ${DIM}|${RESET} ${cost_part}"
 out="${out} ${DIM}|${RESET} ${MAGENTA}${model}${RESET}"
 

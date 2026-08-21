@@ -167,6 +167,7 @@ interface StatusState {
   linesAdd?: number;
   linesDel?: number;
   cwd?: string;
+  gatewayUsage?: any;
 }
 
 // ── Responsive Statusline Builder ──
@@ -212,16 +213,49 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
   }
 
   if (isSmall) {
-    // Small size: strip bar progress, keep clean colored status text & number
     parts.push(`${pctColor}${pctText}${RESET}`);
   } else {
-    // Wide size: show full RGB gradient bar + colored percentage
     const bar = renderBar(used, 12);
     parts.push(`${bar} ${pctColor}${pctText}${RESET}`);
   }
 
-  // 3. Tokens Breakdown (\uF062 in, \uF063 out, \uF0EB reason) - Shown on wide screens
-  if (!isSmall) {
+  // 3. AI Gateway Rate Limits (Primary as Weekly Remaining + Reset Time Priority)
+  if (state.gatewayUsage) {
+    const data = state.gatewayUsage;
+    const priUsed = data.rate_limits?.primary?.used_percent ?? 0;
+    const remainsWeekly = Math.max(0, Math.min(100, 100 - priUsed));
+
+    // Reset priority: choose weekly if not empty, otherwise 5h if not empty
+    const rWeekly = data.display?.["weekly_reset_at"]?.trim() || "";
+    const r5h = data.display?.["5h_reset_at"]?.trim() || "";
+    const rawReset = rWeekly !== "" ? rWeekly : r5h;
+
+    let resetStr = "";
+    if (rawReset !== "") {
+      try {
+        const normalized = rawReset.replace(" UTC", "Z").replace(" ", "T");
+        const date = new Date(normalized);
+        if (!isNaN(date.getTime())) {
+          const dateStr = date.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+          const timeStr = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+          resetStr = ` ${DIM}↻${dateStr} ${timeStr}${RESET}`;
+        } else {
+          resetStr = ` ${DIM}↻${rawReset.replace(" UTC", "")}${RESET}`;
+        }
+      } catch {
+        resetStr = ` ${DIM}↻${rawReset.replace(" UTC", "")}${RESET}`;
+      }
+    }
+
+    let weeklyColor = GREEN;
+    if (remainsWeekly <= 10) weeklyColor = RED;
+    else if (remainsWeekly <= 30) weeklyColor = YELLOW;
+
+    parts.push(`${weeklyColor}${remainsWeekly}% weekly${RESET}${resetStr}`);
+  }
+
+  // 4. Tokens Breakdown (\uF062 in, \uF063 out, \uF0EB reason) - Shown on wide screens
+  if (!isSmall && !state.gatewayUsage) {
     const tokenParts: string[] = [];
     if (state.inputTokens) tokenParts.push(`${CYAN}\uF062 ${formatTokens(state.inputTokens)}${RESET}`);
     if (state.outputTokens) tokenParts.push(`${GREEN}\uF063 ${formatTokens(state.outputTokens)}${RESET}`);
@@ -231,11 +265,13 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
     }
   }
 
-  // 4. Total Cost ($0.012)
-  const costPart = `${YELLOW}$${Number(state.cost || 0).toFixed(3)}${RESET}`;
-  parts.push(costPart);
+  // 5. Total Cost ($0.012) - Hidden on small screens
+  if (!isSmall) {
+    const costPart = `${YELLOW}$${Number(state.cost || 0).toFixed(3)}${RESET}`;
+    parts.push(costPart);
+  }
 
-  // 5. Model & Thinking Level (Clean text, no icon)
+  // 6. Model & Thinking Level (Clean text, no icon)
   const modelName = formatModelName(state.model);
   let modelPart = `${MAGENTA}${modelName}${RESET}`;
 
@@ -248,6 +284,30 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
   return truncateToWidth(fullLine, maxWidth);
 }
 
+function getProviderBaseUrl(providerName: string = "anthropic", cwd?: string): string {
+  try {
+    if (cwd) {
+      const localModels = path.join(cwd, ".pi/models.json");
+      if (fs.existsSync(localModels)) {
+        const json = JSON.parse(fs.readFileSync(localModels, "utf8"));
+        const base = json.providers?.[providerName]?.baseUrl || json.providers?.["*"]?.baseUrl;
+        if (base) return base.replace(/\/v1\/?$/, "");
+      }
+    }
+  } catch {}
+
+  try {
+    const globalModels = path.join(os.homedir(), ".pi/agent/models.json");
+    if (fs.existsSync(globalModels)) {
+      const json = JSON.parse(fs.readFileSync(globalModels, "utf8"));
+      const base = json.providers?.[providerName]?.baseUrl || json.providers?.["anthropic"]?.baseUrl || json.providers?.["openai"]?.baseUrl;
+      if (base) return base.replace(/\/v1\/?$/, "");
+    }
+  } catch {}
+
+  return process.env.ANTHROPIC_BASE_URL || process.env.OPENAI_BASE_URL || process.env.AI_GATEWAY_URL || "http://localhost:8080";
+}
+
 export default function (pi: any) {
   let state: StatusState = {
     model: "Unknown",
@@ -258,6 +318,32 @@ export default function (pi: any) {
     linesAdd: 0,
     linesDel: 0,
   };
+
+  async function fetchGatewayUsage() {
+    try {
+      const provider = state.model?.provider || "anthropic";
+      const host = getProviderBaseUrl(provider, state.cwd);
+      const res = await fetch(`${host}/v1/usage`, {
+        headers: {
+          "accept": "application/json",
+          "X-AI-Provider": "openai",
+        },
+        signal: AbortSignal.timeout(2000),
+      });
+      if (!res.ok) {
+        state.gatewayUsage = null;
+        return;
+      }
+      const data = await res.json();
+      if (data && (data.rate_limits || data.limits)) {
+        state.gatewayUsage = data;
+      } else {
+        state.gatewayUsage = null;
+      }
+    } catch {
+      state.gatewayUsage = null;
+    }
+  }
 
   function extractMetrics(ctx: any) {
     if (!ctx) return;
@@ -280,7 +366,7 @@ export default function (pi: any) {
       } catch {}
     }
 
-    // B. Calculate cumulative session tokens, cache, and cost using Pi's exact field names
+    // B. Cumulative session tokens, cache, and cost
     try {
       let totalIn = 0;
       let totalOut = 0;
@@ -318,8 +404,14 @@ export default function (pi: any) {
     } catch {}
   }
 
+  // Periodic usage polling every 45 seconds
+  const usageInterval = setInterval(() => {
+    fetchGatewayUsage();
+  }, 45000);
+
   pi.on("session_start", async (_event: any, ctx: any) => {
     extractMetrics(ctx);
+    fetchGatewayUsage();
 
     if (ctx.ui?.setFooter) {
       ctx.ui.setFooter((_tui: any, _theme: any, footerData: any) => {
@@ -330,6 +422,9 @@ export default function (pi: any) {
           render(width: number) {
             extractMetrics(ctx);
             return [buildStatusLine(state, width)];
+          },
+          dispose() {
+            clearInterval(usageInterval);
           },
         };
       });
@@ -342,6 +437,7 @@ export default function (pi: any) {
 
   pi.on("turn_end", async (_event: any, ctx: any) => {
     extractMetrics(ctx);
+    fetchGatewayUsage();
   });
 
   pi.on("model_select", async (event: any, ctx: any) => {
