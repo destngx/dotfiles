@@ -1,3 +1,13 @@
+### 0. Think and plan before Step 1
+
+Before defining the contract:
+
+1. State assumptions and acceptance criteria.
+2. Identify ambiguity and conflicting instructions.
+3. Ask for clarification if proceeding would require a risky assumption.
+
+Do not create candidates, edit files, or run checks until this preflight is complete.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**

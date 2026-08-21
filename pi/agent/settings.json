@@ -12,6 +12,9 @@
   "enableInstallTelemetry": false,
   "doubleEscapeAction": "tree",
   "defaultThinkingLevel": "off",
+  "subagents": {
+    "defaultThinking": "off"
+  },
   "tuiMode": "regular",
   "warnings": {
     "anthropicExtraUsage": true
@@ -26,9 +29,22 @@
     "npm:pi-context-view",
     "npm:@piotr-oles/pi-reflag",
     "npm:@narumitw/pi-btw",
-    "npm:@juicesharp/rpiv-todo",
     "npm:@juicesharp/rpiv-ask-user-question",
-    "npm:pi-subagents"
+    "npm:@tintinweb/pi-tasks"
   ],
-  "hideThinkingBlock": true
+  "hideThinkingBlock": false,
+  "showHardwareCursor": false,
+  "clearOnStart": true,
+  "ccHeader": {
+    "color": "c",
+    "ver": 1,
+    "grad": true,
+    "lines": true,
+    "pkg": false,
+    "speed": 50,
+    "slogan": "Code something that makes you proud",
+    "sloganOn": true,
+    "sloganColor": true,
+    "disabled": false
+  }
 }

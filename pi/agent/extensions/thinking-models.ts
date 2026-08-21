@@ -10,11 +10,13 @@ type ThinkingLevel =
 
 const thinkingByModel: Record<string, ThinkingLevel> = {
   // Use provider/model IDs shown by /model.
-  "anthropic/claude-fable-5": "high",
+  "anthropic/claude-fable-5": "xhigh",
   "anthropic/claude-opus-5": "high",
   "anthropic/claude-sonnet-5": "low",
+  "anthropic/claude-haiku-4-5": "off",
   "openai/gpt-5.6-sol": "high",
   "openai/gpt-5.6-terra": "low",
+  "openai/gpt-5.6-luna": "off",
 };
 
 export default function (pi: ExtensionAPI) {
