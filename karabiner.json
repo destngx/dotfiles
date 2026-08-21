@@ -421,6 +421,46 @@
                                 "type": "basic"
                             },
                             {
+                              "type": "basic",
+                              "conditions": [
+                                {
+                                  "type": "variable_unless",
+                                  "name": "__layer",
+                                  "value": 1
+                                }
+                              ],
+                              "from": {
+                                "modifiers": {
+                                  "mandatory": [],
+                                  "optional": ["any"]
+                                },
+                                "simultaneous": [
+                                  { "key_code": "k" },
+                                  { "key_code": "a" }
+                                ],
+                                "simultaneous_options": { 
+                                  "key_down_order": "strict" 
+                                }
+                              },
+                              "parameters": {
+                                "basic.to_if_held_down_threshold_milliseconds": 200,
+                                "basic.simultaneous_threshold_milliseconds": 100
+                              },
+                              "to_if_alone": [
+                                {
+                                  "halt": true,
+                                  "key_code": "k"
+                                },
+                                { "key_code": "a" }
+                              ],
+                              "to_if_held_down": [
+                                {
+                                  "key_code": "a",
+                                  "modifiers": ["right_option"]
+                                }
+                              ]
+                            },
+                            {
                                 "conditions": [
                                     {
                                         "name": "__layer",
@@ -458,6 +498,86 @@
                                     }
                                 ],
                                 "type": "basic"
+                            },
+                            {
+                              "type": "basic",
+                              "conditions": [
+                                {
+                                  "type": "variable_unless",
+                                  "name": "__layer",
+                                  "value": 1
+                                }
+                              ],
+                              "from": {
+                                "modifiers": {
+                                  "mandatory": [],
+                                  "optional": ["any"]
+                                },
+                                "simultaneous": [
+                                  { "key_code": "d" },
+                                  { "key_code": "a" }
+                                ],
+                                "simultaneous_options": { 
+                                  "key_down_order": "strict" 
+                                }
+                              },
+                              "parameters": {
+                                "basic.to_if_held_down_threshold_milliseconds": 200,
+                                "basic.simultaneous_threshold_milliseconds": 100
+                              },
+                              "to_if_alone": [
+                                {
+                                  "halt": true,
+                                  "key_code": "d"
+                                },
+                                { "key_code": "a" }
+                              ],
+                              "to_if_held_down": [
+                                {
+                                  "key_code": "a",
+                                  "modifiers": ["left_shift"]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "basic",
+                              "conditions": [
+                                {
+                                  "type": "variable_unless",
+                                  "name": "__layer",
+                                  "value": 1
+                                }
+                              ],
+                              "from": {
+                                "modifiers": {
+                                  "mandatory": [],
+                                  "optional": ["any"]
+                                },
+                                "simultaneous": [
+                                  { "key_code": "s" },
+                                  { "key_code": "a" }
+                                ],
+                                "simultaneous_options": { 
+                                  "key_down_order": "strict" 
+                                }
+                              },
+                              "parameters": {
+                                "basic.to_if_held_down_threshold_milliseconds": 200,
+                                "basic.simultaneous_threshold_milliseconds": 100
+                              },
+                              "to_if_alone": [
+                                {
+                                  "halt": true,
+                                  "key_code": "s"
+                                },
+                                { "key_code": "a" }
+                              ],
+                              "to_if_held_down": [
+                                {
+                                  "key_code": "a",
+                                  "modifiers": ["left_option"]
+                                }
+                              ]
                             },
                             {
                                 "conditions": [
