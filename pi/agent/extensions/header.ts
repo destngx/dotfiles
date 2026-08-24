@@ -236,7 +236,7 @@ const ANIMATION_STEPS = [
   // 7. White flash on completed Pi logo:
   { phase: 5, active: "none", ax: 0, ay: 0, flash: 0, white: 2, delay: 120 },
   { phase: 5, active: "none", ax: 0, ay: 0, flash: 0, white: 0, delay: 120 },
-  { phase: 5, active: "none", ax: 0, ay: 0, flash: 0, white: 1, delay: 1500 }, // Hold steady
+  { phase: 5, active: "none", ax: 0, ay: 0, flash: 0, white: 1, delay: 0 }, // Final steady assembled Pi logo (no repeat)
 ];
 
 class TetrisWelcomeHeader extends Container {
@@ -255,14 +255,22 @@ class TetrisWelcomeHeader extends Container {
 
   scheduleNextFrame() {
     this.stopAnimation();
+    if (this.stepIndex >= ANIMATION_STEPS.length - 1) {
+      return;
+    }
+
     const currentStep = ANIMATION_STEPS[this.stepIndex];
     this.timer = setTimeout(() => {
-      this.stepIndex = (this.stepIndex + 1) % ANIMATION_STEPS.length;
+      this.stepIndex++;
       this.buildHeader();
       if (this.tui?.requestRender) {
         this.tui.requestRender();
       }
-      this.scheduleNextFrame();
+      if (this.stepIndex < ANIMATION_STEPS.length - 1) {
+        this.scheduleNextFrame();
+      } else {
+        this.stopAnimation();
+      }
     }, currentStep.delay);
   }
 
@@ -308,12 +316,12 @@ class TetrisWelcomeHeader extends Container {
 
     // ── 6-line Aligned Information Grid with Chained Rules ──
     const infoLines = [
-      `${BOLD}${ORANGE}Pi${RESET} ${CYAN}v0.84.2${RESET} ${DIM}(Claude Code edition)${RESET}`,
+      `${BOLD}${ORANGE}Pi${RESET} ${CYAN}v0.84.2${RESET} ${DIM}(DestNgx edition)${RESET}`,
       `${BLUE}Model:${RESET}     ${MAGENTA}${model}${RESET} ${DIM}•${RESET} ${CYAN}${thinking} thinking${RESET}`,
       `${BLUE}Workspace:${RESET} ${YELLOW} ${repoName}${RESET}${branchStr}`,
       `${BLUE}Resources:${RESET} ${GREEN}${counts.skills} skills${RESET} ${DIM}·${RESET} ${YELLOW}${counts.prompts} prompts${RESET} ${DIM}·${RESET} ${CYAN}${counts.extensions} extensions${RESET}`,
       `${BLUE}Custom Rules:${RESET}     ${formatRulesChain(rulesChain)}`,
-      `${BLUE}Shortcuts:${RESET} ${DIM}Type ${CYAN}/help${DIM} for commands • ${CYAN}Ctrl+P${DIM} switch model${RESET}`,
+      `${BLUE}Shortcuts:${RESET} ${DIM}Type ${CYAN}/hotkeys${RESET} for more • ${CYAN}Ctrl+P${RESET} switch model${RESET}`,
     ];
 
     this.addChild(new Spacer(1));

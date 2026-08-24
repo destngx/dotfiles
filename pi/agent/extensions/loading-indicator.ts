@@ -1,6 +1,6 @@
 const RESET = "\x1b[0m";
 
-// ── Claude Code Playful Spinner Verbs ──
+// ── Playful Spinner Verbs ──
 const SPINNER_VERBS = [
   "Cooking…",
   "Pondering…",
