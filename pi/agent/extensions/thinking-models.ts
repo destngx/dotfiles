@@ -14,6 +14,7 @@ const thinkingByModel: Record<string, ThinkingLevel> = {
   "anthropic/claude-opus-5": "high",
   "anthropic/claude-sonnet-5": "low",
   "anthropic/claude-haiku-4-5": "off",
+  "openai/gpt-6-astra": "high",
   "openai/gpt-5.6-sol": "high",
   "openai/gpt-5.6-terra": "low",
   "openai/gpt-5.6-luna": "off",
