@@ -237,6 +237,10 @@ run = 'move-node-to-workspace 2'
 if.app-name-regex-substring = 'Obsidian'
 run = 'move-node-to-workspace 4'
 
+[[on-window-detected]]
+if.app-name-regex-substring = 'Dictionary'
+run = 'layout floating'
+
 ## Entertainment
 [[on-window-detected]]
 if.app-name-regex-substring = 'IINA'
