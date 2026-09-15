@@ -219,39 +219,58 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
     parts.push(`${bar} ${pctColor}${pctText}${RESET}`);
   }
 
-  // 3. AI Gateway Rate Limits (Primary as Weekly Remaining + Reset Time Priority)
-  if (state.gatewayUsage) {
+  // 3. AI Gateway Rate Limits (5h and weekly remaining + reset times)
+  if (state.gatewayUsage && String(state.model?.provider || "").toLowerCase() === "anthropic") {
     const data = state.gatewayUsage;
-    const priUsed = data.rate_limits?.primary?.used_percent ?? 0;
-    const remainsWeekly = Math.max(0, Math.min(100, 100 - priUsed));
+    const primaryUsed = Number(data.rate_limits?.primary?.used_percent);
+    const secondaryUsed = Number(data.rate_limits?.secondary?.used_percent);
+    const remains5h = Number.isFinite(data.limits?.["5h"]?.left_percent)
+      ? data.limits["5h"].left_percent
+      : Math.max(0, Math.min(100, 100 - (Number.isFinite(primaryUsed) ? primaryUsed : 0)));
+    const remainsWeekly = Number.isFinite(data.limits?.weekly?.left_percent)
+      ? data.limits.weekly.left_percent
+      : Math.max(0, Math.min(100, 100 - (Number.isFinite(secondaryUsed) ? secondaryUsed : 0)));
 
-    // Reset priority: choose weekly if not empty, otherwise 5h if not empty
-    const rWeekly = data.display?.["weekly_reset_at"]?.trim() || "";
-    const r5h = data.display?.["5h_reset_at"]?.trim() || "";
-    const rawReset = rWeekly !== "" ? rWeekly : r5h;
-
-    let resetStr = "";
-    if (rawReset !== "") {
+    const formatReset = (rawReset: unknown): string => {
+      const reset = typeof rawReset === "string" ? rawReset.trim() : "";
+      if (!reset) return "";
       try {
-        const normalized = rawReset.replace(" UTC", "Z").replace(" ", "T");
+        const normalized = reset.replace(" UTC", "Z").replace(" ", "T");
         const date = new Date(normalized);
         if (!isNaN(date.getTime())) {
           const dateStr = date.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
           const timeStr = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
-          resetStr = ` ${DIM}↻${dateStr} ${timeStr}${RESET}`;
-        } else {
-          resetStr = ` ${DIM}↻${rawReset.replace(" UTC", "")}${RESET}`;
+          return ` ${DIM}↻${dateStr} ${timeStr}${RESET}`;
         }
+        return ` ${DIM}↻${reset.replace(" UTC", "")}${RESET}`;
       } catch {
-        resetStr = ` ${DIM}↻${rawReset.replace(" UTC", "")}${RESET}`;
+        return ` ${DIM}↻${reset.replace(" UTC", "")}${RESET}`;
       }
-    }
+    };
 
-    let weeklyColor = GREEN;
-    if (remainsWeekly <= 10) weeklyColor = RED;
-    else if (remainsWeekly <= 30) weeklyColor = YELLOW;
+    const limitColor = (remaining: number): string => {
+      if (remaining <= 10) return RED;
+      if (remaining <= 30) return YELLOW;
+      return GREEN;
+    };
 
-    parts.push(`${weeklyColor}${remainsWeekly}% weekly${RESET}${resetStr}`);
+    const format5hRemaining = (rawReset: unknown): string => {
+      const reset = typeof rawReset === "string" ? rawReset.trim() : "";
+      if (!reset) return "";
+      const normalized = reset.replace(" UTC", "Z").replace(" ", "T");
+      const date = new Date(normalized);
+      if (isNaN(date.getTime())) return "";
+
+      const remainingMinutes = Math.max(0, Math.ceil((date.getTime() - Date.now()) / 60_000));
+      const hours = Math.floor(remainingMinutes / 60);
+      const minutes = remainingMinutes % 60;
+      return ` ${DIM}↻${hours}h ${minutes}m remaining${RESET}`;
+    };
+
+    const reset5h = format5hRemaining(data.display?.["5h_reset_at"]);
+    const resetWeekly = formatReset(data.display?.["weekly_reset_at"]);
+    parts.push(`${limitColor(remains5h)}${remains5h}% 5h${RESET}${reset5h}`);
+    parts.push(`${limitColor(remainsWeekly)}${remainsWeekly}% weekly${RESET}${resetWeekly}`);
   }
 
   // 4. Tokens Breakdown (\uF062 in, \uF063 out, \uF0EB reason) - Shown on wide screens
