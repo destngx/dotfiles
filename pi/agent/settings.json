@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.85.1",
+  "lastChangelogVersion": "0.86.1",
   "theme": "dark",
   "defaultProvider": "anthropic",
   "defaultModel": "claude-haiku-4-5",
@@ -32,7 +32,7 @@
     "npm:@juicesharp/rpiv-ask-user-question",
     "npm:@tintinweb/pi-tasks"
   ],
-  "hideThinkingBlock": false,
+  "hideThinkingBlock": true,
   "showHardwareCursor": false,
   "clearOnStart": true,
   "ccHeader": {
