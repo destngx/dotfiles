@@ -161,7 +161,16 @@ alt-tab = 'workspace-back-and-forth'
 alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 
 # Note: this is extremely inflexible, locking specific workspaces to specific monitors.
-# [workspace-to-monitor-force-assignment]
+[workspace-to-monitor-force-assignment]
+1 = 'main'
+2 = 'main'
+3 = 'main'
+4 = 'main'
+5 = 'main'
+6 = 'main'
+7 = 'main'
+8 = 'main'
+9 = 'secondary'
 # D = 'main'
 # P = 'secondary'
 # B = 'secondary'
