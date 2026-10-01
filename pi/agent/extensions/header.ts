@@ -316,7 +316,7 @@ class TetrisWelcomeHeader extends Container {
 
     // ── 6-line Aligned Information Grid with Chained Rules ──
     const infoLines = [
-      `${BOLD}${ORANGE}Pi${RESET} ${CYAN}v0.84.2${RESET} ${DIM}(DestNgx edition)${RESET}`,
+      `${BOLD}${ORANGE}Pi${RESET} ${CYAN}v0.87.1${RESET} ${DIM}(DestNgx edition)${RESET}`,
       `${BLUE}Model:${RESET}     ${MAGENTA}${model}${RESET} ${DIM}•${RESET} ${CYAN}${thinking} thinking${RESET}`,
       `${BLUE}Workspace:${RESET} ${YELLOW} ${repoName}${RESET}${branchStr}`,
       `${BLUE}Resources:${RESET} ${GREEN}${counts.skills} skills${RESET} ${DIM}·${RESET} ${YELLOW}${counts.prompts} prompts${RESET} ${DIM}·${RESET} ${CYAN}${counts.extensions} extensions${RESET}`,
