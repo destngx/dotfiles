@@ -69,8 +69,8 @@ const SPINNER_VERBS = [
 const SPINNER_DOTS = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
 // ── Dynamic Flags for Sailing Right & Left ──
-const FLAGS_RIGHT = ["|>", "|}", "|]", "|)", "|~", "|D", "|P", "|*"];
-const FLAGS_LEFT = ["<|", "{|", "[|", "(|", "~|", "D|", "P|", "*|"];
+const FLAGS_RIGHT = ["|>", "|}", "|]", "|)"];
+const FLAGS_LEFT = ["<|", "{|", "[|", "(|"];
 
 const TEXT_COL_WIDTH = 21;
 // Base frame interval: fast braille spinner & light effect (80ms)
@@ -267,9 +267,34 @@ function generateContinuousFrames(): DynamicFrame[] {
   const xMax = Math.max(xMin + 2, waveTotal - 2);
 
   // Boat trajectory across the full wave width
+  // Sails with a main direction (right, then left) with a 20% back rate on intermediate steps
   const positions: { x: number; dir: number }[] = [];
-  for (let x = xMin; x <= xMax; x++) positions.push({ x, dir: 1 });
-  for (let x = xMax - 1; x > xMin; x--) positions.push({ x, dir: -1 });
+  let curX = xMin;
+  positions.push({ x: curX, dir: 1 });
+
+  // Outward leg: main direction is right (dir: 1), 20% back rate
+  while (curX < xMax) {
+    const isBack = Math.random() < 0.20 && curX > xMin;
+    if (isBack) {
+      curX--;
+      positions.push({ x: curX, dir: -1 });
+    } else {
+      curX++;
+      positions.push({ x: curX, dir: 1 });
+    }
+  }
+
+  // Return leg: main direction is left (dir: -1), 20% back rate
+  while (curX > xMin + 1) {
+    const isBack = Math.random() < 0.20 && curX < xMax;
+    if (isBack) {
+      curX++;
+      positions.push({ x: curX, dir: 1 });
+    } else {
+      curX--;
+      positions.push({ x: curX, dir: -1 });
+    }
+  }
 
   // Full cycle ensures continuous uninterrupted sailing
   const boatCycle = positions.length * BOAT_SLOWDOWN;

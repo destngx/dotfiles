@@ -1,0 +1,4 @@
+- Never use em dashes (—) in your responses. Use hyphens (-) instead.
+- When writing commit, never add your agent name as the co-author.
+- NEVER modify auto-generated files.
+- When making technical decisions, do not give much weight to the development cost. Instead, prefer quality, simplicity, robustness, scalability, and long-term maintainability.

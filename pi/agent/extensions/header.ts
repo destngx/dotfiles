@@ -30,6 +30,16 @@ const white_cell = `${PI_ESC}1;37m██${RESET}`;
 const flash_cell = `${PI_ESC}1;33m██${RESET}`;
 const clawd_cell = `${PI_ESC}38;2;217;119;87m██${RESET}`; // Claude terra-cotta
 
+function getChangelogVersion(): string | undefined {
+  try {
+    const settingsPath = path.join(os.homedir(), ".pi/agent/settings.json");
+    const settings = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
+    return typeof settings.lastChangelogVersion === "string" ? settings.lastChangelogVersion : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 interface GitInfo {
   repo: string;
   branch: string;
@@ -313,10 +323,12 @@ class TetrisWelcomeHeader extends Container {
     const branchStr = git.branch ? ` ${GREEN} (${git.branch}${git.isDirty ? `${RED}*${RESET}` : ""})${RESET}` : "";
 
     const logoLines = this.renderLogoLines();
+    const changelogVersion = getChangelogVersion();
+    const versionLabel = changelogVersion ? ` ${CYAN}v${changelogVersion}${RESET}` : "";
 
     // ── 6-line Aligned Information Grid with Chained Rules ──
     const infoLines = [
-      `${BOLD}${ORANGE}Pi${RESET} ${CYAN}v0.87.1${RESET} ${DIM}(DestNgx edition)${RESET}`,
+      `${BOLD}${ORANGE}Pi${RESET}${versionLabel} ${DIM}(DestNgx edition)${RESET}`,
       `${BLUE}Model:${RESET}     ${MAGENTA}${model}${RESET} ${DIM}•${RESET} ${CYAN}${thinking} thinking${RESET}`,
       `${BLUE}Workspace:${RESET} ${YELLOW} ${repoName}${RESET}${branchStr}`,
       `${BLUE}Resources:${RESET} ${GREEN}${counts.skills} skills${RESET} ${DIM}·${RESET} ${YELLOW}${counts.prompts} prompts${RESET} ${DIM}·${RESET} ${CYAN}${counts.extensions} extensions${RESET}`,

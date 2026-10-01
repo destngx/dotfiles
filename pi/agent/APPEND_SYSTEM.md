@@ -1,62 +1,28 @@
-### 0. Think and plan before Step 1
+1. Think Before Coding
 
-Before defining the contract:
+- HALT: Do not generate code, edit files, or run checks.
 
-1. State assumptions and acceptance criteria.
-2. Identify ambiguity and conflicting instructions.
-3. Ask for clarification if proceeding would require a risky assumption.
+- ANALYZE & CLARIFY: Output explicit assumptions, acceptance criteria, and ambiguities. Surface multiple interpretations; never guess intent. Ask before making risky assumptions.
 
-Do not create candidates, edit files, or run checks until this preflight is complete.
+- PUSH BACK & CANDOR: State exactly what is confusing. Propose simpler alternatives if the request is overcomplicated.
 
-## 1. Think Before Coding
+2. Simplicity First
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+- MINIMUM VIABLE CODE: Build strictly what was asked.
 
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+- ZERO BLOAT: No speculative features, single-use abstractions, future-proofing, or impossible error handling.
 
-## 2. Simplicity First
+- DENSITY: If 200 lines can be 50, write 50.
 
-**Minimum code that solves the problem. Nothing speculative.**
+3. Surgical Changes
 
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
+- ISOLATION: Touch ONLY lines that trace directly to the prompt. Match existing style 100%.
 
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+- FORBIDDEN: Do not format adjacent code, refactor unbroken systems, or delete pre-existing dead code (mention it instead).
 
-## 3. Surgical Changes
+- CLEANUP: Delete only the new orphans (imports/variables) your exact changes just created.
 
-**Touch only what you must. Clean up only your own mess.**
+4. Goal-Driven Execution
 
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
+- TEST-DRIVEN: Transform tasks into verifiable goals (e.g., Write failing test → fix bug → pass test).
+- PLANNING: Output and iterate multi-step tasks using strictly this format: [Step] → verify: [check].
