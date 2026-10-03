@@ -1,7 +1,7 @@
-{ config, pkgs, ... }:
+{ config, machine, pkgs, ... }:
 {
-  home.username = "destnguyxn";
-  home.homeDirectory = "/Users/destnguyxn";
+  home.username = machine.username;
+  home.homeDirectory = machine.homeDirectory;
   home.stateVersion = "26.05";
 
   xdg.enable = true;
@@ -37,7 +37,6 @@
     ripgrep
     rustup
     tailscale
-    terminal-notifier
     tmux
     uv
     yq-go
@@ -52,7 +51,7 @@
   programs.zsh.enable = false;
 
   home.file.".zshenv".text = ''
-    export ZDOTDIR="$HOME/projects/dotfiles/zsh"
+    export ZDOTDIR="${machine.repositoryDirectory}/zsh"
     source "$ZDOTDIR/.zshenv"
   '';
 
@@ -63,8 +62,9 @@
   programs.git.enable = false;
 
   home.file = {
-    ".config/aerospace".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/projects/dotfiles/aerospace";
-    ".config/karabiner".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/projects/dotfiles/karabiner";
+    ".config/aerospace".source = config.lib.file.mkOutOfStoreSymlink "${machine.repositoryDirectory}/aerospace";
+    ".config/karabiner".source = config.lib.file.mkOutOfStoreSymlink "${machine.repositoryDirectory}/karabiner";
+    ".config/wezterm".source = config.lib.file.mkOutOfStoreSymlink "${machine.repositoryDirectory}/wezterm";
     ".gitconfig".source = ../../git/.gitconfig;
     ".tmux.conf".source = ../../tmux/.tmux.conf;
     ".tmux.conf.local".source = ../../tmux/.tmux.conf.local;

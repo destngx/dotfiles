@@ -1,33 +1,32 @@
-{ inputs, pkgs, ... }:
+{ inputs, machine, pkgs, ... }:
 {
   imports = [ ./homebrew.nix ];
 
   nix.enable = false;
 
   system.stateVersion = 6;
-  system.primaryUser = "destnguyxn";
+  system.primaryUser = machine.username;
 
   launchd.user.envVariables = {
-    PI_CODING_AGENT_DIR = "/Users/destnguyxn/projects/dotfiles/pi/agent";
-    WEZTERM_CONFIG_FILE = "/Users/destnguyxn/projects/dotfiles/wezterm/wezterm.lua";
+    PI_CODING_AGENT_DIR = "${machine.repositoryDirectory}/pi/agent";
   };
 
-  nixpkgs.hostPlatform = "aarch64-darwin";
+  nixpkgs.hostPlatform = machine.system;
   nixpkgs.config.allowUnfree = true;
   programs.zsh.enableGlobalCompInit = false;
   environment.shells = [ pkgs.zsh ];
   services.tailscale.enable = true;
 
-  users.users.destnguyxn = {
-    name = "destnguyxn";
-    home = "/Users/destnguyxn";
+  users.users.${machine.username} = {
+    name = machine.username;
+    home = machine.homeDirectory;
     shell = pkgs.zsh;
   };
 
   nix-homebrew = {
     enable = true;
     autoMigrate = true;
-    user = "destnguyxn";
+    user = machine.username;
     mutableTaps = false;
     taps = {
       "homebrew/homebrew-services" = inputs.homebrew-services;

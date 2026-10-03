@@ -27,22 +27,23 @@
 
   outputs = inputs@{ nix-darwin, ... }:
     let
-      system = "aarch64-darwin";
+      machine = import ./nix/machine.nix;
     in {
-      darwinConfigurations."destngx-macbook-air" = nix-darwin.lib.darwinSystem {
-        inherit system;
-        specialArgs = { inherit inputs; };
+      darwinConfigurations.${machine.hostName} = nix-darwin.lib.darwinSystem {
+        system = machine.system;
+        specialArgs = { inherit inputs machine; };
         modules = [
           ./nix/darwin/configuration.nix
           inputs.home-manager.darwinModules.home-manager
           inputs.nix-homebrew.darwinModules.nix-homebrew
           {
-            nixpkgs.hostPlatform = system;
+            nixpkgs.hostPlatform = machine.system;
             home-manager = {
               backupFileExtension = "hm-backup";
               useGlobalPkgs = true;
               useUserPackages = true;
-              users.destnguyxn = import ./nix/home/configuration.nix;
+              extraSpecialArgs = { inherit machine; };
+              users.${machine.username} = import ./nix/home/configuration.nix;
             };
           }
         ];

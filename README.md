@@ -1,39 +1,76 @@
 # Destnguyxn Personal Dotfiles
 
-A place where I keep my configuration and dotfiles.
+A place where I keep my configuration and dotfiles. This repository is powered by Nix: a flake defines the macOS workstation, Homebrew integration, user packages, and selected application and shell configuration. The repository remains the source of truth for managed files.
 
 Check out to get the font at `355dcc691cab1ccf649593cb9a6167f1ee4dca4a`.
 
-## Nix workstation configuration
+## Nix workstation setup
 
-The root `flake.nix` configures nix-darwin, Home Manager, and nix-homebrew for the Apple Silicon host `destngx-macbook-air` and user `destnguyxn`. Nix modules are kept under `nix/`; shell, Git, and tmux configuration remains in their existing repository directories.
+The root `flake.nix` configures nix-darwin, Home Manager, and nix-homebrew for the host and user defined in [`nix/machine.nix`](nix/machine.nix). To set up another Mac, edit that file's `hostName`, `username`, `homeDirectory`, `repositoryDirectory`, and `system` values. Nix modules live under `nix/`. Other application configurations remain in their existing directories and are linked or referenced from there. For example, Home Manager links the entire `karabiner/` and `aerospace/` directories into `~/.config`; Karabiner's config is linked as a directory so it can monitor configuration changes.
 
-### Install Nix
+### 1. Install Nix
 
-This workstation was checked for an existing `/nix` store, Nix daemon launch daemon, and Nix commands; none were found. The selected installer is Determinate Systems' installer. Its command installs Determinate Nix and may prompt for administrator authorization while making system-level changes. Review the installer documentation before proceeding.
+This workstation uses Determinate Nix. Installing Nix can make system-level changes and may prompt for administrator authorization. Review the installer and its documentation before proceeding:
 
 ```sh
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --determinate
 ```
 
-Open a new terminal after installation, then verify:
+Open a new terminal after installation and verify the CLI is available:
 
 ```sh
 nix --version
 nix flake --help
 ```
 
-### Check and evaluate the configuration
+### 2. Get the repository and inspect the flake
 
-The Nix toolchain has since been installed on this workstation. Initial `nix flake check` evaluation succeeded, with the Darwin system build intentionally skipped by the check. Follow-up evaluation exposed stale Homebrew options; these were updated to `homebrew.prefix = "/opt/homebrew"` and `homebrew.onActivation.autoUpdate = false`. The full Darwin and Home Manager derivation paths now evaluate. Re-run the checks below after pulling or changing configuration:
+Before evaluating or activating on a different Mac, edit `nix/machine.nix` to set its hostname, macOS username, home directory, repository checkout directory, and Nix system architecture. The `hostName` value is the flake configuration name; it does not have to match macOS's LocalHostName. Keep `repositoryDirectory` aligned with the actual checkout path because shell startup and application symlinks use it.
+
+From the repository root, set shell variables for the configured host and user, then inspect and validate the configuration without applying it:
 
 ```sh
+host=$(nix eval --impure --raw --expr '(import ./nix/machine.nix).hostName')
+user=$(nix eval --impure --raw --expr '(import ./nix/machine.nix).username')
+nix flake show
 nix flake check --show-trace
-nix eval --show-trace .#darwinConfigurations.destngx-macbook-air.system.build.toplevel.drvPath
-nix eval --show-trace .#darwinConfigurations.destngx-macbook-air.config.home-manager.users.destnguyxn.home.activationPackage.drvPath
+nix eval --show-trace ".#darwinConfigurations.$host.system.build.toplevel.drvPath"
+nix eval --show-trace ".#darwinConfigurations.$host.config.home-manager.users.$user.home.activationPackage.drvPath"
 ```
 
-These commands evaluate derivations; they do not switch the system. Review evaluation output and Homebrew migration behavior before activation. `nix-homebrew.autoMigrate` is enabled, but migration has not been run. Homebrew cleanup, upgrades, and automatic updates are disabled. Do not run `darwin-rebuild switch` until you have reviewed the configuration and explicitly decided to activate it.
+Evaluation and `nix flake check` do not activate the configuration. To build the system without switching to it:
+
+```sh
+nix build --no-link ".#darwinConfigurations.$host.system"
+```
+
+### 3. Activate when ready
+
+Activation applies system and user configuration. Review the Nix changes and their effects first, especially the nix-homebrew migration setting and any existing files that Home Manager will manage. Home Manager is configured to back up conflicting managed files with the `.hm-backup` extension. The Karabiner activation step restarts its user server after linking the config directory.
+
+When you have reviewed the configuration and are ready to apply it:
+
+```sh
+sudo nix run nix-darwin -- switch --flake ".#$host"
+```
+
+After making configuration changes, repeat the check and evaluation commands above before activating again.
+
+### Helpful flake commands
+
+```sh
+# Update flake inputs and write the new revisions to flake.lock
+nix flake update
+
+# Update one input only
+nix flake lock --update-input nixpkgs
+
+# Evaluate the Home Manager activation package path
+host=$(nix eval --impure --raw --expr '(import ./nix/machine.nix).hostName')
+user=$(nix eval --impure --raw --expr '(import ./nix/machine.nix).username')
+nix eval --raw ".#darwinConfigurations.$host.config.home-manager.users.$user.home.activationPackage.outPath"
+
+Updating inputs changes `flake.lock`; review that diff before committing. A system switch applies the configuration and can also run configured Homebrew migration actions. Homebrew cleanup, upgrades, and automatic updates are disabled in this configuration.
 
 Machine-local Git include files are intentionally kept outside the repository. Do not put credentials or secret values in tracked files or Nix expressions.
 
