@@ -1,4 +1,5 @@
 # use nvim, but don't make me think about it
+
 if [[ -n "$(command -v nvim)" ]]; then
   alias vim="nvim"
   alias v="nvim"
@@ -18,6 +19,7 @@ fi
 
 if [[ -n "$(command -v claude)" ]]; then
   alias c="claude"
+  alias cc="claude -c"
 fi
 
 if [[ -n "$(command -v microk8s)" ]]; then
@@ -50,8 +52,6 @@ fi
 if [[ -n "$(command -v pnpm)" ]]; then
   alias pn=pnpm
   alias px=pnpx
-  alias npm=pnpm
-  alias npx=pnpx
 fi
 
 if [[ -n "$(command -v kubectl)" ]]; then
@@ -75,12 +75,10 @@ if [[ -n "$(command -v tofu)" ]]; then
   alias ti="tofu init"
   alias tp="tofu plan"
   alias ta="tofu apply"
-  alias terraform-ls=tofu-ls
 fi
 
 if [[ -n "$(command -v bun)" ]]; then
   alias b=bun
-  alias bi=bun install
 fi
 
 if [[ -n "$(command -v nnn)" ]]; then

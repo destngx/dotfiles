@@ -79,6 +79,12 @@ source <(kubectl completion zsh)
 
 ## docker completions
 source <(docker completion zsh)
-
+FPATH="$HOME/.docker/completions:$FPATH"
 ## helm completions
 source <(helm completion zsh)
+
+## terraform completions
+
+if type complete &>/dev/null; then
+  complete -o nospace -C /opt/homebrew/bin/terraform terraform
+fi

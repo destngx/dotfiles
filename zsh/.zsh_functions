@@ -5,17 +5,6 @@ git() {
     command git status -sb
   fi
 }
-
-if [[ -n "$(command -v bun)" ]]; then
-  bun() {
-    if [[ $# -gt 0 ]]; then
-      command bun "$@"
-    else
-      command bun install
-    fi
-  }
-fi
-
 # Override npm with pnpm
 npm() {
   case "$1" in
@@ -44,7 +33,6 @@ npm() {
       ;;
   esac
 }
-
 # yarn function → uses pnpm
 yarn() {
   case "$1" in
@@ -73,13 +61,23 @@ bun() {
   esac
 }
 
+if [[ -n "$(command -v bun)" ]]; then
+  bun() {
+    if [[ $# -gt 0 ]]; then
+      command bun "$@"
+    else
+      command bun install
+    fi
+  }
+fi
+
 perp() {
     search=""
     echo "Perplexity lookup for: $@"
     for term in $@; do
         search="$search%20$term"
     done
-    xdg-open "https://www.perplexity.ai/search?s=o&q=$search" &
+    open "https://www.perplexity.ai/search?s=o&q=$search" &
 }
 
 ls-port() {
@@ -109,7 +107,6 @@ is-port-available() {
     echo "Port $port is available for use"
   fi
 }
-
 lich-am() {
   curl -s lich.day
 }

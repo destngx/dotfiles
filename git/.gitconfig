@@ -2,6 +2,8 @@
   email = chromevi123@gmail.com
   name = destngx
   signingkey = ~/.ssh/id_rsa.pub
+[includeIf "gitdir:~/projects/company/"]
+  path = .gitconfig-company
 [includeIf "gitdir:~/projects/others/"]
   path = .gitconfig-personal
 [alias]

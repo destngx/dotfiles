@@ -1,4 +1,4 @@
-# Start configuration added by Zim install {{{
+# # Start configuration added by Zim install {{{
 #
 # This is not sourced during shell startup, and it's only used to configure the
 # zimfw plugin manager.
@@ -60,5 +60,5 @@ zmodule https://github.com/agkozak/zsh-z
 zmodule https://github.com/grigorii-zander/zsh-npm-scripts-autocomplete
 zmodule https://github.com/Aloxaf/fzf-tab
 zmodule https://github.com/joshskidmore/zsh-fzf-history-search
-zmodule https://github.com/wfxr/forgit
+
 zmodule ohmyzsh/ohmyzsh --root plugins/aws
