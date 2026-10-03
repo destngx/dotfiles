@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   home.username = "destnguyxn";
   home.homeDirectory = "/Users/destnguyxn";
@@ -45,23 +45,16 @@
     pi-coding-agent
   ];
 
-  programs.zsh = {
-    enable = true;
-    enableCompletion = true;
-    completionInit = "";
-    plugins = [
-      {
-        name = "forgit";
-        src = pkgs.zsh-forgit;
-      }
-    ];
-    envExtra = ''
-      source ${../../zsh/.zshenv}
-    '';
-    initContent = ''
-      source ${../../zsh/.zshrc}
-    '';
-  };
+  home.activation.restartKarabiner = config.lib.dag.entryAfter [ "linkGeneration" ] ''
+    /bin/launchctl kickstart -k gui/$(/usr/bin/id -u)/org.pqrs.service.agent.Karabiner-Console-User-Server
+  '';
+
+  programs.zsh.enable = false;
+
+  home.file.".zshenv".text = ''
+    export ZDOTDIR="$HOME/projects/dotfiles/zsh"
+    source "$ZDOTDIR/.zshenv"
+  '';
 
   programs.tmux = {
     enable = false;
@@ -70,11 +63,8 @@
   programs.git.enable = false;
 
   home.file = {
-    ".config/zsh/.zimrc".source = ../../zsh/.zimrc;
-    ".config/zsh/.zsh_aliases".source = ../../zsh/.zsh_aliases;
-    ".config/zsh/.zsh_functions".source = ../../zsh/.zsh_functions;
-    ".config/zsh/.zsh_completions".source = ../../zsh/.zsh_completions;
-
+    ".config/aerospace".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/projects/dotfiles/aerospace";
+    ".config/karabiner".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/projects/dotfiles/karabiner";
     ".gitconfig".source = ../../git/.gitconfig;
     ".tmux.conf".source = ../../tmux/.tmux.conf;
     ".tmux.conf.local".source = ../../tmux/.tmux.conf.local;

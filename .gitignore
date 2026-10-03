@@ -1,1 +1,13 @@
 .pi
+pi
+!pi/extensions
+!pi/*.md
+!pi/auth.json
+!pi/models.json
+!pi/settings.json
+!pi/trust.json
+!pi/notify.sh
+!pi/statusline.sh
+
+**/.zim
+**/.zcomp*

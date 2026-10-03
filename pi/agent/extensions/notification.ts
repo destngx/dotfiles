@@ -2,7 +2,7 @@ import { spawn } from "child_process";
 import * as path from "path";
 import * as os from "os";
 
-const NOTIFY_SCRIPT = path.join(os.homedir(), ".pi/agent/notify.sh");
+const NOTIFY_SCRIPT = path.join(os.homedir(), "projects/dotfiles/pi/agent/notify.sh");
 const NOTIFICATION_THRESHOLD_MS = 0; // Set to 0 to notify on all completions
 
 function sendNotification(params: {

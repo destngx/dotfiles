@@ -7,6 +7,11 @@
   system.stateVersion = 6;
   system.primaryUser = "destnguyxn";
 
+  launchd.user.envVariables = {
+    PI_CODING_AGENT_DIR = "/Users/destnguyxn/projects/dotfiles/pi/agent";
+    WEZTERM_CONFIG_FILE = "/Users/destnguyxn/projects/dotfiles/wezterm/wezterm.lua";
+  };
+
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
   programs.zsh.enableGlobalCompInit = false;
