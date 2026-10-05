@@ -31,7 +31,6 @@ in
     mosh
     mtr
     neovim
-    onefetch
     opentofu
     peco
     pngpaste
