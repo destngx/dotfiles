@@ -12,18 +12,6 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
-    homebrew-services = {
-      url = "github:homebrew/homebrew-services";
-      flake = false;
-    };
-    aerospace-tap = {
-      url = "github:nikitabobko/homebrew-tap";
-      flake = false;
-    };
-    vjeantet-tap = {
-      url = "github:vjeantet/homebrew-tap";
-      flake = false;
-    };
   };
 
   outputs = inputs@{ nix-darwin, ... }:

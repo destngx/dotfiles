@@ -1,21 +1,5 @@
 {
   "nodes": {
-    "aerospace-tap": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1788650992,
-        "narHash": "sha256-UtBXjrHvfrPikHajq1SECV+Jc9bwmbbUc/bE37D8Xck=",
-        "owner": "nikitabobko",
-        "repo": "homebrew-tap",
-        "rev": "9ac0bfc08904719c52a63101fa7e1e133a23bda2",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nikitabobko",
-        "repo": "homebrew-tap",
-        "type": "github"
-      }
-    },
     "brew-src": {
       "flake": false,
       "locked": {
@@ -51,22 +35,6 @@
         "owner": "nix-community",
         "ref": "release-26.05",
         "repo": "home-manager",
-        "type": "github"
-      }
-    },
-    "homebrew-services": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1742475690,
-        "narHash": "sha256-qg3/+iHtnFe6VxGapisTatGnoH0XG4BnWWqwwzWYzk0=",
-        "owner": "homebrew",
-        "repo": "homebrew-services",
-        "rev": "2c294ab9515576d961cea28c93148c6452db2def",
-        "type": "github"
-      },
-      "original": {
-        "owner": "homebrew",
-        "repo": "homebrew-services",
         "type": "github"
       }
     },
@@ -143,30 +111,11 @@
     },
     "root": {
       "inputs": {
-        "aerospace-tap": "aerospace-tap",
         "home-manager": "home-manager",
-        "homebrew-services": "homebrew-services",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs",
-        "nixpkgs-unstable": "nixpkgs-unstable",
-        "vjeantet-tap": "vjeantet-tap"
-      }
-    },
-    "vjeantet-tap": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1790803876,
-        "narHash": "sha256-cfqos2uJHmHi0wEASkowQ4EJS/8MIy8xQQ6YZKJC+dI=",
-        "owner": "vjeantet",
-        "repo": "homebrew-tap",
-        "rev": "15e443f28da3f0276677433d9f3527ba1e41c176",
-        "type": "github"
-      },
-      "original": {
-        "owner": "vjeantet",
-        "repo": "homebrew-tap",
-        "type": "github"
+        "nixpkgs-unstable": "nixpkgs-unstable"
       }
     }
   },

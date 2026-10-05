@@ -1,7 +1,7 @@
 {
   "providers": {
     "openai": {
-      "baseUrl": "http://ezmacmini:8080"
+      "baseUrl": "http://ezmacmini:8080/v1"
     },
     "anthropic": {
       "baseUrl": "http://ezmacmini:8080"

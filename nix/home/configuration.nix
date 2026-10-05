@@ -11,38 +11,34 @@ in
 
   home.packages = with pkgs; [
     awscli2
+    aerospace
     bat
     chafa
     delta
     eza
     fd
     findutils
+    fzf
     git-lfs
     go
     gnused
-    ghostscript
-    kubernetes-helm
     imagemagick
     lazygit
-    llvm
-    lua-language-server
-    luajit
-    minikube
     mosh
-    mtr
     neovim
     opentofu
     peco
     pngpaste
-    qemu
     ripgrep
     rustup
+    sqlite
     tailscale
     tmux
     uv
     yq-go
     zsh
     unstable-pkgs.pi-coding-agent
+    unstable-pkgs.wezterm
   ];
 
   home.activation.restartKarabiner = config.lib.dag.entryAfter [ "linkGeneration" ] ''

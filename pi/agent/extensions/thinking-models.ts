@@ -15,9 +15,9 @@ const thinkingByModel: Record<string, ThinkingLevel> = {
   "anthropic/claude-sonnet-5": "low",
   "anthropic/claude-haiku-4-5": "off",
   "openai/gpt-6-astra": "high",
-  "openai/gpt-5.6-sol": "high",
-  "openai/gpt-5.6-terra": "low",
-  "openai/gpt-5.6-luna": "off",
+  "openai/gpt-6.1-sol": "high",
+  "openai/gpt-6-terra": "low",
+  "openai/gpt-6-luna": "off",
 };
 
 export default function (pi: ExtensionAPI) {

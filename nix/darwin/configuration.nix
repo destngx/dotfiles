@@ -24,11 +24,7 @@
     autoMigrate = true;
     user = machine.username;
     mutableTaps = false;
-    taps = {
-      "homebrew/homebrew-services" = inputs.homebrew-services;
-      "nikitabobko/homebrew-tap" = inputs.aerospace-tap;
-      "vjeantet/homebrew-tap" = inputs.vjeantet-tap;
-    };
-    trust.taps = [ "nikitabobko/tap" ];
   };
 }
+
+

@@ -75,16 +75,24 @@ fi
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 ## kubectl completions
-source <(kubectl completion zsh)
+if [[ -n "$(command -v kubectl)" ]]; then
+  source <(kubectl completion zsh)
+fi
 
 ## docker completions
-source <(docker completion zsh)
-FPATH="$HOME/.docker/completions:$FPATH"
+if [[ -n "$(command -v docker)" ]]; then
+  source <(docker completion zsh)
+  FPATH="$HOME/.docker/completions:$FPATH"
+fi
 ## helm completions
-source <(helm completion zsh)
+if [[ -n "$(command -v helm)" ]]; then
+  source <(helm completion zsh)
+fi
 
 ## terraform completions
 
-if type complete &>/dev/null; then
-  complete -o nospace -C /opt/homebrew/bin/terraform terraform
+if [[ -n "$(command -v terraform)" ]]; then
+  if type complete &>/dev/null; then
+    complete -o nospace -C /opt/homebrew/bin/terraform terraform
+  fi
 fi

@@ -34,8 +34,9 @@ fi
 
 if [[ -n "$(command -v eza)" ]]; then
   alias l="eza --"
-  alias ls="eza --icons --"
-  alias la="eza -la --icons --"
+  alias ls="eza --group-directories-first --icons=auto"
+  alias ll='eza -al --git --group-directories-first --icons=auto'
+  alias la="eza -la --icons=auto --"
   alias lt="ls --tree --level=3 --"
   alias tree='eza --tree --icons --git-ignore --'
 fi

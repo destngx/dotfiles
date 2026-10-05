@@ -1,28 +1,20 @@
-{ ... }:
+{ machine, ... }:
 {
   homebrew = {
     enable = true;
     prefix = "/opt/homebrew";
-    taps = [
-      "homebrew/services"
-      "nikitabobko/tap"
-      "vjeantet/tap"
-    ];
-    brews = [
-      "socket_vmnet"
-    ];
+    taps = [ ];
+    brews = [ ];
     casks = [
-      "aerospace"
       "browserosaurus"
       "codex"
       "gcc-arm-embedded"
       "session-manager-plugin"
-      "wezterm@nightly"
       "windows-app"
     ];
     onActivation = {
-      cleanup = "none";
-      upgrade = false;
+      cleanup = "uninstall";
+      upgrade = true;
       autoUpdate = false;
     };
   };

@@ -1,8 +1,6 @@
 {
   "lastChangelogVersion": "1.0.0",
   "theme": "dark",
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-haiku-4-5",
   "terminal": {
     "showTerminalProgress": true
   },
@@ -20,10 +18,10 @@
     "anthropicExtraUsage": true
   },
   "enabledModels": [
-    "anthropic/claude-fable-5",
-    "anthropic/claude-opus-5",
-    "anthropic/claude-sonnet-5",
-    "anthropic/claude-haiku-4-5"
+    "openai/gpt-6-astra",
+    "openai/gpt-6.1-sol",
+    "openai/gpt-5.6-terra",
+    "openai/gpt-6-luna"
   ],
   "packages": [
     "npm:pi-context-view",
