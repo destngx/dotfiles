@@ -7,10 +7,6 @@
   system.stateVersion = 6;
   system.primaryUser = machine.username;
 
-  launchd.user.envVariables = {
-    PI_CODING_AGENT_DIR = "${machine.repositoryDirectory}/pi/agent";
-  };
-
   nixpkgs.hostPlatform = machine.system;
   nixpkgs.config.allowUnfree = true;
   programs.zsh.enableGlobalCompInit = false;

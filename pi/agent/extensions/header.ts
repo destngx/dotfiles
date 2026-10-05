@@ -325,6 +325,7 @@ class TetrisWelcomeHeader extends Container {
     const logoLines = this.renderLogoLines();
     const changelogVersion = getChangelogVersion();
     const versionLabel = changelogVersion ? ` ${CYAN}v${changelogVersion}${RESET}` : "";
+    // const versionLabel = ""
 
     // ── 6-line Aligned Information Grid with Chained Rules ──
     const infoLines = [

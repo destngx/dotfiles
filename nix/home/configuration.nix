@@ -1,4 +1,7 @@
-{ config, machine, pkgs, ... }:
+{ config, inputs, machine, pkgs, ... }:
+let
+  unstable-pkgs = import inputs.nixpkgs-unstable { system = pkgs.system; };
+in
 {
   home.username = machine.username;
   home.homeDirectory = machine.homeDirectory;
@@ -10,7 +13,6 @@
     awscli2
     bat
     chafa
-    checkov
     delta
     eza
     fd
@@ -41,13 +43,15 @@
     uv
     yq-go
     zsh
-    pi-coding-agent
+    unstable-pkgs.pi-coding-agent
   ];
 
   home.activation.restartKarabiner = config.lib.dag.entryAfter [ "linkGeneration" ] ''
     /bin/launchctl kickstart -k gui/$(/usr/bin/id -u)/org.pqrs.service.agent.Karabiner-Console-User-Server
   '';
 
+  # These Home Manager modules stay disabled because the configs are provided via home.file below.
+  # The zsh entry sources the repository's .zshenv; tmux and Git files are linked directly.
   programs.zsh.enable = false;
 
   home.file.".zshenv".text = ''

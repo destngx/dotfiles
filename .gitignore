@@ -8,6 +8,6 @@ pi
 !pi/trust.json
 !pi/notify.sh
 !pi/statusline.sh
-
+result
 **/.zim
 **/.zcomp*

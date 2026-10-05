@@ -2,7 +2,8 @@
   description = "macOS workstation configuration for destngx";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
@@ -42,7 +43,7 @@
               backupFileExtension = "hm-backup";
               useGlobalPkgs = true;
               useUserPackages = true;
-              extraSpecialArgs = { inherit machine; };
+              extraSpecialArgs = { inherit inputs machine; };
               users.${machine.username} = import ./nix/home/configuration.nix;
             };
           }
