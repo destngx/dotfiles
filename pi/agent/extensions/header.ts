@@ -32,7 +32,7 @@ const clawd_cell = `${PI_ESC}38;2;217;119;87m██${RESET}`; // Claude terra-co
 
 function getChangelogVersion(): string | undefined {
   try {
-    const settingsPath = path.join(os.homedir(), ".pi/agent/settings.json");
+    const settingsPath = path.join(os.homedir(), "projects/dotfiles/pi/agent/settings.json");
     const settings = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
     return typeof settings.lastChangelogVersion === "string" ? settings.lastChangelogVersion : undefined;
   } catch {
@@ -325,7 +325,6 @@ class TetrisWelcomeHeader extends Container {
     const logoLines = this.renderLogoLines();
     const changelogVersion = getChangelogVersion();
     const versionLabel = changelogVersion ? ` ${CYAN}v${changelogVersion}${RESET}` : "";
-    // const versionLabel = ""
 
     // ── 6-line Aligned Information Grid with Chained Rules ──
     const infoLines = [
