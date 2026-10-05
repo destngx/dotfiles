@@ -1,5 +1,12 @@
 { machine, ... }:
 {
+  nix-homebrew = {
+    enable = true;
+    autoMigrate = true;
+    user = machine.username;
+    mutableTaps = false;
+  };
+
   homebrew = {
     enable = true;
     prefix = "/opt/homebrew";

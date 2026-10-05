@@ -17,7 +17,8 @@ if [[ -n "$(command -v pi)" ]]; then
   if [[ -n "$(command -v omp)" ]]; then
     alias p="omp"
   else
-    alias p="pi update --extensions && pi"
+    # alias p="pi update --extensions && pi"
+    alias p="pi"
     alias pr="pi -r"
   fi
 fi

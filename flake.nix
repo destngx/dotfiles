@@ -16,13 +16,13 @@
 
   outputs = inputs@{ nix-darwin, ... }:
     let
-      machine = import ./nix/machine.nix;
+      machine = import ./nix/hosts/destngx-macbook-air/machine.nix;
     in {
       darwinConfigurations.${machine.hostName} = nix-darwin.lib.darwinSystem {
         system = machine.system;
         specialArgs = { inherit inputs machine; };
         modules = [
-          ./nix/darwin/configuration.nix
+          ./nix/hosts/destngx-macbook-air/darwin.nix
           inputs.home-manager.darwinModules.home-manager
           inputs.nix-homebrew.darwinModules.nix-homebrew
           {
@@ -32,7 +32,7 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               extraSpecialArgs = { inherit inputs machine; };
-              users.${machine.username} = import ./nix/home/configuration.nix;
+              users.${machine.username} = import ./nix/hosts/destngx-macbook-air/home.nix;
             };
           }
         ];

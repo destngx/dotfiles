@@ -1,0 +1,28 @@
+{ pkgs, ... }:
+{
+  home.packages = with pkgs; [
+    awscli2
+    bat
+    chafa
+    delta
+    eza
+    fd
+    findutils
+    fzf
+    git-lfs
+    go
+    gnused
+    imagemagick
+    lazygit
+    mosh
+    neovim
+    opentofu
+    peco
+    ripgrep
+    rustup
+    sqlite
+    tailscale
+    uv
+    yq-go
+  ];
+}

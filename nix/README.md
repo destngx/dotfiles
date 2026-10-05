@@ -1,22 +1,22 @@
 # macOS workstation Nix configuration
 
-This repository contains a nix-darwin and Home Manager configuration for the host and user defined in [`machine.nix`](machine.nix). To set up another Mac, update the hostname, username, home directory, repository checkout path, and system architecture there. The `hostName` value is the flake attribute name and does not have to match macOS's LocalHostName. The flake entrypoint is `../flake.nix`; Darwin and Home Manager modules are in this directory.
+This repository contains a nix-darwin and Home Manager configuration for the host and user defined in [`hosts/destngx-macbook-air/machine.nix`](hosts/destngx-macbook-air/machine.nix). The host entrypoints live under `hosts/`; Nix modules live under `modules/`, organized by platform and application. The flake entrypoint is `../flake.nix`.
 
 ## Review before activation
 
-- Homebrew's current inventory was captured from the workstation and may change. Compare it with `darwin/homebrew.nix` before activating.
+- Homebrew's current inventory was captured from the workstation and may change. Compare it with `modules/darwin/homebrew.nix` before activating.
 - `nix-homebrew.autoMigrate` is enabled. Understand and review its effects before the first activation.
-- Homebrew cleanup, upgrades, and automatic updates are disabled in the configuration.
+- Homebrew cleanup removes formulae and casks not declared in the configuration, upgrades declared packages during activation, and does not automatically update Homebrew.
 - Machine-local Git include files remain outside this repository.
 - Do not put credentials or secret values in tracked configuration files or Nix expressions.
 
 ## Check, build, and activate
 
-From the repository root, read the host and username configured in `nix/machine.nix`, then validate and evaluate without activating:
+From the repository root, read the host and username configured in `nix/hosts/destngx-macbook-air/machine.nix`, then validate and evaluate without activating:
 
 ```sh
-host=$(nix eval --raw --expr '(import ./nix/machine.nix).hostName')
-user=$(nix eval --raw --expr '(import ./nix/machine.nix).username')
+host=$(nix eval --raw --expr '(import ./nix/hosts/destngx-macbook-air/machine.nix).hostName')
+user=$(nix eval --raw --expr '(import ./nix/hosts/destngx-macbook-air/machine.nix).username')
 nix flake show
 nix flake check --show-trace
 nix eval --show-trace ".#darwinConfigurations.$host.system.build.toplevel.drvPath"
