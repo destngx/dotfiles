@@ -8,6 +8,11 @@ if [[ -n "$(command -v nvim)" ]]; then
   fi
 fi
 
+if [[ -n "$(command -v nix)" ]]; then
+  alias "nix-clean"="nix-collect-garbage -d && nix-store --optimise"
+  alias "nix-switch"="sudo darwin-rebuild switch --flake '.#destngx-macbook-air'"
+fi
+
 if [[ -n "$(command -v pi)" ]]; then
   if [[ -n "$(command -v omp)" ]]; then
     alias p="omp"
