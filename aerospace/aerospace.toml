@@ -85,11 +85,11 @@ cmd-alt-h = [] # Disable "hide others"
 # See: https://nikitabobko.github.io/AeroSpace/goodness#open-a-new-window-with-applescript
 # See: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
 # You can uncomment the following lines to open up wezterm with alt + enter shortcut (like in i3)
-alt-backtick = '''exec-and-forget osascript -e '
-tell application "wezterm"
-    activate
-end tell'
-'''
+# alt-backtick = '''exec-and-forget osascript -e '
+# tell application "wezterm"
+#     activate
+# end tell'
+# '''
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
 alt-h = 'focus left'

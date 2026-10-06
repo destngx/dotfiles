@@ -40,8 +40,6 @@ const SPINNER_VERBS = [
   "Fiddle-faddling…",
   "Lollygagging…",
   "Razzmatazzing…",
-  "Sock-hopping…",
-  "Tomfoolering…",
   "Moonwalking…",
   "Spelunking…",
   "Percolating…",
@@ -56,17 +54,11 @@ const SPINNER_VERBS = [
   "Discombobulating…",
   "Cat-napping…",
   "Noodling…",
-  "Brainstorming…",
   "Abracadabraing…",
   "Brouhahaing…",
   "Rigmaroling…",
   "Higgledy-piggledying…",
-  "Ballyhooing…",
-  "Hullaballooing…",
 ];
-
-// ── Braille Spinner Frames ──
-const SPINNER_DOTS = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
 // ── Dynamic Flags for Sailing Right & Left ──
 const FLAGS_RIGHT = ["|>", "|}", "|]", "|)"];
@@ -180,25 +172,22 @@ function buildColoredWave(
       i += 3;
     } else {
       // ── Dynamic Rolling Ocean Swell (~70% '-' and '~') ──
-      const wavePhase = (i + (side === "left" ? -waveStep : waveStep) + waveStep * 2 + 120) % 16;
+      const wavePhase = (i + (side === "left" ? -waveStep : waveStep) + waveStep * 2 + 120) % 24;
 
       if (wavePhase === 0) {
         // High top crest peak: pure brilliant white
         res += `${W_WHITE}^${RESET}`;
-      } else if (wavePhase === 5) {
-        // Wave slope rising: light azure blue
-        res += `${W_LIGHT}/${RESET}`;
-      } else if (wavePhase === 6) {
-        // Wave slope falling: light azure blue
-        res += `${W_LIGHT}\\${RESET}`;
+      } else if (wavePhase === 7 || wavePhase === 8) {
+        // Wave slopes: light azure blue
+        res += `${W_LIGHT}~${RESET}`;
       } else if (wavePhase === 11 && swellMode === 3) {
         // Breaker spray (occasional white foam)
         res += `${W_WHITE}\`${RESET}`;
       } else if (
         wavePhase === 1 ||
         wavePhase === 2 ||
-        wavePhase === 7 ||
-        wavePhase === 8 ||
+        wavePhase === 9 ||
+        wavePhase === 10 ||
         wavePhase === 12
       ) {
         // Calm flat water troughs: dark ocean blue '-'
@@ -229,10 +218,8 @@ class DynamicFrame {
   }
 
   render(): string {
-    const dot = SPINNER_DOTS[this.k % SPINNER_DOTS.length];
-    const coloredDot = `\x1b[1;38;2;130;205;255m${dot}${RESET}`;
     const textPart = renderShimmerText(currentPhrase, this.k);
-    const line2 = `${coloredDot} ${textPart}  ${this.seaPart}`;
+    const line2 = `${textPart}  ${this.seaPart}`;
     return `${this.line1}\n${line2}`;
   }
 
@@ -259,9 +246,10 @@ function lcm(a: number, b: number): number {
 
 // ── Precompute Continuous Sea & Boat Trajectory (Runs continuously from start to end) ──
 function generateContinuousFrames(): DynamicFrame[] {
+  const waveOffset = Math.floor(Math.random() * 24);
   const termWidth = process.stdout.columns || 80;
   const targetContentWidth = Math.max(50, termWidth - 4); // 4 columns margin for TUI padding
-  const prefixWidth = TEXT_COL_WIDTH + 4; // dot (1) + space (1) + text (TEXT_COL_WIDTH) + gap (2)
+  const prefixWidth = TEXT_COL_WIDTH + 2; // Verb padding plus two spaces before the sea
 
   const seaWidth = Math.max(20, targetContentWidth - prefixWidth);
   const waveTotal = seaWidth - 6; // 6 cols for boat: space (1) + hull (4) + space (1)
@@ -308,7 +296,7 @@ function generateContinuousFrames(): DynamicFrame[] {
 
   for (let k = 0; k < totalFrames; k++) {
     // Wave advances every 3 ticks: 3 * 80ms = 240ms
-    const waveStep = Math.floor(k / WAVE_SLOWDOWN);
+    const waveStep = Math.floor(k / WAVE_SLOWDOWN) + waveOffset;
 
     // Boat advances every 9 ticks: 9 * 80ms = 720ms
     const boatIdx = Math.floor(k / BOAT_SLOWDOWN) % positions.length;
@@ -323,7 +311,8 @@ function generateContinuousFrames(): DynamicFrame[] {
         : `${B_FLAG}${flagStr.slice(0, 1)}${RESET}${B_MAST}|${RESET}`;
 
     // Line 1: flag positioned directly over hull center
-    const flagSpaces = prefixWidth + x + 2;
+    const flagOffset = dir === 1 ? 0 : -1;
+    const flagSpaces = prefixWidth + x + 2 + flagOffset;
     const line1 = " ".repeat(flagSpaces) + flagColored;
 
     // Fast-rolling dynamic waves on left and right sides

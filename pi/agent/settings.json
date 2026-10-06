@@ -35,17 +35,5 @@
   "hideThinkingBlock": true,
   "showHardwareCursor": false,
   "clearOnStart": true,
-  "ccHeader": {
-    "color": "c",
-    "ver": 1,
-    "grad": true,
-    "lines": true,
-    "pkg": false,
-    "speed": 50,
-    "slogan": "Code something that makes you proud",
-    "sloganOn": true,
-    "sloganColor": true,
-    "disabled": false
-  },
   "treeFilterMode": "user-only"
 }

@@ -2,7 +2,8 @@ import { spawn } from "child_process";
 import * as path from "path";
 import * as os from "os";
 
-const NOTIFY_SCRIPT = path.join(os.homedir(), "projects/dotfiles/pi/agent/notify.sh");
+const DOTFILES_DIR = path.join(os.homedir(), "projects/dotfiles");
+const NOTIFY_SCRIPT = path.join(DOTFILES_DIR, "pi/agent/notify.sh");
 const NOTIFICATION_THRESHOLD_MS = 0; // Set to 0 to notify on all completions
 
 function sendNotification(params: {
@@ -11,8 +12,6 @@ function sendNotification(params: {
   message?: string;
   sound?: string;
   sessionId?: string;
-  weztermPane?: string;
-  tmuxPane?: string;
   notificationType?: string;
 }) {
   const title = params.title || "Pi";
@@ -20,14 +19,12 @@ function sendNotification(params: {
   const message = (params.message || "Task completed").replace(/\s+/g, " ").slice(0, 350);
   const sound = params.sound || "Glass";
   const sessionId = params.sessionId || "pi";
-  const weztermPane = params.weztermPane || process.env.WEZTERM_PANE || "";
-  const tmuxPane = params.tmuxPane || process.env.TMUX_PANE || "";
   const notificationType = params.notificationType || "completed";
 
   try {
     const child = spawn(
       NOTIFY_SCRIPT,
-      [title, subtitle, message, sound, sessionId, weztermPane, tmuxPane, notificationType],
+      [title, subtitle, message, sound, sessionId, notificationType],
       {
         detached: true,
         stdio: "ignore",
@@ -88,8 +85,6 @@ export default function (pi: any) {
       message: lastMessage,
       sound: "Glass",
       sessionId: currentSessionId,
-      weztermPane: process.env.WEZTERM_PANE,
-      tmuxPane: process.env.TMUX_PANE,
       notificationType: type,
     });
   };

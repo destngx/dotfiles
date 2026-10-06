@@ -1,13 +1,7 @@
-.pi
-pi
-!pi/extensions
-!pi/*.md
-!pi/auth.json
-!pi/models.json
-!pi/settings.json
-!pi/trust.json
-!pi/notify.sh
-!pi/statusline.sh
+pi/agent/npm
+pi/agent/sessions
+pi/agent/crashes.json
+pi/agent/models-store.json
 result
 **/.zim
 **/.zcomp*

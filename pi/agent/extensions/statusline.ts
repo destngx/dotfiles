@@ -215,7 +215,7 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
   if (isSmall) {
     parts.push(`${pctColor}${pctText}${RESET}`);
   } else {
-    const bar = renderBar(used, 12);
+    const bar = renderBar(used, 6);
     parts.push(`${bar} ${pctColor}${pctText}${RESET}`);
   }
 
@@ -445,11 +445,7 @@ export default function (pi: any) {
     } catch {}
   }
 
-  // Periodic usage polling every 45 seconds
-  const usageInterval = setInterval(() => {
-    fetchGatewayUsage();
-  }, 45000);
-
+  // Refresh usage when a response completes.
   pi.on("session_start", async (_event: any, ctx: any) => {
     extractMetrics(ctx);
     fetchGatewayUsage();
@@ -464,9 +460,7 @@ export default function (pi: any) {
             extractMetrics(ctx);
             return [buildStatusLine(state, width)];
           },
-          dispose() {
-            clearInterval(usageInterval);
-          },
+          dispose() {},
         };
       });
     }

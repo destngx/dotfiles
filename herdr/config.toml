@@ -2,7 +2,8 @@ onboarding = false
 [keys]
 prefix = "ctrl+a"
 new_workspace = "prefix+c"
-goto = "prefix+s"
+navigate_workspace_down = "j"
+navigate_workspace_up = "k"
 
 settings = "prefix+,"
 reload_config = "prefix+r"
@@ -48,9 +49,10 @@ tab_bar_position = "top"
 status_indicators = "symbols"
 pane_gaps = false
 window_title = "{terminal_title}"
+accent = "#7e9cd8"
 
 [ui.toast]
-delivery = "system"
+delivery = "herdr"
 
 [theme]
 name = "kanagawa"

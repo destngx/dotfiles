@@ -11,7 +11,9 @@
     enable = true;
     prefix = "/opt/homebrew";
     taps = [ ];
-    brews = [ ];
+    brews = [
+      "terminal-notifier"
+    ];
     casks = [
       "browserosaurus"
       "codex"
