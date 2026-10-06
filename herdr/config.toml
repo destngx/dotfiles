@@ -43,8 +43,9 @@ description = "navigate right (vim/herdr)"
 kitty_graphics = true
 
 [ui]
+prompt_new_tab_name = false
 tab_bar_position = "top"
-status_indicators = "dots"
+status_indicators = "symbols"
 pane_gaps = false
 window_title = "{terminal_title}"
 

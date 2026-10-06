@@ -220,19 +220,21 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
   }
 
   // 3. AI Gateway Rate Limits (5h and weekly remaining + reset times)
-  if (state.gatewayUsage && String(state.model?.provider || "").toLowerCase() === "anthropic") {
+  if (state.gatewayUsage && ["anthropic", "openai"].includes(String(state.model?.provider || "").toLowerCase())) {
     const data = state.gatewayUsage;
-    const primaryUsed = Number(data.rate_limits?.primary?.used_percent);
-    const secondaryUsed = Number(data.rate_limits?.secondary?.used_percent);
-    const remains5h = Number.isFinite(data.limits?.["5h"]?.left_percent)
-      ? data.limits["5h"].left_percent
-      : Math.max(0, Math.min(100, 100 - (Number.isFinite(primaryUsed) ? primaryUsed : 0)));
-    const remainsWeekly = Number.isFinite(data.limits?.weekly?.left_percent)
-      ? data.limits.weekly.left_percent
-      : Math.max(0, Math.min(100, 100 - (Number.isFinite(secondaryUsed) ? secondaryUsed : 0)));
+    const isOpenAI = String(state.model?.provider || "").toLowerCase() === "openai";
 
-    const formatReset = (rawReset: unknown): string => {
+    const numericPercent = (value: unknown): number | null => {
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+      if (typeof value === "string" && value.trim() !== "" && Number.isFinite(Number(value))) return Number(value);
+      return null;
+    };
+
+    const formatReset = (rawReset: unknown, timeOnly = false): string => {
       const reset = typeof rawReset === "string" ? rawReset.trim() : "";
+      if (typeof rawReset === "number" && Number.isFinite(rawReset)) {
+        return ` ${DIM}till ${timeOnly ? new Date(rawReset * 1000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false }) : new Date(rawReset * 1000).toLocaleString("en-GB", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", hour12: false })}${RESET}`;
+      }
       if (!reset) return "";
       try {
         const normalized = reset.replace(" UTC", "Z").replace(" ", "T");
@@ -240,11 +242,11 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
         if (!isNaN(date.getTime())) {
           const dateStr = date.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
           const timeStr = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
-          return ` ${DIM}↻${dateStr} ${timeStr}${RESET}`;
+          return ` ${DIM}till ${timeOnly ? timeStr : `${dateStr} ${timeStr}`}${RESET}`;
         }
-        return ` ${DIM}↻${reset.replace(" UTC", "")}${RESET}`;
+        return ` ${DIM}till ${reset.replace(" UTC", "")}${RESET}`;
       } catch {
-        return ` ${DIM}↻${reset.replace(" UTC", "")}${RESET}`;
+        return ` ${DIM}till ${reset.replace(" UTC", "")}${RESET}`;
       }
     };
 
@@ -267,10 +269,34 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
       return ` ${DIM}↻${hours}h ${minutes}m remaining${RESET}`;
     };
 
-    const reset5h = format5hRemaining(data.display?.["5h_reset_at"]);
-    const resetWeekly = formatReset(data.display?.["weekly_reset_at"]);
-    parts.push(`${limitColor(remains5h)}${remains5h}% 5h${RESET}${reset5h}`);
-    parts.push(`${limitColor(remainsWeekly)}${remainsWeekly}% weekly${RESET}${resetWeekly}`);
+    if (isOpenAI) {
+      const primaryWindow = data.rate_limit?.primary_window || data.rate_limits?.primary_window || data.primary_window || data.rate_limit?.primary;
+      const secondaryWindow = data.rate_limit?.secondary_window || data.rate_limits?.secondary_window || data.secondary_window || data.rate_limit?.secondary;
+      const primaryUsed = numericPercent(primaryWindow?.used_percent);
+      const secondaryUsed = numericPercent(secondaryWindow?.used_percent);
+      const primaryRemaining = numericPercent(primaryWindow?.remaining_percent);
+      const secondaryRemaining = numericPercent(secondaryWindow?.remaining_percent);
+      const primaryLeft = numericPercent(data.limits?.["5h"]?.left_percent);
+      const weeklyLeft = numericPercent(data.limits?.weekly?.left_percent);
+      const remains5h = primaryLeft ?? primaryRemaining ?? (primaryUsed !== null ? Math.max(0, Math.min(100, 100 - primaryUsed)) : null);
+      const remainsWeekly = weeklyLeft ?? secondaryRemaining ?? (secondaryUsed !== null ? Math.max(0, Math.min(100, 100 - secondaryUsed)) : null);
+      if (remains5h !== null) {
+        parts.push(`${limitColor(remains5h)}${remains5h}%${formatReset(primaryWindow?.reset_at ?? data.display?.["5h_reset_at"], true)}`);
+      }
+      if (remainsWeekly !== null) {
+        parts.push(`${limitColor(remainsWeekly)}${DIM}weekly ${RESET}${limitColor(remainsWeekly)}${remainsWeekly}%${DIM}${formatReset(secondaryWindow?.reset_at ?? data.display?.weekly_reset_at)}${RESET}`);
+      }
+    } else {
+      const primaryUsed = numericPercent(data.rate_limits?.primary?.used_percent);
+      const secondaryUsed = numericPercent(data.rate_limits?.secondary?.used_percent);
+      const remains5h = numericPercent(data.limits?.["5h"]?.left_percent) ?? numericPercent(data.rate_limits?.primary?.left_percent) ?? (primaryUsed !== null ? Math.max(0, Math.min(100, 100 - primaryUsed)) : null);
+      const remainsWeekly = numericPercent(data.limits?.weekly?.left_percent) ?? numericPercent(data.rate_limits?.secondary?.left_percent) ?? (secondaryUsed !== null ? Math.max(0, Math.min(100, 100 - secondaryUsed)) : null);
+      const reset5h = format5hRemaining(data.display?.["5h_reset_at"]);
+      const resetWeekly = formatReset(data.display?.["weekly_reset_at"]);
+      if (remains5h !== null) parts.push(`${limitColor(remains5h)}${remains5h}% 5h${RESET}${reset5h}`);
+      if (remainsWeekly !== null) parts.push(`${limitColor(remainsWeekly)}${remainsWeekly}% weekly${RESET}${resetWeekly}`);
+    }
+
   }
 
   // 4. Tokens Breakdown (\uF062 in, \uF063 out, \uF0EB reason) - Shown on wide screens
@@ -354,11 +380,7 @@ export default function (pi: any) {
         return;
       }
       const data = await res.json();
-      if (data && (data.rate_limits || data.limits)) {
-        state.gatewayUsage = data;
-      } else {
-        state.gatewayUsage = null;
-      }
+      state.gatewayUsage = data && typeof data === "object" ? data : null;
     } catch {
       state.gatewayUsage = null;
     }
