@@ -94,11 +94,12 @@ function getShimmerPos(k: number, len: number): number {
 
 // ── Render Scanning Highlight Beam Across Current Verb ──
 function renderShimmerText(verb: string, k: number): string {
-  const len = verb.length;
+  const chars = Array.from(verb);
+  const len = chars.length;
   const shimmerPos = getShimmerPos(k, len);
   let text = "";
   for (let i = 0; i < len; i++) {
-    const char = verb[i];
+    const char = chars[i];
     const dist = Math.abs(i - shimmerPos);
 
     if (dist === 0) {
@@ -111,7 +112,8 @@ function renderShimmerText(verb: string, k: number): string {
       text += `\x1b[38;2;140;150;165m${char}${RESET}`;
     }
   }
-  const pad = " ".repeat(Math.max(0, TEXT_COL_WIDTH - len));
+  const textWidth = len + 1;
+  const pad = " ".repeat(Math.max(0, TEXT_COL_WIDTH - textWidth));
   return `${text}${pad}`;
 }
 

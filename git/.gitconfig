@@ -41,6 +41,7 @@
   autocrlf = input
   eol = lf
   pager = delta
+  excludesfile = ~/projects/dotfiles/git/.gitignores
 [delta]
   navigate = true
   dark = true

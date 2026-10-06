@@ -53,12 +53,13 @@ config.font_rules = {
 config.harfbuzz_features = { "zero", "cv05", "cv02", "ss05", "ss04" }
 config.color_scheme = 'Kanagawa (Gogh)'
 config.leader = { key = 'a', mods = 'CTRL', timeout_milliseconds = 1000 }
+config.status_update_interval = 200
 config.window_background_opacity = 0.96
-config.enable_kitty_keyboard = true
+config.enable_kitty_keyboard = false
 
 local function is_remote_session(pane)
   local process_name = string.gsub(pane:get_foreground_process_name(), '(.*[/\\])(.*)', '%2')
-  return process_name == 'tmux' or process_name == 'ssh' or process_name:find('mosh') ~= nil
+  return process_name == 'tmux' or process_name == 'herdr' or process_name == 'ssh' or process_name:find('mosh') ~= nil
 end
 
 local function send_tmux_prefix_and_key(win, pane, key, shift)
@@ -70,11 +71,25 @@ local function send_tmux_prefix_and_key(win, pane, key, shift)
   end
 end
 
+local function send_herdr_prefix_and_key(win, pane, key, shift)
+  win:perform_action(wezterm.action.SendKey({ key = 'b', mods = 'CTRL' }), pane)
+  if shift then
+    win:perform_action(wezterm.action.SendKey({ key = key, mods = 'SHIFT' }), pane)
+  else
+    win:perform_action(wezterm.action.SendKey({ key = key }), pane)
+  end
+end
+
+local function send_prefix_and_key(win, pane, key, shift)
+  local process_name = string.gsub(pane:get_foreground_process_name(), '(.*[/\\\\])(.*)', '%2')
+  if process_name == 'herdr' then
+    send_herdr_prefix_and_key(win, pane, key, shift)
+  else
+    send_tmux_prefix_and_key(win, pane, key, shift)
+  end
+end
+
 config.keys = {
-  utils.split_nav(wezterm, "move", "h"),
-  utils.split_nav(wezterm, "move", "j"),
-  utils.split_nav(wezterm, "move", "k"),
-  utils.split_nav(wezterm, "move", "l"),
   utils.split_nav(wezterm, "resize", "h"),
   utils.split_nav(wezterm, "resize", "j"),
   utils.split_nav(wezterm, "resize", "k"),
@@ -93,7 +108,7 @@ config.keys = {
     mods = 'LEADER',
     action = wezterm.action_callback(function(win, pane)
       if is_remote_session(pane) then
-        send_tmux_prefix_and_key(win, pane, 'Tab', false)
+        send_prefix_and_key(win, pane, 'Tab', false)
       else
         win:perform_action(act.ActivatePaneDirection 'Prev', pane)
       end
@@ -104,7 +119,7 @@ config.keys = {
     mods = 'LEADER',
     action = wezterm.action_callback(function(win, pane)
       if is_remote_session(pane) then
-        send_tmux_prefix_and_key(win, pane, 'h', false)
+        send_prefix_and_key(win, pane, 'h', false)
       else
         win:perform_action(act.ActivateTabRelative(-1), pane)
       end
@@ -115,7 +130,7 @@ config.keys = {
     mods = 'LEADER',
     action = wezterm.action_callback(function(win, pane)
       if is_remote_session(pane) then
-        send_tmux_prefix_and_key(win, pane, 'l', false)
+        send_prefix_and_key(win, pane, 'l', false)
       else
         win:perform_action(act.ActivateTabRelative(1), pane)
       end
@@ -131,7 +146,7 @@ config.keys = {
     mods = 'LEADER',
     action = wezterm.action_callback(function(win, pane)
       if is_remote_session(pane) then
-        send_tmux_prefix_and_key(win, pane, 'c', false)
+        send_prefix_and_key(win, pane, 'c', false)
       else
         win:perform_action(act.SpawnTab 'CurrentPaneDomain', pane)
       end
@@ -147,7 +162,7 @@ config.keys = {
     key = "x",
     action = wezterm.action_callback(function(win, pane)
       if is_remote_session(pane) then
-        send_tmux_prefix_and_key(win, pane, 'x', false)
+        send_prefix_and_key(win, pane, 'x', false)
       else
         win:perform_action(act.CloseCurrentPane({ confirm = true }), pane)
       end
@@ -158,7 +173,7 @@ config.keys = {
     key = ",",
     action = wezterm.action_callback(function(win, pane)
       if is_remote_session(pane) then
-        send_tmux_prefix_and_key(win, pane, ',', false)
+        send_prefix_and_key(win, pane, ',', false)
       else
         win:perform_action(act.PromptInputLine({
           description = "Enter new name for tab",
@@ -186,18 +201,18 @@ config.keys = {
     key    = "-",
     action = wezterm.action_callback(function(win, pane)
       if is_remote_session(pane) then
-        send_tmux_prefix_and_key(win, pane, '-', false)
+        send_prefix_and_key(win, pane, '-', false)
       else
         win:perform_action(wezterm.action.SplitVertical { domain = 'CurrentPaneDomain' }, pane)
       end
     end),
   },
   {
-    mods   = "LEADER|SHIFT",
+    mods   = "LEADER",
     key    = "_",
     action = wezterm.action_callback(function(win, pane)
       if is_remote_session(pane) then
-        send_tmux_prefix_and_key(win, pane, '_', true)
+        send_prefix_and_key(win, pane, '-', true)
       else
         win:perform_action(wezterm.action.SplitHorizontal { domain = 'CurrentPaneDomain' }, pane)
       end
@@ -208,7 +223,7 @@ config.keys = {
     key = 'z',
     action = wezterm.action_callback(function(win, pane)
       if is_remote_session(pane) then
-        send_tmux_prefix_and_key(win, pane, 'z', false)
+        send_prefix_and_key(win, pane, 'z', false)
       else
         win:perform_action(wezterm.action.TogglePaneZoomState, pane)
       end
@@ -219,7 +234,7 @@ config.keys = {
     key = "Space",
     action = wezterm.action_callback(function(win, pane)
       if is_remote_session(pane) then
-        send_tmux_prefix_and_key(win, pane, 'Space', false)
+        send_prefix_and_key(win, pane, 'Space', false)
       else
         win:perform_action(wezterm.action.RotatePanes "Clockwise", pane)
       end
@@ -230,7 +245,7 @@ config.keys = {
     key = 's',
     action = wezterm.action_callback(function(win, pane)
       if is_remote_session(pane) then
-        send_tmux_prefix_and_key(win, pane, 's', false)
+        send_prefix_and_key(win, pane, 's', false)
       else
         win:perform_action(wezterm.action.PaneSelect { alphabet = "asdfghjkl;", mode = 'SwapWithActive' }, pane)
       end
@@ -241,7 +256,7 @@ config.keys = {
     mods = 'LEADER',
     action = wezterm.action_callback(function(win, pane)
       if is_remote_session(pane) then
-        send_tmux_prefix_and_key(win, pane, 'Enter', false)
+        send_prefix_and_key(win, pane, 'Enter', false)
       else
         win:perform_action(wezterm.action.ActivateCopyMode, pane)
       end
@@ -312,8 +327,22 @@ config.colors = {
   },
 }
 
+wezterm.on('update-status', function(window, pane)
+  local process_name = string.gsub(pane:get_foreground_process_name() or '', '(.*[/\\])(.*)', '%2')
+  local leader_key = process_name == 'herdr' and 'b' or 'a'
+  local overrides = window:get_config_overrides() or {}
+  local current_leader = overrides.leader or config.leader
+  if current_leader.key ~= leader_key then
+    overrides.leader = { key = leader_key, mods = 'CTRL', timeout_milliseconds = 1000 }
+    window:set_config_overrides(overrides)
+  end
+end)
+
 wezterm.on('user-var-changed', function(window, pane, name, value)
   local overrides = window:get_config_overrides() or {}
+  if name == "IS_TMUX" then
+    overrides.enable_kitty_keyboard = utils.is_tmux(pane) or nil
+  end
   if name == "ZEN_MODE" then
     local incremental = value:find("+")
     local number_value = tonumber(value)

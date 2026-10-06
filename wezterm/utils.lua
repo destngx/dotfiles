@@ -9,8 +9,29 @@ function M.is_darwin()
   return wezterm.target_triple:find("darwin") ~= nil
 end
 
+function M.is_tmux(pane)
+  local process_name = string.gsub(pane:get_foreground_process_name(), '(.*[/\\])(.*)', '%2')
+  if process_name == 'tmux' then
+    return true
+  end
+  local user_vars = pane:get_user_vars() or {}
+  return user_vars.IS_TMUX == 'true'
+end
+
+local function is_herdr_session(pane)
+  local user_vars = pane:get_user_vars() or {}
+  if user_vars.HERDR_ENV == '1' then
+    return true
+  end
+  local process_name = string.gsub(pane:get_foreground_process_name(), '(.*[/\\])(.*)', '%2')
+  return process_name == 'herdr'
+end
+
 local function is_remote_session(pane)
   local process_name = string.gsub(pane:get_foreground_process_name(), '(.*[/\\])(.*)', '%2')
+  if is_herdr_session(pane) then
+    return false
+  end
   if process_name == 'tmux' or process_name == 'ssh' or process_name:find('mosh') ~= nil then
     return true
   end
@@ -49,6 +70,22 @@ function M.split_nav(wezterm_ref, resize_or_move, key)
     key = key,
     mods = resize_or_move == "resize" and "META" or "CTRL",
     action = wezterm_ref.action_callback(function(win, pane)
+      if is_herdr_session(pane) then
+        if resize_or_move == "move" and is_vim(pane) then
+          win:perform_action({
+            SendKey = { key = key, mods = "CTRL" },
+          }, pane)
+        elseif resize_or_move == "move" then
+          win:perform_action(wezterm_ref.action.SendKey({ key = "a", mods = "CTRL" }), pane)
+          win:perform_action(wezterm_ref.action.SendKey({ key = key }), pane)
+        else
+          win:perform_action({
+            SendKey = { key = key, mods = "META" },
+          }, pane)
+        end
+        return
+      end
+
       if is_remote_session(pane) then
         win:perform_action({
           SendKey = { key = key, mods = resize_or_move == "resize" and "META" or "CTRL" },

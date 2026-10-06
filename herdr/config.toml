@@ -1,0 +1,55 @@
+onboarding = false
+[keys]
+prefix = "ctrl+a"
+new_workspace = "prefix+c"
+goto = "prefix+s"
+
+settings = "prefix+,"
+reload_config = "prefix+r"
+close_workspace = "prefix+ctrl+d"
+next_tab = "prefix+tab"
+previous_tab = "prefix+shift+tab"
+split_vertical = "prefix+-"
+split_horizontal = "prefix+_"
+close_pane = "prefix+x"
+zoom = "prefix+z"
+cycle_pane_next = "prefix+space"
+
+[[keys.command]]
+key = "ctrl+h"
+type = "plugin_action"
+command = "smart-splits.nvim.left"
+description = "navigate left (vim/herdr)"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "plugin_action"
+command = "smart-splits.nvim.down"
+description = "navigate down (vim/herdr)"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "plugin_action"
+command = "smart-splits.nvim.up"
+description = "navigate up (vim/herdr)"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "plugin_action"
+command = "smart-splits.nvim.right"
+description = "navigate right (vim/herdr)"
+
+[terminal]
+kitty_graphics = true
+
+[ui]
+tab_bar_position = "top"
+status_indicators = "dots"
+pane_gaps = false
+window_title = "{terminal_title}"
+
+[ui.toast]
+delivery = "system"
+
+[theme]
+name = "kanagawa"

@@ -10,7 +10,7 @@
     ../../modules/home/apps/herdr.nix
     ../../modules/home/apps/git.nix
     ../../modules/home/apps/zsh.nix
-    ../../modules/home/apps/wezterm.nix
+    ../../modules/home/apps/ghostty.nix
     ../../modules/home/apps/pi.nix
   ];
 }

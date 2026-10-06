@@ -5,6 +5,8 @@
     "showTerminalProgress": true
   },
   "transport": "auto",
+  "defaultProvider": "openai",
+  "defaultModel": "gpt-6-luna",
   "httpIdleTimeoutMs": 120000,
   "quietStartup": true,
   "enableInstallTelemetry": false,
@@ -44,5 +46,6 @@
     "sloganOn": true,
     "sloganColor": true,
     "disabled": false
-  }
+  },
+  "treeFilterMode": "user-only"
 }
