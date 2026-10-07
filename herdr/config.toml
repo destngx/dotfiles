@@ -2,6 +2,7 @@ onboarding = false
 [keys]
 prefix = "ctrl+a"
 new_workspace = "prefix+c"
+new_tab = "cmd+t"
 navigate_workspace_down = "j"
 navigate_workspace_up = "k"
 
@@ -52,7 +53,7 @@ window_title = "{terminal_title}"
 accent = "#7e9cd8"
 
 [ui.toast]
-delivery = "herdr"
+delivery = "system"
 
 [theme]
 name = "kanagawa"

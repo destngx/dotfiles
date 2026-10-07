@@ -24,7 +24,7 @@ function sendNotification(params: {
   try {
     const child = spawn(
       NOTIFY_SCRIPT,
-      [title, subtitle, message, sound, sessionId, notificationType],
+      ["notify", title, subtitle, message, sound, sessionId, notificationType],
       {
         detached: true,
         stdio: "ignore",
