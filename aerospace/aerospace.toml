@@ -208,9 +208,6 @@ q = ['enable toggle'] # Disable window management
 #
 # Event listeners
 
-## Browsers
-
-### Keep Pip detect before window move
 [[on-window-detected]]
 if.app-id = 'app.zen-browser.zen'
 run = 'move-node-to-workspace 1'
@@ -230,6 +227,7 @@ run = 'move-node-to-workspace 4'
 [[on-window-detected]]
 if.app-name-regex-substring = 'Claude'
 run = 'move-node-to-workspace 5'
+
 [[on-window-detected]]
 if.app-name-regex-substring = 'Antigravity'
 run = 'move-node-to-workspace 5'

@@ -53,7 +53,7 @@ window_title = "{terminal_title}"
 accent = "#7e9cd8"
 
 [ui.toast]
-delivery = "system"
+delivery = "herdr"
 
 [theme]
 name = "kanagawa"

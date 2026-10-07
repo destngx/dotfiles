@@ -143,13 +143,13 @@ function generateTrainFrames(): DynamicTrainFrame[] {
   const smokes = [".","0", "o", "O", "@", " "];
   const termWidth = process.stdout.columns || 80;
   const targetContentWidth = Math.max(50, termWidth - 4);
-  const prefixWidth = 25;
+  const prefixWidth = 24;
   const railWidth = Math.max(20, targetContentWidth - prefixWidth);
   const trackPattern = track.repeat(Math.ceil((railWidth + 3) / track.length));
   const TRAIN_BODY   = " [_=_]-=nI";
   const TRAIN_WHEELS = "-=(0)==(o)=";
   const trainLen = TRAIN_WHEELS.length;
-  const blankPrefix = "*".repeat(prefixWidth);
+  const blankPrefix = "]".repeat(prefixWidth);
   const cycleLength = railWidth + trainLen + 6;
   let smoke = [" ", " ", " ", " "];
 

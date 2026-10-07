@@ -2,6 +2,7 @@
 {
   home.packages = with pkgs; [
     awscli2
+    aerospace
     bat
     chafa
     delta

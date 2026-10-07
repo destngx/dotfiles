@@ -1,5 +1,5 @@
 {
-  "theme": "dark",
+  "theme": "auto",
   "model": "haiku",
   "autoDreamedEnabled": true,
   "askUserQuestionTimeout": "60s",
@@ -11,13 +11,25 @@
     "DISABLE_BUG_COMMAND": 1,
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": 1
   },
-    "hooks": {
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^(startup|resume|clear|compact|fork)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '$HOME/projects/dotfiles/claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/notify.sh capture"
+            "command": "$HOME/projects/dotfiles/claude/hooks/notify.sh capture"
           }
         ]
       }
@@ -28,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/notify.sh notify"
+            "command": "$HOME/projects/dotfiles/claude/hooks/notify.sh notify"
           }
         ]
       }
@@ -38,7 +50,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/notify.sh notify"
+            "command": "$HOME/projects/dotfiles/claude/hooks/notify.sh notify"
           }
         ]
       }
@@ -46,7 +58,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "~/.claude/statusline.sh",
+    "command": "$HOME/projects/dotfiles/claude/statusline.sh",
     "padding": 2
   }
 }

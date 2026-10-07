@@ -26,7 +26,7 @@
     onActivation = {
       cleanup = "uninstall";
       upgrade = true;
-      autoUpdate = false;
+      autoUpdate = true;
     };
   };
 }

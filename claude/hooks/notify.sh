@@ -4,8 +4,8 @@ set -u
 
 ACTION="${1:-notify}"
 
-AEROSPACE="/opt/homebrew/bin/aerospace"
-WEZTERM="/opt/homebrew/bin/wezterm"
+AEROSPACE="$(command -v aerospace || true)"
+HERDR="$(command -v herdr || true)"
 NOTIFIER="/opt/homebrew/bin/terminal-notifier"
 
 # ---------------------------------------------------------
@@ -15,12 +15,15 @@ NOTIFIER="/opt/homebrew/bin/terminal-notifier"
 if [ "$ACTION" = "focus" ]; then
   PANE_ID="${2:-}"
 
-  # Hardcoded: WezTerm always lives on AeroSpace workspace 2.
-  "$AEROSPACE" workspace 2
+  if [ -n "$PANE_ID" ] && [ -n "$HERDR" ]; then
+    PANE_INFO="$("$HERDR" pane get "$PANE_ID" 2>/dev/null || true)"
+    WORKSPACE_ID="$(printf '%s' "$PANE_INFO" | /usr/bin/plutil -extract result.pane.workspace_id raw -o - - 2>/dev/null || true)"
+    TAB_ID="$(printf '%s' "$PANE_INFO" | /usr/bin/plutil -extract result.pane.tab_id raw -o - - 2>/dev/null || true)"
 
-  # Focus the exact WezTerm pane running this Claude session.
-  if [ -n "$PANE_ID" ]; then
-    "$WEZTERM" cli activate-pane --pane-id "$PANE_ID"
+    [ -n "$AEROSPACE" ] && "$AEROSPACE" workspace 2 >/dev/null 2>&1 || true
+    [ -n "$WORKSPACE_ID" ] && "$HERDR" workspace focus "$WORKSPACE_ID" >/dev/null 2>&1 || true
+    [ -n "$TAB_ID" ] && "$HERDR" tab focus "$TAB_ID" >/dev/null 2>&1 || true
+    "$HERDR" agent focus "$PANE_ID" >/dev/null 2>&1 || true
   fi
 
   exit 0
@@ -37,7 +40,7 @@ CWD="$(jq -r '.cwd // ""' <<< "$INPUT")"
 SESSION_ID="$(jq -r '.session_id // "claude"' <<< "$INPUT")"
 
 PROJECT="$(basename "$CWD")"
-PANE_ID="${WEZTERM_PANE:-}"
+PANE_ID="${HERDR_PANE_ID:-}"
 
 [ ! -x "$NOTIFIER" ] && exit 0
 

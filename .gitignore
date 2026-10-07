@@ -2,6 +2,14 @@ pi/agent/npm
 pi/agent/sessions
 pi/agent/crashes.json
 pi/agent/models-store.json
+claude/backups
+claude/cache
+claude/plugins
+claude/session*
+claude/skills/synced
+claude/projects
+claude/.claude.json
+claude/history.jsonl
 result
 zsh/**
 **/zsh-zimfw
