@@ -15,7 +15,6 @@ split_vertical = "prefix+-"
 split_horizontal = "prefix+_"
 close_pane = "prefix+x"
 zoom = "prefix+z"
-cycle_pane_next = "prefix+space"
 
 [[keys.command]]
 key = "ctrl+h"
