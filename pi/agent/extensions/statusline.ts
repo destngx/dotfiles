@@ -1,5 +1,7 @@
 import { execSync } from "child_process";
 import * as path from "path";
+import * as fs from "fs";
+import * as os from "os";
 
 // ── Colors ──
 const CYAN = "\x1b[36m";
@@ -220,9 +222,9 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
   }
 
   // 3. AI Gateway Rate Limits (5h and weekly remaining + reset times)
-  if (state.gatewayUsage && ["anthropic", "openai"].includes(String(state.model?.provider || "").toLowerCase())) {
+  if (state.gatewayUsage) {
     const data = state.gatewayUsage;
-    const isOpenAI = String(state.model?.provider || "").toLowerCase() === "openai";
+    const isOpenAI = String(state.model?.provider || "").toLowerCase() === "openai" || String(state.gatewayUsage?.provider || "").toLowerCase() === "openai";
 
     const numericPercent = (value: unknown): number | null => {
       if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -331,6 +333,16 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
 
 function getProviderBaseUrl(providerName: string = "anthropic", cwd?: string): string {
   try {
+    const agentDir = process.env.PI_CODING_AGENT_DIR || path.join(os.homedir(), ".pi/agent");
+    const globalModels = path.join(agentDir, "models.json");
+    if (fs.existsSync(globalModels)) {
+      const json = JSON.parse(fs.readFileSync(globalModels, "utf8"));
+      const base = json.providers?.[providerName]?.baseUrl || json.providers?.["*"]?.baseUrl;
+      if (base) return base.replace(/\/v1\/?$/, "");
+    }
+  } catch {}
+
+  try {
     if (cwd) {
       const localModels = path.join(cwd, ".pi/models.json");
       if (fs.existsSync(localModels)) {
@@ -338,15 +350,6 @@ function getProviderBaseUrl(providerName: string = "anthropic", cwd?: string): s
         const base = json.providers?.[providerName]?.baseUrl || json.providers?.["*"]?.baseUrl;
         if (base) return base.replace(/\/v1\/?$/, "");
       }
-    }
-  } catch {}
-
-  try {
-    const globalModels = path.join(os.homedir(), ".pi/agent/models.json");
-    if (fs.existsSync(globalModels)) {
-      const json = JSON.parse(fs.readFileSync(globalModels, "utf8"));
-      const base = json.providers?.[providerName]?.baseUrl || json.providers?.["anthropic"]?.baseUrl || json.providers?.["openai"]?.baseUrl;
-      if (base) return base.replace(/\/v1\/?$/, "");
     }
   } catch {}
 
@@ -366,8 +369,12 @@ export default function (pi: any) {
 
   async function fetchGatewayUsage() {
     try {
-      const provider = state.model?.provider || "anthropic";
-      const host = getProviderBaseUrl(provider, state.cwd);
+      const provider = state.model?.provider || process.env.PI_PROVIDER || "openai";
+      const cwdModels = state.cwd ? path.join(state.cwd, ".pi/models.json") : "";
+      const configModels = path.join(process.env.PI_CODING_AGENT_DIR || path.join(os.homedir(), ".pi/agent"), "models.json");
+      const modelsPath = cwdModels && fs.existsSync(cwdModels) ? cwdModels : configModels;
+      const json = JSON.parse(fs.readFileSync(modelsPath, "utf8"));
+      const host = (json.providers?.[provider]?.baseUrl || json.providers?.["*"]?.baseUrl || "http://localhost:8080").replace(/\/v1\/?$/, "");
       const res = await fetch(`${host}/v1/usage`, {
         headers: {
           "accept": "application/json",
@@ -381,7 +388,7 @@ export default function (pi: any) {
       }
       const data = await res.json();
       state.gatewayUsage = data && typeof data === "object" ? data : null;
-    } catch {
+    } catch (error) {
       state.gatewayUsage = null;
     }
   }
@@ -445,10 +452,9 @@ export default function (pi: any) {
     } catch {}
   }
 
-  // Refresh usage when a response completes.
+  // Refresh usage when a session starts and after a response completes.
   pi.on("session_start", async (_event: any, ctx: any) => {
     extractMetrics(ctx);
-    fetchGatewayUsage();
 
     if (ctx.ui?.setFooter) {
       ctx.ui.setFooter((_tui: any, _theme: any, footerData: any) => {
@@ -464,6 +470,9 @@ export default function (pi: any) {
         };
       });
     }
+
+    await fetchGatewayUsage();
+    ctx.ui?.requestRender?.();
   });
 
   pi.on("turn_start", async (_event: any, ctx: any) => {
@@ -472,7 +481,8 @@ export default function (pi: any) {
 
   pi.on("turn_end", async (_event: any, ctx: any) => {
     extractMetrics(ctx);
-    fetchGatewayUsage();
+    await fetchGatewayUsage();
+    ctx.ui?.requestRender?.();
   });
 
   pi.on("model_select", async (event: any, ctx: any) => {
