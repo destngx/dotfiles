@@ -8,6 +8,7 @@ window-padding-balance = false
 background-opacity = 0.96
 macos-option-as-alt = true
 keybind = cmd+t=unbind
+keybind = ctrl+space=unbind
 background = #161720
 split-divider-color = #727169
 foreground = #c0caf5

@@ -8,7 +8,7 @@
   path = .gitconfig-personal
 [alias]
   a = "!git status --short | peco | awk '{print $2}' | xargs git add"
-  d = "!f() { file=$(git -c core.quotePath=false diff --name-only HEAD -- | peco) && [ -n \"$file\" ] && git diff HEAD -- \"$file\"; }; f"
+  d = "!f() { files=$(git -c core.quotePath=false diff --name-only HEAD -- | peco) && [ -n \"$files\" ] && echo \"$files\" | tr '\\n' '\\0' | xargs -0 -o git diff HEAD --; }; f"
   f = fetch --all
   co = checkout
   ci = commit -S -m

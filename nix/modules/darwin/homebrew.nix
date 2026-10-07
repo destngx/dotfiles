@@ -16,6 +16,8 @@
     ];
     casks = [
       "browserosaurus"
+      "claude"
+      "claude-code"
       "codex"
       "gcc-arm-embedded"
       "session-manager-plugin"

@@ -228,6 +228,9 @@ if.app-name-regex-substring = 'Sheet'
 run = 'move-node-to-workspace 4'
 
 [[on-window-detected]]
+if.app-name-regex-substring = 'Claude'
+run = 'move-node-to-workspace 5'
+[[on-window-detected]]
 if.app-name-regex-substring = 'Antigravity'
 run = 'move-node-to-workspace 5'
 
