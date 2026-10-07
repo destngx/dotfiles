@@ -52,38 +52,9 @@
       "nix-switch" = "sudo darwin-rebuild switch --flake '.#destngx-macbook-air'";
       p = "pi";
       pr = "pi -r";
-      c = "claude";
-      cc = "claude -c";
-      m = "microk8s";
-      mk = "microk8s.kubectl";
-      l = "eza --";
-      ls = "eza --group-directories-first --icons=auto";
-      ll = "eza -al --git --group-directories-first --icons=auto";
-      la = "eza -la --icons=auto --";
-      lt = "ls --tree --level=3 --";
-      tree = "eza --tree --icons --git-ignore --";
-      t = "tmux";
-      ta = "tmux a -t";
-      tls = "tmux ls";
-      tn = "tmux new -t";
-      cat = "bat";
-      pn = "pnpm";
-      px = "pnpx";
-      py = "python3";
-      python = "python3";
       "..." = "cd ../../";
       "...." = "cd ../../../";
       redo = "sudo !!";
-      g = "git";
-      gst = "git st";
-      gpl = "git pl";
-      gps = "git pl && git ps";
-      ghist = "git hist";
-      gca = "git ca";
-      gci = "git ci";
-      ti = "terraform init";
-      tp = "terraform plan";
-      ts = "terraform show";
       herdr = "command herdr";
     };
 
@@ -96,18 +67,6 @@
         alias cf='cd $(fd . --type d | fzf)'
       fi
 
-      git() { if [[ $# -gt 0 ]]; then command git "$@"; else command git status -sb; fi }
-      npm() {
-        case "$1" in
-          install|i) pnpm install "''${@:2}" ;;
-          add) pnpm add "''${@:2}" ;;
-          uninstall|remove|r) pnpm remove "''${@:2}" ;;
-          uninstall-global|remove-global|r-global) pnpm remove --global "''${@:2}" ;;
-          run) pnpm run "''${@:2}" ;;
-          *) echo "npm $@ → pnpm equivalent may vary"; command pnpm "$@" ;;
-        esac
-      }
-      yarn() { case "$1" in install|i) pnpm install "''${@:2}" ;; add) pnpm add "''${@:2}" ;; remove|r|uninstall) pnpm remove "''${@:2}" ;; run) pnpm run "''${@:2}" ;; exec|x) pnpm dlx "''${@:2}" ;; list|ls) pnpm list "''${@:2}" ;; update|up) pnpm update "''${@:2}" ;; *) pnpm "$@" ;; esac }
       ls-port() { echo "User processes:"; lsof -nP -iTCP -sTCP:LISTEN; echo "System processes require sudo permission:"; sudo lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null || { echo "Error: Unable to list ports. Make sure you have permission."; return 1; } }
       is-port-available() { local port="$1"; if [[ -z "$port" ]]; then echo "Usage: is-port-open <port_number>"; return 1; fi; local result=$(lsof -nP -i:"$port" 2>/dev/null); if [[ -n "$result" ]]; then echo "Port $port is in use by:"; echo "$result" | awk 'NR>1 {print "- " $1 " (PID: " $2 ")"}'; else echo "Port $port is available for use"; fi }
       lich-am() { curl -s lich.day }

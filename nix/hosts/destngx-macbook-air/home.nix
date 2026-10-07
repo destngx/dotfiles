@@ -10,6 +10,11 @@
     ../../modules/home/apps/herdr.nix
     ../../modules/home/apps/git.nix
     ../../modules/home/apps/zsh.nix
+    ../../modules/home/apps/claude.nix
+    ../../modules/home/apps/eza.nix
+    ../../modules/home/apps/bat.nix
+    ../../modules/home/apps/pnpm.nix
+    ../../modules/home/apps/python.nix
     ../../modules/home/apps/ghostty.nix
     ../../modules/home/apps/pi.nix
   ];

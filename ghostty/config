@@ -14,6 +14,7 @@ foreground = #c0caf5
 selection-background = #2d4f67
 selection-foreground = #c8d3f5
 cursor-color = #c8d3f5
+cursor-style = block
 cursor-text = #1a1b26
 palette = 0=#161720
 palette = 1=#c34043
