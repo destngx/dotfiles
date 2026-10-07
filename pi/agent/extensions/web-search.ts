@@ -5,7 +5,7 @@ import * as os from "os";
 
 function getProviderBaseUrl(): string {
   try {
-    const globalModels = path.join(os.homedir(), ".pi/agent/models.json");
+    const globalModels = path.join(os.homedir(), "projects/dotfiles/pi/agent/models.json");
     if (fs.existsSync(globalModels)) {
       const json = JSON.parse(fs.readFileSync(globalModels, "utf8"));
       const base = json.providers?.["anthropic"]?.baseUrl || json.providers?.["openai"]?.baseUrl;
@@ -36,7 +36,7 @@ export default function (pi: any) {
             "X-AI-Provider": "openai",
           },
           body: JSON.stringify({
-            model: "gpt-5.6-luna",
+            model: "gpt-6-luna",
             stream: true,
             tools: [{ type: "web_search" }],
             input: [
