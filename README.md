@@ -76,7 +76,9 @@ nix build --no-link ".#darwinConfigurations.$host.system"
 On a fresh installation, `darwin-rebuild` may not yet be on your `PATH`. Bootstrap nix-darwin by running its rebuild command through `nix run`:
 
 ```sh
-sudo nix run nix-darwin#darwin-rebuild -- switch --flake ".#$host"
+nix run 'nix-darwin#darwin-rebuild' -- switch \
+  --flake ".#$host" \
+  --sudo
 ```
 
 After the first successful switch, `darwin-rebuild` should be available. For subsequent activations, use the repository CLI:
