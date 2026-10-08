@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -u
 
-AEROSPACE="/etc/profiles/per-user/destnguyxn/bin/aerospace"
+USER_NAME="$(id -un)"
+NIX_PROFILE="/etc/profiles/per-user/$USER_NAME/bin"
+AEROSPACE="$NIX_PROFILE/aerospace"
 NOTIFIER="$(command -v terminal-notifier || true)"
-HERDR="$(command -v herdr || true)"
+HERDR="$NIX_PROFILE/herdr"
 if [ -z "$NOTIFIER" ] && [ -x /opt/homebrew/bin/terminal-notifier ]; then
   NOTIFIER="/opt/homebrew/bin/terminal-notifier"
 fi
