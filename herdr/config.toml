@@ -1,3 +1,6 @@
+# Link smart-splits.nvim into Herdr:
+# herdr plugin link ~/.local/share/nvim/lazy/smart-splits.nvim
+
 onboarding = false
 [keys]
 prefix = "ctrl+a"

@@ -209,6 +209,10 @@ q = ['enable toggle'] # Disable window management
 # Event listeners
 
 [[on-window-detected]]
+if.app-name-regex-substring = 'Team'
+run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
 if.app-id = 'app.zen-browser.zen'
 run = 'move-node-to-workspace 1'
 
