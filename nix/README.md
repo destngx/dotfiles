@@ -1,6 +1,6 @@
 # macOS workstation Nix configuration
 
-This repository contains a nix-darwin and Home Manager configuration for the host and user defined in [`hosts/destngx-macbook-air/machine.nix`](hosts/destngx-macbook-air/machine.nix). The host entrypoints live under `hosts/`; Nix modules live under `modules/`, organized by platform and application. The flake entrypoint is `../flake.nix`.
+This repository contains a nix-darwin and Home Manager configuration for the hosts defined under [`hosts/`](hosts/). Each host has its own `machine.nix` and entrypoints; Nix modules live under `modules/`, organized by platform and application. The flake entrypoint is `../flake.nix`.
 
 ## Review before activation
 
@@ -12,11 +12,12 @@ This repository contains a nix-darwin and Home Manager configuration for the hos
 
 ## Check, build, and activate
 
-From the repository root, read the host and username configured in `nix/hosts/destngx-macbook-air/machine.nix`, then validate and evaluate without activating:
+From the repository root, select a host directory when rebuilding, for example `bin/nix-rebuild nix/hosts/destngx-macbook-air switch`. To validate and evaluate without activating:
 
 ```sh
-host=$(nix eval --raw --expr '(import ./nix/hosts/destngx-macbook-air/machine.nix).hostName')
-user=$(nix eval --raw --expr '(import ./nix/hosts/destngx-macbook-air/machine.nix).username')
+host_dir=nix/hosts/destngx-macbook-air
+host=$(basename "$host_dir")
+user=$(nix eval --raw --expr '(import ./nix/hosts/'"$host"'/machine.nix).username')
 nix flake show
 nix flake check --show-trace
 nix eval --show-trace ".#darwinConfigurations.$host.system.build.toplevel.drvPath"
@@ -32,7 +33,7 @@ nix build --no-link ".#darwinConfigurations.$host.system"
 When ready to apply the configuration, review the changes and effects first, especially the nix-homebrew migration and files Home Manager will manage. Home Manager backs up conflicting managed files using the `.hm-backup` extension. The Karabiner activation step restarts its user server after linking the config directory. Activate explicitly with:
 
 ```sh
-sudo nix run nix-darwin -- switch --flake ".#$host"
+bin/nix-rebuild "$host_dir" switch
 ```
 
 Updating inputs changes `flake.lock`; review that diff before committing:

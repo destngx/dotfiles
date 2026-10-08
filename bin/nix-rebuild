@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  echo "Usage: ${0##*/} <host-directory> [darwin-rebuild arguments...]" >&2
+  echo "Example: ${0##*/} nix/hosts/destngx-macbook-air switch" >&2
+  exit 2
+}
+
+[[ $# -ge 1 ]] || usage
+host_dir=$1
+shift
+
+repo_dir=$(cd -- "$(dirname -- "$0")/.." && pwd)
+case "$host_dir" in
+  "$repo_dir"/*) host_dir=${host_dir#"$repo_dir"/} ;;
+esac
+[[ "$host_dir" == nix/hosts/* ]] || { echo "Host directory must be under nix/hosts/: $host_dir" >&2; exit 1; }
+host=${host_dir#nix/hosts/}
+host=${host%%/*}
+
+[[ -f "$repo_dir/nix/hosts/$host/machine.nix" ]] || { echo "Host directory not found: $host_dir" >&2; exit 1; }
+
+exec sudo darwin-rebuild "$@" --flake "$repo_dir#$host"

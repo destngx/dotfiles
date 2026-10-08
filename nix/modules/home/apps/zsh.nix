@@ -47,7 +47,6 @@
     historySubstringSearch.enable = true;
     shellAliases = {
       v = "nvim";
-      "nix-switch" = "echo 'After switching, restart the Herdr server if environment variables changed.'; sudo darwin-rebuild switch --flake '.#destngx-macbook-air'";
       "nix-clean" = "nix-collect-garbage -d && nix-store --optimise";
       p = "pi";
       pr = "pi -r";

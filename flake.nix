@@ -17,26 +17,36 @@
 
   outputs = inputs@{ nix-darwin, ... }:
     let
-      machine = import ./nix/hosts/destngx-macbook-air/machine.nix;
+      hostDirectories = builtins.readDir ./nix/hosts;
+      hosts = builtins.filter (name: hostDirectories.${name} == "directory") (builtins.attrNames hostDirectories);
+      mkDarwinConfiguration = hostName:
+        let
+          machine = import (./nix/hosts + "/${hostName}/machine.nix");
+        in nix-darwin.lib.darwinSystem {
+          system = machine.system;
+          specialArgs = { inherit inputs machine; };
+          modules = [
+            (./nix/hosts + "/${hostName}/darwin.nix")
+            inputs.home-manager.darwinModules.home-manager
+            inputs.nix-homebrew.darwinModules.nix-homebrew
+            {
+              nixpkgs.hostPlatform = machine.system;
+              home-manager = {
+                backupFileExtension = "hm-backup";
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs = { inherit inputs machine; };
+                users.${machine.username} = import (./nix/hosts + "/${hostName}/home.nix");
+              };
+            }
+          ];
+        };
     in {
-      darwinConfigurations.${machine.hostName} = nix-darwin.lib.darwinSystem {
-        system = machine.system;
-        specialArgs = { inherit inputs machine; };
-        modules = [
-          ./nix/hosts/destngx-macbook-air/darwin.nix
-          inputs.home-manager.darwinModules.home-manager
-          inputs.nix-homebrew.darwinModules.nix-homebrew
-          {
-            nixpkgs.hostPlatform = machine.system;
-            home-manager = {
-              backupFileExtension = "hm-backup";
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs = { inherit inputs machine; };
-              users.${machine.username} = import ./nix/hosts/destngx-macbook-air/home.nix;
-            };
-          }
-        ];
-      };
+      darwinConfigurations = builtins.listToAttrs (map
+        (hostName: {
+          name = hostName;
+          value = mkDarwinConfiguration hostName;
+        })
+        hosts);
     };
 }
