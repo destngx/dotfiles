@@ -14,7 +14,6 @@
       export MANPATH="${machine.homeDirectory}/tools/ripgrep/doc/man:$MANPATH"
     '';
     sessionVariables = {
-      VOLTA_HOME = "${machine.homeDirectory}/.volta";
       PNPM_HOME = "${machine.homeDirectory}/.local/share/pnpm";
       XDG_CONFIG_HOME = "${machine.homeDirectory}/.config";
       EDITOR = "nvim";
@@ -61,6 +60,7 @@
     initContent = lib.mkOrder 1200 ''
       bindkey -e
       WORDCHARS=''${WORDCHARS//[\/]}
+      eval "$(mise activate zsh)"
 
       if command -v fzf >/dev/null 2>&1; then
         alias vf='nvim $(fzf)'
@@ -90,9 +90,7 @@
     "/usr/local/bin"
     "${machine.homeDirectory}/.local/share/nvim/mason/bin"
     "${machine.homeDirectory}/.local/bin"
-    "${machine.homeDirectory}/.lmstudio/bin"
     "${machine.homeDirectory}/.antigravity/antigravity/bin"
-    "${machine.homeDirectory}/.volta/bin"
     "${machine.homeDirectory}/.local/share/pnpm"
     "/Applications/Obsidian.app/Contents/MacOS"
   ];

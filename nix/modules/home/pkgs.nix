@@ -11,19 +11,18 @@
     findutils
     fzf
     git-lfs
-    go
     gnused
+    gnupg
     imagemagick
     lazygit
     mosh
+    mise
     neovim
     opentofu
     peco
     ripgrep
-    rustup
     sqlite
     tailscale
-    uv
     yq-go
   ];
 }
