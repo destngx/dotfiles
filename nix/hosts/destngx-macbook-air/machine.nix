@@ -17,6 +17,7 @@
     "fd"
     "findutils"
     "fzf"
+    "ghostty-bin"
     "git-lfs"
     "gnused"
     "gnupg"
