@@ -9,20 +9,9 @@
 
   homebrew = {
     enable = true;
-    prefix = "/opt/homebrew";
-    taps = [ ];
-    brews = [
-      "terminal-notifier"
-    ];
-    casks = [
-      "browserosaurus"
-      "claude"
-      "claude-code"
-      "codex"
-      "gcc-arm-embedded"
-      "session-manager-plugin"
-      "windows-app"
-    ];
+    brews = machine.homebrew.brews;
+    taps = machine.homebrew.taps;
+    casks = machine.homebrew.casks;
     onActivation = {
       cleanup = "uninstall";
       upgrade = true;

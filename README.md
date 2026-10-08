@@ -6,7 +6,33 @@ Check out to get the font at `355dcc691cab1ccf649593cb9a6167f1ee4dca4a`.
 
 ## Nix workstation setup
 
-The root `flake.nix` configures nix-darwin, Home Manager, and nix-homebrew for each host under `nix/hosts/`. Each host directory contains its own `machine.nix` and module entrypoints; the `bin/nix-rebuild` CLI accepts a host directory path to select a configuration, for example `bin/nix-rebuild nix/hosts/destngx-macbook-air switch`. Application modules live under `nix/modules/`; macOS-specific modules are isolated under `darwin/`, while Home Manager modules are organized by application under `home/`. Other application configurations remain in their existing directories and are linked or referenced from those modules. For example, Home Manager links the entire `karabiner/` and `aerospace/` directories into `~/.config`; Karabiner's config is linked as a directory so it can monitor configuration changes.
+The `nix/` directory contains the host definitions and Nix modules. Review these activation considerations before applying the configuration:
+
+- Homebrew's current inventory was captured from the workstation and may change. Compare it with `nix/modules/darwin/homebrew.nix` before activating.
+- `nix-homebrew.autoMigrate` is enabled. Understand and review its effects before the first activation.
+- Homebrew cleanup removes formulae and casks not declared in the configuration, upgrades declared packages during activation, and does not automatically update Homebrew.
+- Machine-local Git include files remain outside this repository.
+- Do not put credentials or secret values in tracked configuration files or Nix expressions.
+
+The `hostName` value in each host's `machine.nix` is the flake configuration name; it does not have to match macOS's LocalHostName. Keep `repositoryDirectory` aligned with the actual checkout path because shell startup and application symlinks use it.
+
+From the repository root, select a host directory when rebuilding, for example `bin/nix-rebuild nix/hosts/destngx-macbook-air switch`. To validate and evaluate without activating:
+
+```sh
+host_dir=nix/hosts/destngx-macbook-air
+host=$(basename "$host_dir")
+user=$(nix eval --impure --raw --expr '(import ./nix/hosts/'"$host"'/machine.nix).username')
+nix flake show
+nix flake check --show-trace
+nix eval --show-trace ".#darwinConfigurations.$host.system.build.toplevel.drvPath"
+nix eval --show-trace ".#darwinConfigurations.$host.config.home-manager.users.$user.home.activationPackage.drvPath"
+```
+
+`nix flake check` checks the flake outputs; to evaluate or build a specific host, use its host name as shown above. Evaluation and checks do not activate the configuration. Build it without switching:
+
+```sh
+nix build --no-link ".#darwinConfigurations.$host.system"
+```
 
 ### 1. Install Nix
 
@@ -47,17 +73,23 @@ nix build --no-link ".#darwinConfigurations.$host.system"
 
 ### 3. Activate when ready
 
-Activation applies system and user configuration. Review the Nix changes and their effects first, especially the nix-homebrew migration setting and any existing files that Home Manager will manage. Home Manager is configured to back up conflicting managed files with the `.hm-backup` extension. The Karabiner activation step restarts its user server after linking the config directory. During Homebrew activation, undeclared formulae and casks are removed, declared packages are upgraded, and automatic Homebrew updates are disabled.
+On a fresh installation, `darwin-rebuild` may not yet be on your `PATH`. Bootstrap nix-darwin by running its rebuild command through `nix run`:
 
-When you have reviewed the configuration and are ready to apply it:
+```sh
+sudo nix run nix-darwin#darwin-rebuild -- switch --flake ".#$host"
+```
+
+After the first successful switch, `darwin-rebuild` should be available. For subsequent activations, use the repository CLI:
 
 ```sh
 bin/nix-rebuild "$host_dir" switch
 ```
 
+Activation applies system and user configuration. Review the Nix changes and their effects first, especially the nix-homebrew migration setting and any existing files that Home Manager will manage. Home Manager is configured to back up conflicting managed files with the `.hm-backup` extension. The Karabiner activation step restarts its user server after linking the config directory. During Homebrew activation, undeclared formulae and casks are removed, declared packages are upgraded, and automatic Homebrew updates are disabled.
+
 After making configuration changes, repeat the check and evaluation commands above before activating again.
 
-### Helpful flake commands
+### 4. Helpful flake commands
 
 ```sh
 # Update flake inputs and write the new revisions to flake.lock
