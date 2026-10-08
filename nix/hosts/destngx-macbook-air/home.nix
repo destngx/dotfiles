@@ -8,6 +8,7 @@
     ../../modules/home/apps/karabiner.nix
     ../../modules/home/apps/pngpaste.nix
     ../../modules/home/apps/herdr.nix
+    ../../modules/home/apps/mise.nix
     ../../modules/home/apps/git.nix
     ../../modules/home/apps/zsh.nix
     ../../modules/home/apps/claude.nix
