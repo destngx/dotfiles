@@ -4,6 +4,9 @@
   homeDirectory = "/Users/destnguyxn";
   repositoryDirectory = "/Users/destnguyxn/projects/dotfiles";
   system = "aarch64-darwin";
+  unstablePackages = [
+    "pi-coding-agent"
+  ];
   packages = [
     "awscli2"
     "aerospace"

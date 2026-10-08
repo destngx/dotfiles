@@ -12,6 +12,6 @@ in
     #   enable = true;
     #   configDir = "${machine.repositoryDirectory}/pi/agent";
     # };
-    home.packages = [ unstable-pkgs.pi-coding-agent ];
+    home.packages = map (name: unstable-pkgs.${name}) machine.unstablePackages;
   };
 }
