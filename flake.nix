@@ -35,6 +35,7 @@
                 backupFileExtension = "hm-backup";
                 useGlobalPkgs = true;
                 useUserPackages = true;
+                verbose = false;
                 extraSpecialArgs = { inherit inputs machine; };
                 users.${machine.username} = import (./nix/hosts + "/${hostName}/home.nix");
               };

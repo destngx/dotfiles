@@ -41,7 +41,7 @@
     casks = [
       "browserosaurus"
       "claude"
-      "claude-code"
+      "claude-code@latest"
       "codex"
       "gcc-arm-embedded"
       "maccy"

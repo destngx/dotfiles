@@ -8,7 +8,9 @@ claude/plugins
 claude/session*
 claude/skills/synced
 claude/projects
+claude/paste-cache
 claude/.claude.json
+claude/.last-cleanup
 claude/history.jsonl
 claude/stats-cache.json
 claude/file-history
