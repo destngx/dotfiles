@@ -5,13 +5,15 @@
     enableZshIntegration = true;
   };
 
+  # Override per machine in nix/hosts/<host>/.env.
+  secrets.fallbacks.OPENAI_ENV_BASE_URL = "http://localhost:8080/v1";
+
   programs.zsh = {
     enable = true;
     enableCompletion = true;
     dotDir = "${machine.repositoryDirectory}/zsh";
     sessionVariables = {
       XDG_CONFIG_HOME = "${machine.homeDirectory}/.config";
-      OPENAI_ENV_BASE_URL = "http://ezmacmini:8080/v1";
     };
     autosuggestion.enable = true;
     syntaxHighlighting = {

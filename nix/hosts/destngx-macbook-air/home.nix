@@ -3,6 +3,7 @@
   imports = [
     ../../modules/home/base.nix
     ../../modules/home/pkgs.nix
+    ../../modules/home/secrets.nix
 
     ../../modules/home/apps/aerospace.nix
     ../../modules/home/apps/karabiner.nix
