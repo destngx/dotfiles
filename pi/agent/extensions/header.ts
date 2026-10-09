@@ -333,7 +333,7 @@ class TetrisWelcomeHeader extends Container {
       `${BLUE}Workspace:${RESET} ${YELLOW} ${repoName}${RESET}${branchStr}`,
       `${BLUE}Resources:${RESET} ${GREEN}${counts.skills} skills${RESET} ${DIM}·${RESET} ${YELLOW}${counts.prompts} prompts${RESET} ${DIM}·${RESET} ${CYAN}${counts.extensions} extensions${RESET}`,
       `${BLUE}Custom Rules:${RESET}     ${formatRulesChain(rulesChain)}`,
-      `${BLUE}Shortcuts:${RESET} ${DIM}Type ${CYAN}/hotkeys${RESET} for more • ${CYAN}Ctrl+P${RESET} switch model${RESET}`,
+      `${BLUE}Shortcuts:${RESET} ${DIM}Type ${CYAN}/hotkeys${RESET} for more • ${CYAN}Alt+P${RESET} switch model${RESET}`,
     ];
 
     this.addChild(new Spacer(1));

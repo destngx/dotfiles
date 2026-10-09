@@ -1,15 +1,9 @@
 {
-  "theme": "auto",
-  "model": "haiku",
-  "autoDreamedEnabled": true,
-  "askUserQuestionTimeout": "60s",
-  "preferredNotifChannel": "auto",
-  "editorMode": "vim",
   "env": {
-    "DISABLE_TELEMETRY": 1,
-    "DISABLE_ERROR_REPORTING": 1,
-    "DISABLE_BUG_COMMAND": 1,
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": 1
+    "DISABLE_TELEMETRY": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_BUG_COMMAND": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
   },
   "hooks": {
     "SessionStart": [
@@ -18,7 +12,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash '$HOME/projects/dotfiles/claude/hooks/herdr-agent-state.sh' session",
+            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-agent-state.sh",
             "timeout": 10
           }
         ]
@@ -60,5 +54,10 @@
     "type": "command",
     "command": "$HOME/projects/dotfiles/claude/statusline.sh",
     "padding": 2
-  }
+  },
+  "askUserQuestionTimeout": "60s",
+  "theme": "auto",
+  "editorMode": "vim",
+  "preferredNotifChannel": "auto",
+  "autoDreamedEnabled": true
 }

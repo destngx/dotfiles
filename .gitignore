@@ -10,6 +10,9 @@ claude/skills/synced
 claude/projects
 claude/.claude.json
 claude/history.jsonl
+claude/stats-cache.json
+claude/file-history
+claude/shell-snapshots
 result
 zsh/**
 **/zsh-zimfw

@@ -1,5 +1,8 @@
-{ lib, ... }:
+{ lib, machine, ... }:
 {
+  home.sessionVariables.PNPM_HOME = "${machine.homeDirectory}/.local/share/pnpm";
+  home.sessionPath = [ "${machine.homeDirectory}/.local/share/pnpm" ];
+
   programs.zsh.shellAliases = {
     pn = "pnpm";
     px = "pnpx";

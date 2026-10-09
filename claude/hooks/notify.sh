@@ -4,10 +4,17 @@ set -u
 
 ACTION="${1:-notify}"
 
-AEROSPACE="$(command -v aerospace || true)"
-HERDR="$(command -v herdr || true)"
-NOTIFIER="/opt/homebrew/bin/terminal-notifier"
+SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 
+USER_NAME="$(id -un)"
+NIX_PROFILE="/etc/profiles/per-user/$USER_NAME/bin"
+AEROSPACE="$NIX_PROFILE/aerospace"
+HERDR="$NIX_PROFILE/herdr"
+NOTIFIER="$(command -v terminal-notifier || true)"
+if [ -z "$NOTIFIER" ] && [ -x /opt/homebrew/bin/terminal-notifier ]; then
+  NOTIFIER="/opt/homebrew/bin/terminal-notifier"
+fi
 # ---------------------------------------------------------
 # Notification click handler
 # ---------------------------------------------------------
@@ -92,13 +99,17 @@ case "$EVENT" in
     ;;
 esac
 
-CLICK_COMMAND="$HOME/.claude/hooks/notify.sh focus $PANE_ID"
+NOTIFY_ARGS=(
+  -title "$TITLE"
+  -subtitle "$SUBTITLE"
+  -message "$MESSAGE"
+  -sound "$SOUND"
+  -group "claude-$SESSION_ID"
+  -execute "$SCRIPT_PATH focus $PANE_ID"
+)
 
-"$NOTIFIER" \
-  -title "$TITLE" \
-  -subtitle "$SUBTITLE" \
-  -message "$MESSAGE" \
-  -sound "$SOUND" \
-  -contentImage "$HOME/.claude/claude.png" \
-  -group "claude-$SESSION_ID" \
-  -execute "$CLICK_COMMAND"
+if [ -f "$CLAUDE_DIR/claude.png" ]; then
+  NOTIFY_ARGS+=(-contentImage "$CLAUDE_DIR/claude.png")
+fi
+
+"$NOTIFIER" "${NOTIFY_ARGS[@]}"

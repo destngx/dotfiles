@@ -13,5 +13,10 @@ in
     #   configDir = "${machine.repositoryDirectory}/pi/agent";
     # };
     home.packages = map (name: unstable-pkgs.${name}) machine.unstablePackages;
+
+    programs.zsh.shellAliases = {
+      p = "pi";
+      pr = "pi -r";
+    };
   };
 }

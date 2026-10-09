@@ -1,5 +1,5 @@
 {
   "app.thinking.cycle": "ctrl+t",
   "app.thinking.toggle": [],
-  "app.model.select": []
+  "app.model.select": "alt+p"
 }

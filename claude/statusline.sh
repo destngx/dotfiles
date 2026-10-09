@@ -23,6 +23,11 @@ cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 lines_add=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
 lines_del=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
+effort=$(echo "$input" | jq -r '.effort.level // empty')
+five_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
+five_reset=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
+week_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
+week_reset=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
 
 # ── Git info ──
 branch=""
@@ -32,8 +37,34 @@ if [ -n "$cwd" ]; then
   repo=$(basename "$(git -C "$cwd" --no-optional-locks rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null)
 fi
 
+# ── Starship-style directory (default starship: ~ substitution, 3 components max) ──
+dir="${cwd/#$HOME/~}"
+if [ -n "$repo" ]; then
+  # Within a repo, truncate to repo root like starship does
+  top=$(git -C "$cwd" --no-optional-locks rev-parse --show-toplevel 2>/dev/null)
+  rel="${cwd#"$top"}"
+  dir="${repo}${rel}"
+fi
+IFS='/' read -ra _parts <<< "$dir"
+if [ "${#_parts[@]}" -gt 3 ]; then
+  n=${#_parts[@]}
+  dir="…/${_parts[n-3]}/${_parts[n-2]}/${_parts[n-1]}"
+fi
+
+# ── Starship-style git status markers ──
+git_flags=""
+if [ -n "$branch" ]; then
+  porcelain=$(git -C "$cwd" --no-optional-locks status --porcelain 2>/dev/null)
+  if [ -n "$porcelain" ]; then
+    echo "$porcelain" | grep -q '^??' && git_flags="${git_flags}?"
+    echo "$porcelain" | grep -q '^.[MD]' && git_flags="${git_flags}!"
+    echo "$porcelain" | grep -q '^[MADRC]' && git_flags="${git_flags}+"
+  fi
+  [ -n "$git_flags" ] && git_flags=" [${git_flags}]"
+fi
+
 # ── Context bar: RGB gradient, full blocks only ──
-BAR_WIDTH=20
+BAR_WIDTH=10
 
 if [ -n "$used" ]; then
   used_int=$(printf '%.0f' "$used")
@@ -64,33 +95,50 @@ if [ -n "$used" ]; then
   done
   bar="${bar}${RESET}"
 
-  if [ "$used_int" -ge 90 ]; then status_emoji="🚨"
-  elif [ "$used_int" -ge 70 ]; then status_emoji="🔥"
-  elif [ "$used_int" -ge 20 ]; then status_emoji="⚡"
-  else status_emoji="🟢"; fi
-
   if [ "$used_int" -ge 90 ]; then pct_color="$RED"
   elif [ "$used_int" -ge 70 ]; then pct_color="$YELLOW"
   else pct_color="$GREEN"; fi
 
-  ctx_part="${status_emoji} ${bar} ${pct_color}${used_int}%${RESET}"
+  ctx_part="${bar} ${pct_color}${used_int}%${RESET}"
 else
-  ctx_part="🟢 \033[38;2;60;60;60m░░░░░░░░░░░░░░░░░░░░${RESET} --%"
+  ctx_part="\033[38;2;60;60;60m░░░░░░░░░░${RESET} --%"
 fi
 
 # ── Cost ──
 cost_part="${YELLOW}$(printf '$%.2f' "$cost")${RESET}"
+
+# ── Plan usage limits ──
+pct_color() {
+  if [ "$1" -ge 90 ]; then printf '%s' "$RED"
+  elif [ "$1" -ge 70 ]; then printf '%s' "$YELLOW"
+  else printf '%s' "$GREEN"; fi
+}
+
+limit_part() {
+  local label="$1" pct="$2" reset="$3" fmt="$4" pct_int part
+  [ -n "$pct" ] || return
+  pct_int=$(printf '%.0f' "$pct")
+  part="${label:+$label }$(pct_color "$pct_int")${pct_int}%${RESET}"
+  [ -n "$reset" ] && part="${part} ${DIM}till${RESET} $(date -r "$reset" "$fmt")"
+  printf '%s' "$part"
+}
+
+five_part=$(limit_part "" "$five_pct" "$five_reset" '+%H:%M')
+week_part=$(limit_part "weekly" "$week_pct" "$week_reset" '+%-d %B %H:%M')
 
 # ── Code velocity ──
 velocity="${GREEN}+${lines_add}${RESET} ${RED}-${lines_del}${RESET}"
 
 # ── Single line ──
 out=""
-[ -n "$repo" ] && out="${BOLD}${YELLOW}${repo}${RESET}"
-[ -n "$branch" ] && out="${out:+$out }${BOLD}${CYAN}🌿 (${branch})${RESET}"
+[ -n "$dir" ] && out="${BOLD}${CYAN}${dir}${RESET}"
+[ -n "$branch" ] && out="${out:+$out }on ${BOLD}${MAGENTA} ${branch}${RESET}${BOLD}${RED}${git_flags}${RESET}"
 out="${out:+$out ${DIM}|${RESET} }${ctx_part}"
+[ -n "$five_part" ] && out="${out} ${DIM}|${RESET} ${five_part}"
+[ -n "$week_part" ] && out="${out} ${DIM}|${RESET} ${week_part}"
 out="${out} ${DIM}|${RESET} ${cost_part}"
 out="${out} ${DIM}|${RESET} ${velocity}"
-out="${out} ${DIM}|${RESET} ${MAGENTA}🤖 ${model}${RESET}"
+out="${out} ${DIM}|${RESET} ${MAGENTA}${model}${RESET}"
+[ -n "$effort" ] && out="${out} ${DIM}${effort}${RESET}"
 
 printf '%b' "$out"

@@ -1,4 +1,4 @@
-{ config, inputs, machine, pkgs, ... }:
+{ config, inputs, lib, machine, pkgs, ... }:
 {
   home.packages = [ inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default ];
 
@@ -8,4 +8,9 @@
 
   home.file.".config/herdr/config.toml".source =
     config.lib.file.mkOutOfStoreSymlink "${machine.repositoryDirectory}/herdr/config.toml";
+
+  programs.zsh.shellAliases.herdr = "command herdr";
+  programs.zsh.initContent = lib.mkAfter ''
+    if command -v herdr >/dev/null 2>&1; then source <(herdr completion zsh); fi
+  '';
 }
