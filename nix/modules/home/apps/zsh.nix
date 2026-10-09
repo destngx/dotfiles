@@ -3,6 +3,7 @@
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
+    settings.git_status.ignore_submodules = true;
   };
 
   # Override per machine in nix/hosts/<host>/.env.

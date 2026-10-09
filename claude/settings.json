@@ -1,10 +1,18 @@
 {
+  "syncClaudeAiSkills": false,
   "env": {
     "DISABLE_TELEMETRY": "1",
     "DISABLE_ERROR_REPORTING": "1",
     "DISABLE_BUG_COMMAND": "1",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "CLAUDE_CODE_DISABLE_1M_CONTEXT": "1",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "haiku"
   },
+  "deniedMcpServers": [
+    {
+      "serverName": "claude.ai Claude Docs"
+    }
+  ],
   "hooks": {
     "SessionStart": [
       {
@@ -45,19 +53,57 @@
           {
             "type": "command",
             "command": "$HOME/projects/dotfiles/claude/hooks/notify.sh notify"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-bg-tasks.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-bg-tasks.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^Agent$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-bg-tasks.sh",
+            "timeout": 10
           }
         ]
       }
     ]
   },
+  "workflowKeywordTriggerEnabled": false,
   "statusLine": {
     "type": "command",
-    "command": "$HOME/projects/dotfiles/claude/statusline.sh",
-    "padding": 2
+    "command": "$HOME/projects/dotfiles/claude/statusline.sh"
   },
   "askUserQuestionTimeout": "60s",
+  "pluginConfigs": {
+    "cc-plugin-agents-md@builtin": {
+      "options": {
+        "instructionFiles": "claude-md-and-agents-md"
+      }
+    }
+  },
+  "autoMemoryEnabled": true,
   "theme": "auto",
   "editorMode": "vim",
   "preferredNotifChannel": "auto",
-  "autoDreamedEnabled": true
+  "autoCompactEnabled": true,
+  "autoDreamedEnabled": true,
+  "ultracodeKeywordTrigger": false
 }

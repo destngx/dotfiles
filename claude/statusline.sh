@@ -18,7 +18,12 @@ rgb() { printf '\033[38;2;%d;%d;%dm' "$1" "$2" "$3"; }
 
 # ── Parse JSON fields ──
 model=$(echo "$input" | jq -r '.model.display_name // "Unknown"')
-used=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
+used=$(echo "$input" | jq -r '
+  .context_window as $c
+  | if ($c.current_usage and ($c.context_window_size // 0) > 0) then
+      ($c.current_usage | (.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)) * 100 / $c.context_window_size
+    else ($c.used_percentage // empty) end')
+ctx_size=$(echo "$input" | jq -r '.context_window.context_window_size // empty')
 cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 lines_add=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
 lines_del=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
@@ -51,20 +56,28 @@ if [ "${#_parts[@]}" -gt 3 ]; then
   dir="…/${_parts[n-3]}/${_parts[n-2]}/${_parts[n-1]}"
 fi
 
-# ── Starship-style git status markers ──
-git_flags=""
-if [ -n "$branch" ]; then
-  porcelain=$(git -C "$cwd" --no-optional-locks status --porcelain 2>/dev/null)
-  if [ -n "$porcelain" ]; then
-    echo "$porcelain" | grep -q '^??' && git_flags="${git_flags}?"
-    echo "$porcelain" | grep -q '^.[MD]' && git_flags="${git_flags}!"
-    echo "$porcelain" | grep -q '^[MADRC]' && git_flags="${git_flags}+"
-  fi
-  [ -n "$git_flags" ] && git_flags=" [${git_flags}]"
+# ── Git dirty marker ──
+dirty=""
+if [ -n "$branch" ] && [ -n "$(git -C "$cwd" --no-optional-locks status --porcelain 2>/dev/null)" ]; then
+  dirty="*"
 fi
 
 # ── Context bar: RGB gradient, full blocks only ──
-BAR_WIDTH=10
+BAR_WIDTH=6
+# Hide the gauge (keep the percentage) in narrow panes
+MIN_COLS_FOR_BAR=100
+cols=${COLUMNS:-$(tput cols 2>/dev/null || echo 200)}
+[ "$cols" -lt "$MIN_COLS_FOR_BAR" ] && BAR_WIDTH=0
+
+# Window size as 200k / 1M
+ctx_size_part=""
+if [ -n "$ctx_size" ]; then
+  if [ "$ctx_size" -ge 1000000 ] && [ $(( ctx_size % 1000000 )) -eq 0 ]; then
+    ctx_size_part="${DIM}/$(( ctx_size / 1000000 ))M${RESET}"
+  else
+    ctx_size_part="${DIM}/$(( ctx_size / 1000 ))k${RESET}"
+  fi
+fi
 
 if [ -n "$used" ]; then
   used_int=$(printf '%.0f' "$used")
@@ -93,32 +106,35 @@ if [ -n "$used" ]; then
       bar="${bar}\033[38;2;60;60;60m░"
     fi
   done
-  bar="${bar}${RESET}"
+  [ -n "$bar" ] && bar="${bar}${RESET}"
 
   if [ "$used_int" -ge 90 ]; then pct_color="$RED"
   elif [ "$used_int" -ge 70 ]; then pct_color="$YELLOW"
   else pct_color="$GREEN"; fi
 
-  ctx_part="${bar} ${pct_color}${used_int}%${RESET}"
+  ctx_part="${bar:+$bar }${pct_color}$(printf '%.1f' "$used")%${RESET}${ctx_size_part}"
 else
-  ctx_part="\033[38;2;60;60;60m░░░░░░░░░░${RESET} --%"
+  empty=""
+  for (( i=0; i<BAR_WIDTH; i++ )); do empty="${empty}░"; done
+  ctx_part="${empty:+\033[38;2;60;60;60m${empty}${RESET} }--%${ctx_size_part}"
 fi
 
 # ── Cost ──
 cost_part="${YELLOW}$(printf '$%.2f' "$cost")${RESET}"
 
-# ── Plan usage limits ──
-pct_color() {
-  if [ "$1" -ge 90 ]; then printf '%s' "$RED"
-  elif [ "$1" -ge 70 ]; then printf '%s' "$YELLOW"
+# ── Plan usage limits (shown as remaining) ──
+remain_color() {
+  if [ "$1" -le 10 ]; then printf '%s' "$RED"
+  elif [ "$1" -le 30 ]; then printf '%s' "$YELLOW"
   else printf '%s' "$GREEN"; fi
 }
 
 limit_part() {
-  local label="$1" pct="$2" reset="$3" fmt="$4" pct_int part
+  local label="$1" pct="$2" reset="$3" fmt="$4" remain part
   [ -n "$pct" ] || return
-  pct_int=$(printf '%.0f' "$pct")
-  part="${label:+$label }$(pct_color "$pct_int")${pct_int}%${RESET}"
+  remain=$(( 100 - $(printf '%.0f' "$pct") ))
+  [ "$remain" -lt 0 ] && remain=0
+  part="${label:+$label }$(remain_color "$remain")${remain}% left${RESET}"
   [ -n "$reset" ] && part="${part} ${DIM}till${RESET} $(date -r "$reset" "$fmt")"
   printf '%s' "$part"
 }
@@ -132,12 +148,11 @@ velocity="${GREEN}+${lines_add}${RESET} ${RED}-${lines_del}${RESET}"
 # ── Single line ──
 out=""
 [ -n "$dir" ] && out="${BOLD}${CYAN}${dir}${RESET}"
-[ -n "$branch" ] && out="${out:+$out }on ${BOLD}${MAGENTA} ${branch}${RESET}${BOLD}${RED}${git_flags}${RESET}"
+[ -n "$branch" ] && out="${out:+$out }${MAGENTA}${RESET} (${BOLD}${MAGENTA}${branch}${RED}${dirty}${RESET} ${velocity})"
 out="${out:+$out ${DIM}|${RESET} }${ctx_part}"
 [ -n "$five_part" ] && out="${out} ${DIM}|${RESET} ${five_part}"
 [ -n "$week_part" ] && out="${out} ${DIM}|${RESET} ${week_part}"
 out="${out} ${DIM}|${RESET} ${cost_part}"
-out="${out} ${DIM}|${RESET} ${velocity}"
 out="${out} ${DIM}|${RESET} ${MAGENTA}${model}${RESET}"
 [ -n "$effort" ] && out="${out} ${DIM}${effort}${RESET}"
 

@@ -99,10 +99,18 @@ case "$EVENT" in
     ;;
 esac
 
+# terminal-notifier parses values starting with [ ( { " ' < as plist data; a leading backslash escapes them.
+escape_arg() {
+  case "$1" in
+    [\[\(\{\"\'\<]*) printf '\\%s' "$1" ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
 NOTIFY_ARGS=(
-  -title "$TITLE"
-  -subtitle "$SUBTITLE"
-  -message "$MESSAGE"
+  -title "$(escape_arg "$TITLE")"
+  -subtitle "$(escape_arg "$SUBTITLE")"
+  -message "$(escape_arg "$MESSAGE")"
   -sound "$SOUND"
   -group "claude-$SESSION_ID"
   -execute "$SCRIPT_PATH focus $PANE_ID"

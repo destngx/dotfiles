@@ -59,3 +59,11 @@ delivery = "herdr"
 
 [theme]
 name = "kanagawa"
+
+# $bg is reported by claude/hooks/herdr-bg-tasks.sh (Claude background tasks)
+[ui.sidebar.agents.rows_by_agent]
+claude = [
+  ["state_icon", "machine", "workspace", "tab"],
+  ["agent"],
+  [{ token = "$bg", fg = "#e6c384" }],
+]
