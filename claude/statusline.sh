@@ -148,7 +148,7 @@ velocity="${GREEN}+${lines_add}${RESET} ${RED}-${lines_del}${RESET}"
 # ── Single line ──
 out=""
 [ -n "$dir" ] && out="${BOLD}${CYAN}${dir}${RESET}"
-[ -n "$branch" ] && out="${out:+$out }${MAGENTA}${RESET} (${BOLD}${MAGENTA}${branch}${RED}${dirty}${RESET} ${velocity})"
+[ -n "$branch" ] && out="${out:+$out }(${BOLD}${MAGENTA}${branch}${RED}${dirty}${RESET} ${velocity})"
 out="${out:+$out ${DIM}|${RESET} }${ctx_part}"
 [ -n "$five_part" ] && out="${out} ${DIM}|${RESET} ${five_part}"
 [ -n "$week_part" ] && out="${out} ${DIM}|${RESET} ${week_part}"

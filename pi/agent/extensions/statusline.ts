@@ -181,7 +181,7 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
   const { repo, branch, isDirty } = getGitInfo(state.cwd);
   const parts: string[] = [];
 
-  // 1. Git Repository & Branch (Nerd Font: \uF07B folder, \uE725 branch)
+  // 1. Git Repository & Branch (Nerd Font: \uF07B folder)
   if (repo) {
     let repoPart = `${BOLD}${YELLOW}\uF07B ${repo}${RESET}`;
     if (branch) {
@@ -189,7 +189,7 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
       const velocity = !isUltraSmall
         ? ` ${GREEN}+${state.linesAdd || 0}${RESET} ${RED}-${state.linesDel || 0}${RESET}`
         : "";
-      repoPart += ` ${BOLD}${CYAN}\uE725 (${branch}${dirty}${velocity})${RESET}`;
+      repoPart += ` ${BOLD}${CYAN}(${branch}${dirty}${velocity})${RESET}`;
     }
     parts.push(repoPart);
   }
