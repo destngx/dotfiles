@@ -12,6 +12,7 @@
     ../../modules/home/apps/mise.nix
     ../../modules/home/apps/git.nix
     ../../modules/home/apps/zsh.nix
+    ../../modules/home/apps/homebrew.nix
     ../../modules/home/apps/claude.nix
     ../../modules/home/apps/eza.nix
     ../../modules/home/apps/bat.nix

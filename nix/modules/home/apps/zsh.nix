@@ -3,7 +3,16 @@
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
-    settings.git_status.ignore_submodules = true;
+    settings = {
+      git_status.ignore_submodules = true;
+      # Default detect_files includes `project.json`, which every Nx project has.
+      dotnet.detect_files = [
+        "global.json"
+        "Directory.Build.props"
+        "Directory.Build.targets"
+        "Packages.props"
+      ];
+    };
   };
 
   # Override per machine in nix/hosts/<host>/.env.

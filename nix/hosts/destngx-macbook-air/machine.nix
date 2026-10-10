@@ -36,6 +36,7 @@
   homebrew = {
     taps = [ ];
     brews = [
+      "gh"
       "terminal-notifier"
     ];
     casks = [

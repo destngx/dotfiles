@@ -18,7 +18,7 @@ in
     casks = machine.homebrew.casks;
     onActivation = {
       cleanup = "uninstall";
-      # Only install missing / remove unlisted packages; never upgrade installed ones.
+      # upgrade disable by default, enable when need update apps
       upgrade = false;
       # Never self-update brew (it is pinned by nix-homebrew's brew-src input anyway).
       autoUpdate = false;

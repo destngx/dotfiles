@@ -4,5 +4,6 @@
   programs.zsh.shellAliases = {
     c = "claude";
     cc = "claude -c";
+    cr = "claude -r";
   };
 }

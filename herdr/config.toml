@@ -60,10 +60,14 @@ delivery = "herdr"
 [theme]
 name = "kanagawa"
 
+# $run is reported by claude/hooks/herdr-activity.sh (running tools and subagents)
 # $bg is reported by claude/hooks/herdr-bg-tasks.sh (Claude background tasks)
-[ui.sidebar.agents.rows_by_agent]
-claude = [
-  ["state_icon", "machine", "workspace", "tab"],
+# Applies to every agent; empty rows (e.g. $bg for non-Claude agents) are hidden.
+[ui.sidebar.agents]
+rows = [
+  ["state_icon", "machine", "terminal_title_stripped", "tab"],
+  ["workspace"],
   ["agent"],
+  [{ token = "$run", fg = "#7fb4ca" }],
   [{ token = "$bg", fg = "#e6c384" }],
 ]

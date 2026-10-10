@@ -20,4 +20,4 @@ result
 zsh/**
 **/zsh-zimfw
 
-nix/hosts/*/.env
+**/.env
