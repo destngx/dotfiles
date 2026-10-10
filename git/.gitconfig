@@ -42,6 +42,8 @@
   eol = lf
   pager = delta
   excludesfile = ~/projects/dotfiles/git/.gitignores
+  # Global hooks; each one chains to the repo's own .git/hooks/<name>
+  hooksPath = ~/projects/dotfiles/git/hooks
 [delta]
   navigate = true
   dark = true

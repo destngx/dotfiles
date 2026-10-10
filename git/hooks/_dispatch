@@ -1,0 +1,28 @@
+#!/bin/sh
+# Global git hook dispatcher (core.hooksPath points at this directory).
+# Every hook name is a symlink to this file: run global logic for that hook,
+# then chain to the repo's own .git/hooks/<name> so local hooks keep working.
+
+hook="$(basename "$0")"
+
+case "$hook" in
+  commit-msg)
+    # Strip AI agent co-author trailers (Claude / Anthropic) from every commit.
+    msg_file="$1"
+    pattern='^[[:space:]]*co-authored-by:.*(claude|anthropic)'
+    if grep -qiE "$pattern" "$msg_file"; then
+      tmp="$(mktemp)" || exit 1
+      grep -viE "$pattern" "$msg_file" >"$tmp"
+      # Drop trailing blank lines left behind by the removed trailer.
+      sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}' "$tmp" >"$msg_file"
+      rm -f "$tmp"
+      echo "commit-msg: removed Claude/Anthropic Co-Authored-By trailer" >&2
+    fi
+    ;;
+esac
+
+local_hook="$(git rev-parse --git-common-dir 2>/dev/null)/hooks/$hook"
+if [ -x "$local_hook" ]; then
+  exec "$local_hook" "$@"
+fi
+exit 0
