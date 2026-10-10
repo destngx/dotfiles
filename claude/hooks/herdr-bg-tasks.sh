@@ -1,8 +1,7 @@
 #!/bin/sh
-# Surface Claude background tasks in herdr.
+# Follow Claude background subagents in herdr panes.
 #   PostToolUse (async Agent): open a split pane following the subagent's transcript.
-#   Stop / SubagentStop: report the `$bg` sidebar token from the `background_tasks`
-#     snapshot and close panes whose task is no longer running.
+#   Stop / SubagentStop: close panes whose task is no longer in the `background_tasks` snapshot.
 # Set CLAUDE_HERDR_BG_DEBUG=1 to dump hook input to /tmp/claude-herdr-bg-<event>.json.
 
 input="$(cat)"
@@ -47,17 +46,12 @@ open_pane() {
   herdr pane run "$new_pane" "clear; $viewer '$out_file'" >/dev/null 2>&1 || true
 }
 
-report_and_reap() {
+reap_panes() {
   # Absent field (older Claude Code): leave everything alone.
   [ "$(field 'has("background_tasks")')" = "true" ] || return 0
 
-  running='[(.background_tasks // [])[] | select((.status // "running") | test("^(completed|failed|killed|stopped|done)$") | not)]'
-
-  # e.g. "⚙ 3 bg · 2 shell 1 subagent"; empty clears the token
-  summary="$(field "$running"' | if length == 0 then "" else "⚙ \(length) bg · " + (group_by(.type) | map("\(length) \(.[0].type // "task")") | join(" ")) end')"
-  herdr pane report-metadata "$HERDR_PANE_ID" --source claude-bg-tasks --token bg="$summary" >/dev/null 2>&1 || true
-
-  running_ids="$(field "$running"' | .[].id')"
+  running_ids="$(field '(.background_tasks // [])[]
+    | select((.status // "running") | test("^(completed|failed|killed|stopped|done)$") | not) | .id')"
   for f in "$state_dir"/*.pane; do
     [ -e "$f" ] || continue
     task_id="$(basename "$f" .pane)"
@@ -69,6 +63,6 @@ report_and_reap() {
 
 case "$event" in
   PostToolUse) open_pane ;;
-  Stop | SubagentStop) report_and_reap ;;
+  Stop | SubagentStop) reap_panes ;;
 esac
 exit 0

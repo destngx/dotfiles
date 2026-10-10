@@ -34,7 +34,7 @@
           },
           {
             "type": "command",
-            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-activity.sh",
+            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-subagents.sh",
             "timeout": 10
           }
         ]
@@ -46,11 +46,6 @@
           {
             "type": "command",
             "command": "$HOME/projects/dotfiles/claude/hooks/notify.sh capture"
-          },
-          {
-            "type": "command",
-            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-activity.sh",
-            "timeout": 10
           }
         ]
       }
@@ -77,11 +72,6 @@
             "type": "command",
             "command": "$HOME/projects/dotfiles/claude/hooks/herdr-bg-tasks.sh",
             "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-activity.sh",
-            "timeout": 10
           }
         ]
       }
@@ -91,7 +81,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-activity.sh",
+            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-subagents.sh",
             "timeout": 10
           }
         ]
@@ -107,18 +97,7 @@
           },
           {
             "type": "command",
-            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-activity.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-activity.sh",
+            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-subagents.sh",
             "timeout": 10
           }
         ]
@@ -131,26 +110,6 @@
           {
             "type": "command",
             "command": "$HOME/projects/dotfiles/claude/hooks/herdr-bg-tasks.sh",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-activity.sh",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-activity.sh",
             "timeout": 10
           }
         ]
