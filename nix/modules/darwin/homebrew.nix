@@ -9,6 +9,9 @@ in
     autoMigrate = true;
     user = machine.username;
     mutableTaps = false;
+    # Its integration runs `brew shellenv` in /etc/zshrc on every shell; the home-manager
+    # homebrew module sets the same environment statically instead.
+    enableZshIntegration = false;
   };
 
   homebrew = {
