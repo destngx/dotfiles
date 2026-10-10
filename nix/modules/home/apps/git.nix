@@ -16,5 +16,7 @@
 
   programs.zsh.initContent = lib.mkAfter ''
     git() { if [[ $# -gt 0 ]]; then command git "$@"; else command git status -sb; fi }
+
+    ${builtins.readFile ../../../../git/worktree.zsh}
   '';
 }
