@@ -1,2 +1,5 @@
 [tools]
 node = "26.11.1"
+
+[settings]
+trusted_config_paths = ["~/projects/monorepo", "~/projects/monorepo-worktrees"]
