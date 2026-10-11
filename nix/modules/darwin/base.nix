@@ -1,4 +1,4 @@
-{ machine, pkgs, ... }:
+{ inputs, machine, pkgs, ... }:
 {
   nix.enable = false;
 
@@ -7,6 +7,15 @@
 
   nixpkgs.hostPlatform = machine.system;
   nixpkgs.config.allowUnfree = true;
+  # Expose nixpkgs-unstable as pkgs.unstable (home-manager shares these pkgs via useGlobalPkgs).
+  nixpkgs.overlays = [
+    (final: prev: {
+      unstable = import inputs.nixpkgs-unstable {
+        inherit (prev) config;
+        system = prev.stdenv.hostPlatform.system;
+      };
+    })
+  ];
   # The user's zsh (home-manager) owns completion, prompt and Homebrew env; skip the system-wide
   # versions so /etc/zshrc does no redundant work on every interactive shell.
   programs.zsh.enableGlobalCompInit = false;

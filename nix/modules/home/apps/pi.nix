@@ -1,7 +1,4 @@
-{ config, inputs, lib, machine, pkgs, ... }:
-let
-  unstable-pkgs = import inputs.nixpkgs-unstable { system = pkgs.stdenv.hostPlatform.system; };
-in
+{ machine, ... }:
 {
   config = {
     # TODO: Remove this once the stable version of home-manager has the pi-coding-agent package, which > 26.05
@@ -12,7 +9,6 @@ in
     #   enable = true;
     #   configDir = "${machine.repositoryDirectory}/pi/agent";
     # };
-    home.packages = map (name: unstable-pkgs.${name}) machine.unstablePackages;
 
     programs.zsh.shellAliases = {
       p = "pi";

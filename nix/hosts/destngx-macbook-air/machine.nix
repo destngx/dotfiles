@@ -24,7 +24,6 @@
     "imagemagick"
     "lazygit"
     "mosh"
-    "mise"
     "neovim"
     "opentofu"
     "peco"
