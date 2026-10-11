@@ -1,5 +1,10 @@
 {
   "syncClaudeAiSkills": false,
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "permissions": {
     "allow": [
       "Read(~/projects/**)",
@@ -99,6 +104,18 @@
             "type": "command",
             "command": "$HOME/projects/dotfiles/claude/hooks/herdr-subagents.sh",
             "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/projects/dotfiles/claude/hooks/gnu-sed-guard.sh",
+            "timeout": 5
           }
         ]
       }
