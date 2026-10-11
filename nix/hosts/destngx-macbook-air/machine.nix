@@ -5,6 +5,8 @@
   repositoryDirectory = "/Users/destnguyxn/projects/dotfiles";
   system = "aarch64-darwin";
   unstablePackages = [
+    # Unstable: pnpm 12 global installs (npm.package_manager = "pnpm") need mise >= 2026.9.2.
+    "mise"
     "pi-coding-agent"
   ];
   packages = [
