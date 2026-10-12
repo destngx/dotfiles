@@ -2,3 +2,5 @@
 .pi/tasks
 
 **/.claude/settings.local.json
+
+.gwf/

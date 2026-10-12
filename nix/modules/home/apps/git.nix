@@ -5,7 +5,9 @@
 
   # `gwf` as an executable for agents and scripts, whose shells do not load the zsh function. Command
   # output goes to stderr; `create` prints the worktree path on stdout so callers can
-  # `cd "$(gwf create <branch>)"`. Interactive shells keep using the function defined below.
+  # `cd "$(gwf create <branch>)"`. Without a terminal, commands that would prompt fail with a hint
+  # (`rm -y`, `gc -y` are the prompt-free forms) and untrusted .gwf/setup scripts are skipped.
+  # Interactive shells keep using the function defined below.
   home.packages = [
     (pkgs.writeScriptBin "gwf" ''
       #!${config.programs.zsh.package}/bin/zsh
