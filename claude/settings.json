@@ -116,6 +116,11 @@
             "type": "command",
             "command": "$HOME/projects/dotfiles/claude/hooks/gnu-sed-guard.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "$HOME/projects/dotfiles/claude/hooks/cache-env-guard.sh",
+            "timeout": 5
           }
         ]
       }
