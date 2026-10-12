@@ -1,14 +1,20 @@
 # Git worktree helpers powered by fzf.
 #
 #   gwf [switch|s] [query]        switch to a worktree (default; `gwf <query>` also works)
-#   gwf list|ls                   list worktrees (* marks the current one)
+#   gwf list|ls [-s|--size]       list worktrees (* marks the current one); --size adds disk usage
+#                                 and the age of the last commit
 #   gwf create|c [branch] [base]  create a worktree and cd into it; with no branch, pick one with fzf
 #                                 (local, remote, or type a new name). New branches start from <base>,
 #                                 defaulting to origin's default branch, then HEAD.
 #   gwf remove|rm [query]         remove worktree(s) (multi-select with tab) after confirmation,
 #                                 optionally deleting their branches
+#   gwf gc [days]                 offer stale worktrees for removal: branch merged into origin's default
+#                                 branch, upstream gone, or clean with no commit for [days] (default 14)
 #
-# New worktrees live in <main-worktree>.worktrees/<branch>, or $GWT_ROOT/<repo>/<branch> when set.
+# New worktrees live in <main-worktree>-worktrees/<dir>, or $GWT_ROOT/<repo>/<dir> when set, where
+# <dir> is the branch without its type prefix ("feat/app-topic" -> "app-topic").
+# After creating a worktree, an executable .gwf/setup in it runs with the worktree as cwd
+# (install deps, write local env), so agents and humans get a ready-to-use checkout.
 
 _gwf_require() {
   command git rev-parse --git-dir >/dev/null 2>&1 || { print -u2 "gwf: not inside a git repository"; return 1; }
@@ -49,7 +55,18 @@ _gwf_pick() {
 }
 
 _gwf_list() {
-  _gwf_display | cut -f2
+  if [[ $1 != (-s|--size) ]]; then
+    _gwf_display | cut -f2
+    return
+  fi
+  # du counts APFS clones (pnpm's default import on macOS) at full size, so shared node_modules
+  # look bigger than they really are.
+  local wt line size age
+  _gwf_display | while IFS=$'\t' read -r wt line; do
+    size=$(du -sh -- "$wt" 2>/dev/null | cut -f1)
+    age=$(command git -C "$wt" log -1 --format=%cr 2>/dev/null)
+    printf '%s \033[36m%6s\033[0m  \033[2m%s\033[0m\n' "$line" "$size" "$age"
+  done
 }
 
 _gwf_switch() {
@@ -92,9 +109,10 @@ _gwf_create() {
   if [[ -n $GWT_ROOT ]]; then
     root=$GWT_ROOT/${${main:t}%.git}
   else
-    root=${main%.git}.worktrees
+    root=${main%.git}-worktrees
   fi
-  dest=$root/${branch//\//-}
+  dest=${branch#*/}
+  dest=$root/${dest//\//-}
   [[ -e $dest ]] && { print -u2 "gwf: $dest already exists"; return 1; }
 
   if command git show-ref --verify --quiet "refs/heads/$branch"; then
@@ -108,13 +126,67 @@ _gwf_create() {
     command git worktree add --no-track -b "$branch" -- "$dest" "$base" || return
   fi
   cd -- "$dest"
+
+  if [[ -x .gwf/setup ]]; then
+    print "gwf: running .gwf/setup"
+    ./.gwf/setup || print -u2 "gwf: .gwf/setup failed (exit $?); the worktree is still usable"
+  fi
 }
 
 _gwf_remove() {
-  local main=$(_gwf_main) wt branch
   local -a targets
   targets=(${(f)"$(_gwf_pick --multi --prompt='remove> ' --query="$*" \
     --header='tab: mark multiple | main worktree cannot be removed')"})
+  _gwf_remove_paths $targets
+}
+
+# Clean worktrees (no uncommitted changes) that are done or abandoned: upstream gone (catches squash
+# merges), merged into origin's default branch with commits of their own, or no commit in $1 days.
+# A fresh branch with no commits yet also counts as "merged", so it only qualifies once it goes idle.
+_gwf_stale() {
+  local days=${1:-14} main=$(_gwf_main) base wt branch sha ts
+  local cutoff=$(( $(date +%s) - days * 86400 ))
+  base=$(command git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null) || base=HEAD
+  local -a merged gone
+  merged=(${(f)"$(command git for-each-ref --merged="$base" --format='%(refname:short)' refs/heads)"})
+  gone=(${(f)"$(command git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads |
+    awk '$2 == "[gone]" { print $1 }')"})
+
+  _gwf_rows | while IFS=$'\t' read -r wt branch sha; do
+    [[ $wt == $main || ! -d $wt ]] && continue
+    [[ -n $(command git -C "$wt" status --porcelain 2>/dev/null) ]] && continue
+    if (( ${gone[(Ie)$branch]} )); then
+      print -r -- "$wt"
+    elif (( ${merged[(Ie)$branch]} )) &&
+         (( $(command git reflog show --format=%H "refs/heads/$branch" -- 2>/dev/null | wc -l) > 1 )); then
+      # merged and the branch moved after creation, i.e. it had real work that landed
+      print -r -- "$wt"
+    else
+      ts=$(command git -C "$wt" log -1 --format=%ct 2>/dev/null)
+      [[ -n $ts ]] && (( ts < cutoff )) && print -r -- "$wt"
+    fi
+  done
+}
+
+_gwf_gc() {
+  local -a stale targets
+  stale=(${(f)"$(_gwf_stale "$@")"})
+  command git worktree prune
+  (( $#stale )) || { print "gwf: no stale worktrees"; return }
+  # Show only stale worktrees, all preselected; tab deselects the ones to keep.
+  targets=(${(f)"$(_gwf_display | awk -F'\t' 'NR == FNR { keep[$0]; next } $1 in keep' \
+    <(print -rl -- $stale) - |
+    fzf --ansi --reverse --height=50% --delimiter='\t' --with-nth=2 --multi --prompt='gc> ' \
+      --header='stale worktrees, all selected | tab: keep one | enter: continue' --bind='load:select-all' \
+      --preview='git -C {1} -c color.status=always status -sb; echo; git -C {1} log --oneline --graph --color=always -30' \
+      --preview-window='right,55%' | cut -f1)"})
+  _gwf_remove_paths $targets
+}
+
+# Remove the given worktree paths after confirmation, optionally deleting their branches.
+_gwf_remove_paths() {
+  local main=$(_gwf_main) wt branch
+  local -a targets=("$@")
   if (( ${targets[(Ie)$main]} )); then
     print -u2 "gwf: skipping main worktree $main"
     targets=(${targets:#$main})
@@ -157,15 +229,16 @@ gwf() {
   (( $# )) && shift
   case $cmd in
     -h|--help|help)
-      print "usage: gwf [switch|s] [query]\n       gwf list|ls\n       gwf create|c [branch] [base]\n       gwf remove|rm [query]"
+      print "usage: gwf [switch|s] [query]\n       gwf list|ls [-s|--size]\n       gwf create|c [branch] [base]\n       gwf remove|rm [query]\n       gwf gc [days]"
       return ;;
   esac
   _gwf_require || return
   case $cmd in
     switch|s)  _gwf_switch "$@" ;;
-    list|ls)   _gwf_list ;;
+    list|ls)   _gwf_list "$@" ;;
     create|c)  _gwf_create "$@" ;;
     remove|rm) _gwf_remove "$@" ;;
+    gc)        _gwf_gc "$@" ;;
     *)         _gwf_switch "$cmd" "$@" ;;
   esac
 }
@@ -189,6 +262,7 @@ if (( $+functions[compdef] )); then
       'list:list worktrees'
       'create:create a worktree and cd into it'
       'remove:remove worktrees'
+      'gc:remove stale worktrees'
     )
     if (( CURRENT == 2 )); then
       _describe -t commands 'gwf command' cmds
