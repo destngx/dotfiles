@@ -160,6 +160,9 @@
     ]
   },
   "workflowKeywordTriggerEnabled": false,
+  "enableWorkflows": false,
+  "disableWorkflows": true,
+  "maxEffortLevel": "high",
   "statusLine": {
     "type": "command",
     "command": "$HOME/projects/dotfiles/claude/statusline.sh"
