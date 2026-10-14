@@ -14,6 +14,7 @@ claude/.claude.json
 claude/.last-cleanup
 claude/history.jsonl
 claude/stats-cache.json
+claude/mcp-needs-auth-cache.json
 claude/file-history
 claude/shell-snapshots
 result
