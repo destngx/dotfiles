@@ -62,11 +62,16 @@ in
     # The dump is per zsh version: compinit discards a dump written by another version, so shells
     # of different versions (e.g. macOS /bin/zsh spawned by a long-running app) would keep
     # rebuilding a shared one.
+    # The stamp holds symlink-resolved fpath: profile dirs keep the same path across rebuilds and
+    # resolve into the store, where mtimes are pinned to 1970, so only the resolved store path
+    # reveals that a package added or removed completions.
     completionInit = ''
       autoload -U compinit
       () {
         local dump=$ZDOTDIR/.zcompdump-$ZSH_VERSION stamp=$ZDOTDIR/.zcompdump-$ZSH_VERSION.fpath dir fresh=0
-        if [[ -s $dump && -r $stamp && "$(<$stamp)" == "$fpath" ]]; then
+        # Resolve per element: inside quotes, :A would apply to the joined string instead.
+        local resolved=(''${fpath:A})
+        if [[ -s $dump && -r $stamp && "$(<$stamp)" == "$resolved" ]]; then
           fresh=1
           for dir in $fpath; do [[ $dir -nt $dump ]] && { fresh=0; break; }; done
         fi
@@ -74,7 +79,7 @@ in
           compinit -C -d $dump
         else
           compinit -d $dump
-          print -r -- "$fpath" >| $stamp
+          print -r -- "$resolved" >| $stamp
           zcompile $dump
         fi
       }
