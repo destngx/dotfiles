@@ -9,6 +9,9 @@ claude/session*
 claude/skills/synced
 claude/skills/.trash
 claude/projects
+claude/daemon
+claude/daemon.log
+claude/jobs
 claude/paste-cache
 claude/.claude.json
 claude/.last-cleanup
