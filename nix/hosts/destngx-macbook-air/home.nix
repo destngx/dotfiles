@@ -26,6 +26,7 @@
     ../../modules/home/apps/fzf.nix
     ../../modules/home/apps/ripgrep.nix
     ../../modules/home/apps/k8s.nix
+    ../../modules/home/apps/opentofu.nix
     ../../modules/home/apps/bt-battery-alert.nix
   ];
 }
