@@ -21,8 +21,8 @@ in
     casks = machine.homebrew.casks;
     onActivation = {
       cleanup = "uninstall";
-      # upgrade disable by default, enable when need update apps
-      upgrade = false;
+      # Upgrade only on demand: `bin/nix-rebuild <host-dir> switch --brew-upgrade`.
+      upgrade = lib.mkDefault false;
       # Never self-update brew (it is pinned by nix-homebrew's brew-src input anyway).
       autoUpdate = false;
       # Install from fresh formula/cask API data.

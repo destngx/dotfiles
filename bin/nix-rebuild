@@ -2,14 +2,24 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: ${0##*/} <host-directory> [darwin-rebuild arguments...]" >&2
-  echo "Example: ${0##*/} nix/hosts/destngx-macbook-air switch" >&2
+  echo "Usage: ${0##*/} <host-directory> [--brew-upgrade] [darwin-rebuild arguments...]" >&2
+  echo "Example: ${0##*/} nix/hosts/destngx-macbook-air switch --brew-upgrade" >&2
+  echo "  --brew-upgrade  also upgrade outdated Homebrew formulae/casks during activation" >&2
   exit 2
 }
 
 [[ $# -ge 1 ]] || usage
 host_dir=$1
 shift
+
+config_suffix=
+args=()
+for arg in "$@"; do
+  case "$arg" in
+    --brew-upgrade) config_suffix=-brew-upgrade ;;
+    *) args+=("$arg") ;;
+  esac
+done
 
 repo_dir=$(cd -- "$(dirname -- "$0")/.." && pwd)
 case "$host_dir" in
@@ -21,4 +31,4 @@ host=${host%%/*}
 
 [[ -f "$repo_dir/nix/hosts/$host/machine.nix" ]] || { echo "Host directory not found: $host_dir" >&2; exit 1; }
 
-exec sudo darwin-rebuild "$@" --flake "$repo_dir#$host"
+exec sudo darwin-rebuild ${args[@]+"${args[@]}"} --flake "$repo_dir#$host$config_suffix"

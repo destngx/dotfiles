@@ -19,7 +19,7 @@
     let
       hostDirectories = builtins.readDir ./nix/hosts;
       hosts = builtins.filter (name: hostDirectories.${name} == "directory") (builtins.attrNames hostDirectories);
-      mkDarwinConfiguration = hostName:
+      mkDarwinConfiguration = hostName: extraModules:
         let
           machine = import (./nix/hosts + "/${hostName}/machine.nix");
         in nix-darwin.lib.darwinSystem {
@@ -40,14 +40,22 @@
                 users.${machine.username} = import (./nix/hosts + "/${hostName}/home.nix");
               };
             }
-          ];
+          ] ++ extraModules;
         };
     in {
-      darwinConfigurations = builtins.listToAttrs (map
-        (hostName: {
-          name = hostName;
-          value = mkDarwinConfiguration hostName;
-        })
+      # `<host>-brew-upgrade` is the same system with Homebrew upgrades enabled for one activation
+      # (selected by `bin/nix-rebuild --brew-upgrade`); flakes can't take runtime arguments.
+      darwinConfigurations = builtins.listToAttrs (builtins.concatMap
+        (hostName: [
+          {
+            name = hostName;
+            value = mkDarwinConfiguration hostName [ ];
+          }
+          {
+            name = "${hostName}-brew-upgrade";
+            value = mkDarwinConfiguration hostName [ { homebrew.onActivation.upgrade = true; } ];
+          }
+        ])
         hosts);
     };
 }
