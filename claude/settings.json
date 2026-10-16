@@ -43,6 +43,16 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "^(startup|resume|clear|compact|fork)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/destnguyxn/projects/dotfiles/claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -55,6 +65,11 @@
           {
             "type": "command",
             "command": "$HOME/projects/dotfiles/claude/hooks/amphetamine-awake.sh start",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "$HOME/projects/dotfiles/claude/hooks/herdr-bg-tasks.sh",
             "timeout": 10
           }
         ]

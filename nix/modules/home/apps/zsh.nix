@@ -115,6 +115,8 @@ in
       (lib.mkOrder 1200 ''
         bindkey -e
         WORDCHARS=''${WORDCHARS//[\/]}
+        # Case-insensitive completion (also feeds fzf-tab's candidates), e.g. `d<Tab>` offers Downloads.
+        zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}'
 
         ls-port() { echo "User processes:"; lsof -nP -iTCP -sTCP:LISTEN; echo "System processes require sudo permission:"; sudo lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null || { echo "Error: Unable to list ports. Make sure you have permission."; return 1; } }
         is-port-available() { local port="$1"; if [[ -z "$port" ]]; then echo "Usage: is-port-open <port_number>"; return 1; fi; local result=$(lsof -nP -i:"$port" 2>/dev/null); if [[ -n "$result" ]]; then echo "Port $port is in use by:"; echo "$result" | awk 'NR>1 {print "- " $1 " (PID: " $2 ")"}'; else echo "Port $port is available for use"; fi }

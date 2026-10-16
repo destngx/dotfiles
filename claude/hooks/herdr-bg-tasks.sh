@@ -2,6 +2,8 @@
 # Follow Claude background subagents in herdr panes.
 #   PostToolUse (async Agent): open a split pane following the subagent's transcript.
 #   Stop / SubagentStop: close panes whose task is no longer in the `background_tasks` snapshot.
+#   Stop: set the `$bg` sidebar token when Claude goes idle with background tasks still running,
+#     so the pane is not closed by accident. UserPromptSubmit clears it.
 # Set CLAUDE_HERDR_BG_DEBUG=1 to dump hook input to /tmp/claude-herdr-bg-<event>.json.
 
 input="$(cat)"
@@ -46,12 +48,31 @@ open_pane() {
   herdr pane run "$new_pane" "clear; $viewer '$out_file'" >/dev/null 2>&1 || true
 }
 
+running_task_ids() {
+  field '(.background_tasks // [])[]
+    | select((.status // "running") | test("^(completed|failed|killed|stopped|done)$") | not) | .id'
+}
+
+report_bg() {
+  herdr pane report-metadata "$HERDR_PANE_ID" --source claude-bg-tasks --token bg="$1" >/dev/null 2>&1 || true
+}
+
+flag_idle_bg() {
+  # Absent field (older Claude Code): unknown, so show nothing.
+  [ "$(field 'has("background_tasks")')" = "true" ] || return 0
+  count="$(running_task_ids | grep -c .)"
+  case "$count" in
+    0) report_bg "" ;;
+    1) report_bg "1 bg task running" ;;
+    *) report_bg "$count bg tasks running" ;;
+  esac
+}
+
 reap_panes() {
   # Absent field (older Claude Code): leave everything alone.
   [ "$(field 'has("background_tasks")')" = "true" ] || return 0
 
-  running_ids="$(field '(.background_tasks // [])[]
-    | select((.status // "running") | test("^(completed|failed|killed|stopped|done)$") | not) | .id')"
+  running_ids="$(running_task_ids)"
   for f in "$state_dir"/*.pane; do
     [ -e "$f" ] || continue
     task_id="$(basename "$f" .pane)"
@@ -63,6 +84,8 @@ reap_panes() {
 
 case "$event" in
   PostToolUse) open_pane ;;
-  Stop | SubagentStop) reap_panes ;;
+  Stop) reap_panes; flag_idle_bg ;;
+  SubagentStop) reap_panes ;;
+  UserPromptSubmit) report_bg "" ;;
 esac
 exit 0

@@ -61,6 +61,7 @@ delivery = "herdr"
 name = "kanagawa"
 
 # $agents is reported by claude/hooks/herdr-subagents.sh (running Claude subagents)
+# $bg is reported by claude/hooks/herdr-bg-tasks.sh (Claude idle with background tasks still running)
 # Applies to every agent; empty rows (e.g. $agents for non-Claude agents) are hidden.
 [ui.sidebar.agents]
 rows = [
@@ -68,4 +69,5 @@ rows = [
   ["workspace"],
   ["agent"],
   [{ token = "$agents", fg = "#7fb4ca" }],
+  [{ token = "$bg", fg = "#ff9e3b", bold = true }],
 ]
