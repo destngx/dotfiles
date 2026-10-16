@@ -18,12 +18,19 @@ rgb() { printf '\033[38;2;%d;%d;%dm' "$1" "$2" "$3"; }
 
 # ── Parse JSON fields ──
 model=$(echo "$input" | jq -r '.model.display_name // "Unknown"')
-used=$(echo "$input" | jq -r '
-  .context_window as $c
-  | if ($c.current_usage and ($c.context_window_size // 0) > 0) then
-      ($c.current_usage | (.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)) * 100 / $c.context_window_size
-    else ($c.used_percentage // empty) end')
 ctx_size=$(echo "$input" | jq -r '.context_window.context_window_size // empty')
+# Measure against the auto-compact cap when it is below the model window
+compact_window="${CLAUDE_CODE_AUTO_COMPACT_WINDOW:-}"
+if [[ "$compact_window" =~ ^[0-9]+$ ]] && [ -n "$ctx_size" ] && [ "$compact_window" -lt "$ctx_size" ]; then
+  ctx_size="$compact_window"
+fi
+used=$(echo "$input" | jq -r --argjson size "${ctx_size:-0}" '
+  .context_window as $c
+  | if ($c.current_usage and $size > 0) then
+      ($c.current_usage | (.input_tokens // 0) + (.cache_creation_input_tokens // 0) + (.cache_read_input_tokens // 0)) * 100 / $size
+    elif ($c.used_percentage and $size > 0 and ($c.context_window_size // 0) > 0) then
+      $c.used_percentage * $c.context_window_size / $size
+    else ($c.used_percentage // empty) end')
 cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 lines_add=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
 lines_del=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
