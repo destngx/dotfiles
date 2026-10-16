@@ -2,8 +2,9 @@
 # Follow Claude background subagents in herdr panes.
 #   PostToolUse (async Agent): open a split pane following the subagent's transcript.
 #   Stop / SubagentStop: close panes whose task is no longer in the `background_tasks` snapshot.
-#   Stop: set the `$bg` sidebar token when Claude goes idle with background tasks still running,
-#     so the pane is not closed by accident. UserPromptSubmit clears it.
+#   Stop: record the running background task count; the claude-bg-idle herdr plugin shows it as the
+#     `$bg` sidebar token only while herdr sees the pane idle, so the pane is not closed by accident.
+#   SessionEnd: drop the count.
 # Set CLAUDE_HERDR_BG_DEBUG=1 to dump hook input to /tmp/claude-herdr-bg-<event>.json.
 
 input="$(cat)"
@@ -53,19 +54,13 @@ running_task_ids() {
     | select((.status // "running") | test("^(completed|failed|killed|stopped|done)$") | not) | .id'
 }
 
-report_bg() {
-  herdr pane report-metadata "$HERDR_PANE_ID" --source claude-bg-tasks --token bg="$1" >/dev/null 2>&1 || true
-}
-
-flag_idle_bg() {
-  # Absent field (older Claude Code): unknown, so show nothing.
-  [ "$(field 'has("background_tasks")')" = "true" ] || return 0
-  count="$(running_task_ids | grep -c .)"
-  case "$count" in
-    0) report_bg "" ;;
-    1) report_bg "1 bg task running" ;;
-    *) report_bg "$count bg tasks running" ;;
-  esac
+record_bg_count() {
+  # Absent field (older Claude Code): unknown, so record nothing.
+  [ "$1" = "end" ] || [ "$(field 'has("background_tasks")')" = "true" ] || return 0
+  count_dir="${XDG_STATE_HOME:-$HOME/.local/state}/claude-herdr-bg-idle"
+  mkdir -p "$count_dir"
+  if [ "$1" = "end" ]; then echo 0; else running_task_ids | grep -c .; fi >"$count_dir/$HERDR_PANE_ID"
+  "$(dirname "$0")/../../herdr/plugins/claude-bg-idle/apply.sh" "$HERDR_PANE_ID"
 }
 
 reap_panes() {
@@ -84,8 +79,8 @@ reap_panes() {
 
 case "$event" in
   PostToolUse) open_pane ;;
-  Stop) reap_panes; flag_idle_bg ;;
+  Stop) reap_panes; record_bg_count ;;
   SubagentStop) reap_panes ;;
-  UserPromptSubmit) report_bg "" ;;
+  SessionEnd) record_bg_count end ;;
 esac
 exit 0

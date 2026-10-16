@@ -1,0 +1,14 @@
+id = "destngx.claude-bg-idle"
+name = "Claude background tasks while idle"
+version = "0.1.0"
+min_herdr_version = "0.9.5"
+description = "Show the $bg sidebar token only while an idle Claude pane still has background tasks running"
+platforms = ["linux", "macos"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["sh", "apply.sh"]
+
+[[events]]
+on = "pane.closed"
+command = ["sh", "apply.sh"]

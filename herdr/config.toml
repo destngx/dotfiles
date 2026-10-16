@@ -1,5 +1,7 @@
 # Link smart-splits.nvim into Herdr:
 # herdr plugin link ~/.local/share/nvim/lazy/smart-splits.nvim
+# Link claude-bg-idle into Herdr (drives the $bg sidebar token, see its README.md):
+# herdr plugin link ~/projects/dotfiles/herdr/plugins/claude-bg-idle
 
 onboarding = false
 [keys]
@@ -61,7 +63,7 @@ delivery = "herdr"
 name = "kanagawa"
 
 # $agents is reported by claude/hooks/herdr-subagents.sh (running Claude subagents)
-# $bg is reported by claude/hooks/herdr-bg-tasks.sh (Claude idle with background tasks still running)
+# $bg is reported by herdr/plugins/claude-bg-idle (Claude idle with background tasks still running)
 # Applies to every agent; empty rows (e.g. $agents for non-Claude agents) are hidden.
 [ui.sidebar.agents]
 rows = [
