@@ -20,6 +20,7 @@
     ../../modules/home/apps/pnpm.nix
     ../../modules/home/apps/python.nix
     ../../modules/home/apps/ghostty.nix
+    ../../modules/home/apps/terminal.nix
     ../../modules/home/apps/peco.nix
     ../../modules/home/apps/pi.nix
     ../../modules/home/apps/nvim.nix

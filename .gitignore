@@ -14,6 +14,7 @@ claude/daemon.log
 claude/jobs
 claude/paste-cache
 claude/.claude.json
+claude/.claude.json.backup
 claude/.last-cleanup
 claude/history.jsonl
 claude/stats-cache.json

@@ -58,6 +58,23 @@
         "type": "github"
       }
     },
+    "macos-terminal-themes": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1696242955,
+        "narHash": "sha256-aJkZMgb3o96FKnG4IZe4zkMNLJgJCcPX8MF6PvKEZnA=",
+        "owner": "lysyi3m",
+        "repo": "macos-terminal-themes",
+        "rev": "3b4e967e77777a2447340c0dfe59933ad45f8c57",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lysyi3m",
+        "repo": "macos-terminal-themes",
+        "rev": "3b4e967e77777a2447340c0dfe59933ad45f8c57",
+        "type": "github"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -149,6 +166,7 @@
       "inputs": {
         "herdr": "herdr",
         "home-manager": "home-manager",
+        "macos-terminal-themes": "macos-terminal-themes",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs_2",

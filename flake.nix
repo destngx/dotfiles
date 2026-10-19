@@ -13,6 +13,9 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+
+    macos-terminal-themes.url = "github:lysyi3m/macos-terminal-themes/3b4e967e77777a2447340c0dfe59933ad45f8c57";
+    macos-terminal-themes.flake = false;
   };
 
   outputs = inputs@{ nix-darwin, ... }:
