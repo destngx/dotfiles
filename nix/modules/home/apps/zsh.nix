@@ -123,7 +123,7 @@ in
         lich-am() { curl -s lich.day }
         lich-duong() { local today=$(date +%Y%m%d); curl -s lich.day/$today }
         confirm() { echo -n "$1 [y/N] -> "; read REPLY; case $REPLY in [Yy]) return 0 ;; *) return 1 ;; esac }
-        rm() { if confirm "⚠️  DELETE: $*"; then /bin/rm "$@"; echo "✅ Deleted: $*"; else echo "❌ Aborted"; return 1; fi }
+        rm() { if confirm "⚠️  DELETE: $*"; then /bin/rm "$@" || { local rc=$?; echo "❌ Failed: $*"; return $rc; }; echo "✅ Deleted: $*"; else echo "❌ Aborted"; return 1; fi }
         pubkey() {
           local ssh_dir="$HOME/.ssh" selected_key
           if ! command -v fzf >/dev/null 2>&1; then echo "Error: fzf is not installed. Please install fzf for key selection."; return 1; fi
