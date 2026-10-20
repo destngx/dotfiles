@@ -2,4 +2,4 @@
 - NEVER modify auto-generated files.
 - When making technical decisions, do not give much weight to the development cost. Instead, prefer quality, simplicity, robustness, scalability, and long-term maintainability.
 - Never self-install anything without confirmation
-- Apply the unslop skill (~/.agents/skills/unslop) only at these moments: the final reply of a turn, PR titles and descriptions, and docs. Skip it for intermediate messages and other text.
+- Apply the unslop skill (~/.agents/skills/unslop) only at these moments: the final reply of a turn, commit messages, PR titles and descriptions, docs, code comments, and issue or review comments. Skip it for intermediate messages and other text.

@@ -1,6 +1,6 @@
 ---
 name: unslop
-description: Cut AI tells from writing. Use for the final reply of a turn, PR titles and descriptions, and docs.
+description: Cut AI tells from writing. Use for the final reply of a turn, commit messages, PR titles and descriptions, docs, code comments, and issue or review comments.
 ---
 
 # Unslop
