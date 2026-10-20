@@ -115,3 +115,4 @@ Installer command and macOS installation guidance: Determinate Systems' official
 ## Related repositories
 
 - [corne-keymap-editor](https://github.com/destngx/corne-keymap-editor): ZMK firmware config for the Corne v4 (nice!nano v2). It stays a separate repo because the ZMK build workflow and the [keymap editor](https://nickcoutsos.github.io/keymap-editor/) both expect the config at the repository root.
+- [qmk_firmware (destngx branch)](https://github.com/destngx/qmk_firmware/tree/destngx): fork of [OpenAnnePro/qmk_firmware](https://github.com/OpenAnnePro/qmk_firmware) with my Anne Pro 2 (C18) keymap in `keyboards/annepro2/keymaps/destngx`.
