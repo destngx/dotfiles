@@ -111,3 +111,7 @@ Updating inputs changes `flake.lock`; review that diff before committing. A syst
 Machine-local Git include files are intentionally kept outside the repository. Do not put credentials or secret values in tracked files or Nix expressions.
 
 Installer command and macOS installation guidance: Determinate Systems' official installer documentation.
+
+## Related repositories
+
+- [corne-keymap-editor](https://github.com/destngx/corne-keymap-editor): ZMK firmware config for the Corne v4 (nice!nano v2). It stays a separate repo because the ZMK build workflow and the [keymap editor](https://nickcoutsos.github.io/keymap-editor/) both expect the config at the repository root.
