@@ -31,7 +31,7 @@ used=$(echo "$input" | jq -r --argjson size "${ctx_size:-0}" '
     elif ($c.used_percentage and $size > 0 and ($c.context_window_size // 0) > 0) then
       $c.used_percentage * $c.context_window_size / $size
     else ($c.used_percentage // empty) end')
-cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+# cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 lines_add=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
 lines_del=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
@@ -127,7 +127,8 @@ else
 fi
 
 # ── Cost ──
-cost_part="${YELLOW}$(printf '$%.2f' "$cost")${RESET}"
+# Disabled for now. To restore it, uncomment the line below, the cost= parse, and the cost_part append.
+# cost_part="${YELLOW}$(printf '$%.2f' "$cost")${RESET}"
 
 # ── Plan usage limits (shown as remaining) ──
 remain_color() {
@@ -159,7 +160,7 @@ out=""
 out="${out:+$out ${DIM}|${RESET} }${ctx_part}"
 [ -n "$five_part" ] && out="${out} ${DIM}|${RESET} ${five_part}"
 [ -n "$week_part" ] && out="${out} ${DIM}|${RESET} ${week_part}"
-out="${out} ${DIM}|${RESET} ${cost_part}"
+# out="${out} ${DIM}|${RESET} ${cost_part}"
 out="${out} ${DIM}|${RESET} ${MAGENTA}${model}${RESET}"
 [ -n "$effort" ] && out="${out} ${DIM}${effort}${RESET}"
 
