@@ -18,6 +18,7 @@
     ../../modules/home/apps/eza.nix
     ../../modules/home/apps/bat.nix
     ../../modules/home/apps/pnpm.nix
+    ../../modules/home/apps/nx.nix
     ../../modules/home/apps/python.nix
     ../../modules/home/apps/ghostty.nix
     ../../modules/home/apps/terminal.nix
