@@ -196,5 +196,6 @@
   "preferredNotifChannel": "auto",
   "autoCompactEnabled": true,
   "autoDreamedEnabled": true,
-  "ultracodeKeywordTrigger": false
+  "ultracodeKeywordTrigger": false,
+  "viewMode": "focus"
 }
