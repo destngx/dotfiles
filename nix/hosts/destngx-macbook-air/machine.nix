@@ -27,7 +27,6 @@
     "gnupg"
     "imagemagick"
     "lazygit"
-    "mosh"
     "neovim"
     "opentofu"
     "peco"
