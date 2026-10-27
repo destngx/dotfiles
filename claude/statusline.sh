@@ -165,3 +165,27 @@ out="${out} ${DIM}|${RESET} ${MAGENTA}${model}${RESET}"
 [ -n "$effort" ] && out="${out} ${DIM}${effort}${RESET}"
 
 printf '%b' "$out"
+
+# ── Snapshot for herdr-glance ──
+# herdr-glance shows this status on the phone at full detail, where the
+# terminal cut the line to its width. One file per herdr pane, named after
+# the pane id; the monorepo's apps/herdr-glance/status reads it.
+if [ -n "${HERDR_PANE_ID:-}" ]; then
+  snap_dir="${HERDR_GLANCE_STATUS_DIR:-$HOME/.local/state/herdr-glance/status}"
+  snap="$snap_dir/${HERDR_PANE_ID//[^A-Za-z0-9._-]/_}.json"
+  if mkdir -p "$snap_dir" 2>/dev/null &&
+    echo "$input" | jq -c --arg used "${used:-}" --argjson size "${ctx_size:-0}" --arg dir "$cwd" --arg effort "$effort" '
+      def limit($name): select(. != null and .used_percentage != null)
+        | {name: $name, usedPercent: .used_percentage, resetsAt: (.resets_at // 0)};
+      {
+        version: 1, agent: "claude", session: (.session_id // ""), updatedAt: now,
+        dir: $dir, model: (.model.display_name // ""), effort: $effort,
+        context: (if $used == "" then null else {usedPercent: ($used | tonumber), windowTokens: $size} end),
+        lines: {added: (.cost.total_lines_added // 0), removed: (.cost.total_lines_removed // 0)},
+        limits: [(.rate_limits.five_hour | limit("5-hour")), (.rate_limits.seven_day | limit("Weekly"))]
+      }' >"$snap.$$" 2>/dev/null; then
+    mv -f "$snap.$$" "$snap"
+  else
+    rm -f "$snap.$$"
+  fi
+fi

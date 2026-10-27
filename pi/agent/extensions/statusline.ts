@@ -172,6 +172,105 @@ interface StatusState {
   gatewayUsage?: any;
 }
 
+// ── Plan limits from the AI gateway's /v1/usage reply ──
+interface GatewayLimits {
+  isOpenAI: boolean;
+  remains5h: number | null;
+  remainsWeekly: number | null;
+  // A reset is Unix seconds or a "2026-10-27 13:28:00 UTC" string.
+  reset5h: unknown;
+  resetWeekly: unknown;
+}
+
+function numericPercent(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim() !== "" && Number.isFinite(Number(value))) return Number(value);
+  return null;
+}
+
+function readGatewayLimits(state: StatusState): GatewayLimits | null {
+  const data = state.gatewayUsage;
+  if (!data) return null;
+  const isOpenAI = String(state.model?.provider || "").toLowerCase() === "openai" || String(data?.provider || "").toLowerCase() === "openai";
+
+  if (isOpenAI) {
+    const primaryWindow = data.rate_limit?.primary_window || data.rate_limits?.primary_window || data.primary_window || data.rate_limit?.primary;
+    const secondaryWindow = data.rate_limit?.secondary_window || data.rate_limits?.secondary_window || data.secondary_window || data.rate_limit?.secondary;
+    const primaryUsed = numericPercent(primaryWindow?.used_percent);
+    const secondaryUsed = numericPercent(secondaryWindow?.used_percent);
+    const primaryRemaining = numericPercent(primaryWindow?.remaining_percent);
+    const secondaryRemaining = numericPercent(secondaryWindow?.remaining_percent);
+    const primaryLeft = numericPercent(data.limits?.["5h"]?.left_percent);
+    const weeklyLeft = numericPercent(data.limits?.weekly?.left_percent);
+    return {
+      isOpenAI,
+      remains5h: primaryLeft ?? primaryRemaining ?? (primaryUsed !== null ? Math.max(0, Math.min(100, 100 - primaryUsed)) : null),
+      remainsWeekly: weeklyLeft ?? secondaryRemaining ?? (secondaryUsed !== null ? Math.max(0, Math.min(100, 100 - secondaryUsed)) : null),
+      reset5h: primaryWindow?.reset_at ?? data.display?.["5h_reset_at"],
+      resetWeekly: secondaryWindow?.reset_at ?? data.display?.weekly_reset_at,
+    };
+  }
+  const primaryUsed = numericPercent(data.rate_limits?.primary?.used_percent);
+  const secondaryUsed = numericPercent(data.rate_limits?.secondary?.used_percent);
+  return {
+    isOpenAI,
+    remains5h: numericPercent(data.limits?.["5h"]?.left_percent) ?? numericPercent(data.rate_limits?.primary?.left_percent) ?? (primaryUsed !== null ? Math.max(0, Math.min(100, 100 - primaryUsed)) : null),
+    remainsWeekly: numericPercent(data.limits?.weekly?.left_percent) ?? numericPercent(data.rate_limits?.secondary?.left_percent) ?? (secondaryUsed !== null ? Math.max(0, Math.min(100, 100 - secondaryUsed)) : null),
+    reset5h: data.display?.["5h_reset_at"],
+    resetWeekly: data.display?.["weekly_reset_at"],
+  };
+}
+
+// Unix seconds of a reset, or 0 when it is missing or unreadable.
+function resetSeconds(raw: unknown): number {
+  if (typeof raw === "number" && Number.isFinite(raw)) return raw;
+  if (typeof raw !== "string" || !raw.trim()) return 0;
+  const date = new Date(raw.trim().replace(" UTC", "Z").replace(" ", "T"));
+  return isNaN(date.getTime()) ? 0 : date.getTime() / 1000;
+}
+
+// ── Snapshot for herdr-glance ──
+// herdr-glance shows this status on the phone at full detail, where the
+// terminal cut the line to its width. One file per herdr pane, named after
+// the pane id; the monorepo's apps/herdr-glance/status reads it.
+function writeSnapshot(state: StatusState, ctx: any): void {
+  const pane = process.env.HERDR_PANE_ID;
+  if (!pane) return;
+  try {
+    let session = "";
+    const file = ctx?.sessionManager?.getSessionFile?.();
+    if (typeof file === "string" && path.isAbsolute(file)) {
+      session = file;
+    } else {
+      const id = ctx?.sessionManager?.getSessionId?.();
+      if (typeof id === "string") session = id;
+    }
+    const limits = readGatewayLimits(state);
+    const snapshot = {
+      version: 1,
+      agent: "pi",
+      session,
+      updatedAt: Date.now() / 1000,
+      dir: state.cwd || "",
+      model: formatModelName(state.model),
+      effort: state.thinking || "",
+      context: state.usedPct === null || state.usedPct === undefined || isNaN(state.usedPct)
+        ? null
+        : { usedPercent: state.usedPct, windowTokens: state.contextWindow || 0 },
+      limits: [
+        ...(limits?.remains5h != null ? [{ name: "5-hour", usedPercent: 100 - limits.remains5h, resetsAt: resetSeconds(limits.reset5h) }] : []),
+        ...(limits?.remainsWeekly != null ? [{ name: "Weekly", usedPercent: 100 - limits.remainsWeekly, resetsAt: resetSeconds(limits.resetWeekly) }] : []),
+      ],
+      costUsd: state.cost || null,
+    };
+    const dir = process.env.HERDR_GLANCE_STATUS_DIR || path.join(os.homedir(), ".local/state/herdr-glance/status");
+    const target = path.join(dir, `${pane.replace(/[^A-Za-z0-9._-]/g, "_")}.json`);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(`${target}.${process.pid}`, JSON.stringify(snapshot));
+    fs.renameSync(`${target}.${process.pid}`, target);
+  } catch {}
+}
+
 // ── Responsive Statusline Builder ──
 function buildStatusLine(state: StatusState, targetWidth: number): string {
   const maxWidth = Math.max(20, targetWidth - 1);
@@ -222,16 +321,8 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
   }
 
   // 3. AI Gateway Rate Limits (5h and weekly remaining + reset times)
-  if (state.gatewayUsage) {
-    const data = state.gatewayUsage;
-    const isOpenAI = String(state.model?.provider || "").toLowerCase() === "openai" || String(state.gatewayUsage?.provider || "").toLowerCase() === "openai";
-
-    const numericPercent = (value: unknown): number | null => {
-      if (typeof value === "number" && Number.isFinite(value)) return value;
-      if (typeof value === "string" && value.trim() !== "" && Number.isFinite(Number(value))) return Number(value);
-      return null;
-    };
-
+  const limits = readGatewayLimits(state);
+  if (limits) {
     const formatReset = (rawReset: unknown, timeOnly = false): string => {
       const reset = typeof rawReset === "string" ? rawReset.trim() : "";
       if (typeof rawReset === "number" && Number.isFinite(rawReset)) {
@@ -271,34 +362,18 @@ function buildStatusLine(state: StatusState, targetWidth: number): string {
       return ` ${DIM}↻${hours}h ${minutes}m remaining${RESET}`;
     };
 
-    if (isOpenAI) {
-      const primaryWindow = data.rate_limit?.primary_window || data.rate_limits?.primary_window || data.primary_window || data.rate_limit?.primary;
-      const secondaryWindow = data.rate_limit?.secondary_window || data.rate_limits?.secondary_window || data.secondary_window || data.rate_limit?.secondary;
-      const primaryUsed = numericPercent(primaryWindow?.used_percent);
-      const secondaryUsed = numericPercent(secondaryWindow?.used_percent);
-      const primaryRemaining = numericPercent(primaryWindow?.remaining_percent);
-      const secondaryRemaining = numericPercent(secondaryWindow?.remaining_percent);
-      const primaryLeft = numericPercent(data.limits?.["5h"]?.left_percent);
-      const weeklyLeft = numericPercent(data.limits?.weekly?.left_percent);
-      const remains5h = primaryLeft ?? primaryRemaining ?? (primaryUsed !== null ? Math.max(0, Math.min(100, 100 - primaryUsed)) : null);
-      const remainsWeekly = weeklyLeft ?? secondaryRemaining ?? (secondaryUsed !== null ? Math.max(0, Math.min(100, 100 - secondaryUsed)) : null);
+    const { remains5h, remainsWeekly, reset5h, resetWeekly } = limits;
+    if (limits.isOpenAI) {
       if (remains5h !== null) {
-        parts.push(`${limitColor(remains5h)}${remains5h}%${formatReset(primaryWindow?.reset_at ?? data.display?.["5h_reset_at"], true)}`);
+        parts.push(`${limitColor(remains5h)}${remains5h}%${formatReset(reset5h, true)}`);
       }
       if (remainsWeekly !== null) {
-        parts.push(`${limitColor(remainsWeekly)}${DIM}weekly ${RESET}${limitColor(remainsWeekly)}${remainsWeekly}%${DIM}${formatReset(secondaryWindow?.reset_at ?? data.display?.weekly_reset_at)}${RESET}`);
+        parts.push(`${limitColor(remainsWeekly)}${DIM}weekly ${RESET}${limitColor(remainsWeekly)}${remainsWeekly}%${DIM}${formatReset(resetWeekly)}${RESET}`);
       }
     } else {
-      const primaryUsed = numericPercent(data.rate_limits?.primary?.used_percent);
-      const secondaryUsed = numericPercent(data.rate_limits?.secondary?.used_percent);
-      const remains5h = numericPercent(data.limits?.["5h"]?.left_percent) ?? numericPercent(data.rate_limits?.primary?.left_percent) ?? (primaryUsed !== null ? Math.max(0, Math.min(100, 100 - primaryUsed)) : null);
-      const remainsWeekly = numericPercent(data.limits?.weekly?.left_percent) ?? numericPercent(data.rate_limits?.secondary?.left_percent) ?? (secondaryUsed !== null ? Math.max(0, Math.min(100, 100 - secondaryUsed)) : null);
-      const reset5h = format5hRemaining(data.display?.["5h_reset_at"]);
-      const resetWeekly = formatReset(data.display?.["weekly_reset_at"]);
-      if (remains5h !== null) parts.push(`${limitColor(remains5h)}${remains5h}% 5h${RESET}${reset5h}`);
-      if (remainsWeekly !== null) parts.push(`${limitColor(remainsWeekly)}${remainsWeekly}% weekly${RESET}${resetWeekly}`);
+      if (remains5h !== null) parts.push(`${limitColor(remains5h)}${remains5h}% 5h${RESET}${format5hRemaining(reset5h)}`);
+      if (remainsWeekly !== null) parts.push(`${limitColor(remainsWeekly)}${remainsWeekly}% weekly${RESET}${formatReset(resetWeekly)}`);
     }
-
   }
 
   // 4. Tokens Breakdown (\uF062 in, \uF063 out, \uF0EB reason) - Shown on wide screens
@@ -472,6 +547,7 @@ export default function (pi: any) {
     }
 
     await fetchGatewayUsage();
+    writeSnapshot(state, ctx);
     ctx.ui?.requestRender?.();
   });
 
@@ -482,16 +558,19 @@ export default function (pi: any) {
   pi.on("turn_end", async (_event: any, ctx: any) => {
     extractMetrics(ctx);
     await fetchGatewayUsage();
+    writeSnapshot(state, ctx);
     ctx.ui?.requestRender?.();
   });
 
   pi.on("model_select", async (event: any, ctx: any) => {
     if (event?.model) state.model = event.model;
     extractMetrics(ctx);
+    writeSnapshot(state, ctx);
   });
 
   pi.on("thinking_level_select", async (event: any, ctx: any) => {
     if (event?.level) state.thinking = event.level;
     extractMetrics(ctx);
+    writeSnapshot(state, ctx);
   });
 }
