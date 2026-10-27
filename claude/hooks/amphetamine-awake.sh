@@ -3,6 +3,10 @@
 #   start: UserPromptSubmit  -> mark this session busy, start an Amphetamine session if none is active
 #   stop:  Stop / SessionEnd -> unmark this session, end the Amphetamine session once no session is busy
 # Only ends Amphetamine sessions this hook started, so manual sessions are left alone.
+# Amphetamine keeps one session at a time and its AppleScript API exposes no session id,
+# so the hook identifies its session by the IDs of the power assertions Amphetamine holds
+# for it. Starting a manual session replaces those assertions, so the IDs stop matching and
+# the hook leaves the manual session running.
 
 set -u
 
@@ -19,6 +23,11 @@ SESSION_ID="$(jq -r '.session_id // ""' 2>/dev/null)"
 mkdir -p "$STATE_DIR"
 
 amph() { osascript -e "tell application \"Amphetamine\" to $1" 2>/dev/null; }
+
+# IDs of the power assertions Amphetamine currently holds, one per line.
+amph_assertions() {
+  pmset -g assertions | grep -o '(Amphetamine): \[0x[0-9a-fA-F]*\]' | grep -o '0x[0-9a-fA-F]*' | sort
+}
 
 # PID of the claude process running this hook, used to prune markers of sessions that died without Stop.
 claude_pid() {
@@ -56,14 +65,21 @@ case "$ACTION" in
   start)
     claude_pid > "$STATE_DIR/$SESSION_ID"
     if [ "$(amph 'session is active')" != "true" ]; then
-      amph 'start new session with options {duration:0, interval:0, displaySleepAllowed:true}' >/dev/null && touch "$OWNED"
+      if amph 'start new session with options {duration:0, interval:0, displaySleepAllowed:true}' >/dev/null; then
+        for _ in $(seq 20); do
+          ids="$(amph_assertions)"
+          [ -n "$ids" ] && break
+          sleep 0.1
+        done
+        [ -n "$ids" ] && printf '%s\n' "$ids" > "$OWNED"
+      fi
     fi
     ;;
   stop)
     rm -f "$STATE_DIR/$SESSION_ID"
     prune_dead
     if [ "$(busy_count)" -eq 0 ] && [ -f "$OWNED" ]; then
-      amph 'end session' >/dev/null
+      [ "$(amph_assertions)" = "$(cat "$OWNED")" ] && amph 'end session' >/dev/null
       rm -f "$OWNED"
     fi
     ;;
