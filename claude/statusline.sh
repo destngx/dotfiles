@@ -2,6 +2,7 @@
 # Claude Code status line: RGB gradient, dynamic emoji, cost, code velocity
 
 input=$(cat)
+printf '%s' "$input" | "$HOME/.local/bin/claude-quota" observe >/dev/null 2>&1 &  # claude-quota observe
 
 # ── Colors ──
 CYAN='\033[36m'

@@ -172,6 +172,17 @@
           }
         ]
       }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "$HOME/.local/bin/claude-quota hook stop-failure",
+            "type": "command"
+          }
+        ]
+      }
     ]
   },
   "disableWorkflows": true,
