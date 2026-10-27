@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.0.0",
+  "lastChangelogVersion": "1.4.0",
   "theme": "dark",
   "terminal": {
     "showTerminalProgress": true
@@ -28,8 +28,6 @@
   "packages": [
     "npm:pi-context-view",
     "npm:@piotr-oles/pi-reflag",
-    "npm:@narumitw/pi-btw",
-    "npm:@juicesharp/rpiv-ask-user-question",
     "npm:@tintinweb/pi-tasks"
   ],
   "hideThinkingBlock": true,
