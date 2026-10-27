@@ -8,6 +8,8 @@
     # Unstable: pnpm 12 global installs (npm.package_manager = "pnpm") need mise >= 2026.9.2.
     "mise"
     "pi-coding-agent"
+    # Unstable: TS-2026-013 is fixed in tailscale >= 1.104.2, newer than the stable channel ships.
+    "tailscale"
   ];
   packages = [
     "awscli2"
@@ -31,7 +33,6 @@
     "peco"
     "ripgrep"
     "sqlite"
-    "tailscale"
     "yq-go"
   ];
   homebrew = {
