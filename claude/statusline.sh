@@ -178,7 +178,7 @@ if [ -n "${HERDR_PANE_ID:-}" ]; then
       def limit($name): select(. != null and .used_percentage != null)
         | {name: $name, usedPercent: .used_percentage, resetsAt: (.resets_at // 0)};
       {
-        version: 1, agent: "claude", session: (.session_id // ""), updatedAt: now,
+        version: 1, agent: "claude", session: (.session_id // ""), transcript: (.transcript_path // ""), updatedAt: now,
         dir: $dir, model: (.model.display_name // ""), effort: $effort,
         context: (if $used == "" then null else {usedPercent: ($used | tonumber), windowTokens: $size} end),
         lines: {added: (.cost.total_lines_added // 0), removed: (.cost.total_lines_removed // 0)},
