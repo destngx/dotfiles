@@ -4,7 +4,8 @@ set -euo pipefail
 usage() {
   echo "Usage: ${0##*/} <host-directory> [--brew-upgrade] [darwin-rebuild arguments...]" >&2
   echo "Example: ${0##*/} nix/hosts/destngx-macbook-air switch --brew-upgrade" >&2
-  echo "  --brew-upgrade  also upgrade outdated Homebrew formulae/casks during activation" >&2
+  echo "  --brew-upgrade  also upgrade outdated Homebrew formulae/casks during activation;" >&2
+  echo "                  Claude Code only to a version \`claude-quota check-version\` allows" >&2
   exit 2
 }
 
@@ -30,5 +31,60 @@ host=${host_dir#nix/hosts/}
 host=${host%%/*}
 
 [[ -f "$repo_dir/nix/hosts/$host/machine.nix" ]] || { echo "Host directory not found: $host_dir" >&2; exit 1; }
+
+# Claude Code upgrades only to a version claude-quota's update check allows
+# (monorepo docs/claude-quota/DESIGN.md §9.1). A first install isn't checked.
+gated_cask=claude-code@latest
+brew_env=(env HOMEBREW_FORCE_API_AUTO_UPDATE=1)
+
+claude_code_upgrade_allowed() {
+  local outdated new
+  if ! outdated=$("${brew_env[@]}" brew outdated --cask --json=v2 "$gated_cask"); then
+    echo "Couldn't ask Homebrew whether $gated_cask has a new version." >&2
+    return 1
+  fi
+  # set -e is off in a function called from `if !`, so every failure blocks explicitly.
+  if ! new=$(jq -er '.casks[0].current_version // ""' <<<"$outdated"); then
+    echo "Couldn't read Homebrew's answer about $gated_cask." >&2
+    return 1
+  fi
+  [[ -n $new ]] || return 0
+  if ! command -v claude-quota >/dev/null; then
+    echo "Claude Code $new is out, but claude-quota isn't installed to check it." >&2
+    return 1
+  fi
+  echo "Checking Claude Code $new before upgrading it..." >&2
+  claude-quota check-version "$new" >&2
+}
+
+# Upgrades every Homebrew formula and cask in the config except the gated
+# cask, which `brew bundle` can't leave out.
+upgrade_all_but_claude_code() {
+  local kind flag listed name
+  for kind in brews casks; do
+    listed=$(nix eval --raw "$repo_dir#darwinConfigurations.$host.config.homebrew.$kind" \
+      --apply 'xs: builtins.concatStringsSep " " (map (x: x.name) xs)')
+    local names=()
+    for name in $listed; do
+      [[ $name == "$gated_cask" ]] || names+=("$name")
+    done
+    [[ ${#names[@]} -gt 0 ]] || continue
+    flag=--formula
+    [[ $kind == casks ]] && flag=--cask
+    "${brew_env[@]}" brew upgrade "$flag" "${names[@]}"
+  done
+}
+
+if [[ -n $config_suffix ]] && ! claude_code_upgrade_allowed; then
+  echo "Claude Code stays at its current version; everything else upgrades." >&2
+  sudo darwin-rebuild ${args[@]+"${args[@]}"} --flake "$repo_dir#$host"
+  for arg in ${args[@]+"${args[@]}"}; do
+    if [[ $arg == switch || $arg == activate ]]; then
+      upgrade_all_but_claude_code
+      break
+    fi
+  done
+  exit 0
+fi
 
 exec sudo darwin-rebuild ${args[@]+"${args[@]}"} --flake "$repo_dir#$host$config_suffix"
