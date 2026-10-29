@@ -1,0 +1,35 @@
+{
+  "fire": [
+    {
+      "name": "brainstorm-solution",
+      "prompt": "we need to brainstorm a solution for keeping the dev servers alive after the laptop sleeps"
+    },
+    {
+      "name": "crash-traceback",
+      "prompt": "The workflow run crashes with MissingStatePathError: state path 'env.API_URL' not found. Why?"
+    },
+    {
+      "name": "root-cause",
+      "context": "The nightly import job has failed three nights in a row with a ConflictError on the accounts table.",
+      "prompt": "find the root cause before we touch any code"
+    },
+    {
+      "name": "five-whys",
+      "prompt": "Apply 5 whys to why our deploys keep getting rolled back."
+    }
+  ],
+  "no_fire": [
+    {
+      "name": "arithmetic",
+      "prompt": "what's 17 * 23? just the number"
+    },
+    {
+      "name": "haiku",
+      "prompt": "Write a haiku about git rebase."
+    },
+    {
+      "name": "port-question",
+      "prompt": "Is port 5432 the Postgres default? yes or no"
+    }
+  ]
+}

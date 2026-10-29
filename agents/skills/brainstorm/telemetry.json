@@ -1,0 +1,9 @@
+{
+  "phrases": [
+    "\\bbrainstorm",
+    "\\broot cause\\b",
+    "\\b(5|five) whys\\b",
+    "\\bfirst[- ]principles?\\b",
+    "\\b(crash(es|ed)?|traceback|[A-Z]?\\w*Error\\b)"
+  ]
+}

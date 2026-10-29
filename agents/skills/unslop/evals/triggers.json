@@ -1,0 +1,36 @@
+{
+  "fire": [
+    {
+      "name": "commit-message",
+      "context": "The staged diff adds a retry with backoff to the HTTP client in src/http.ts.",
+      "prompt": "write the commit message for this"
+    },
+    {
+      "name": "pr-description",
+      "context": "The branch moves the settings page to the new form library and deletes the old one.",
+      "prompt": "Draft the PR title and description."
+    },
+    {
+      "name": "sounds-like-ai",
+      "prompt": "This paragraph sounds like AI wrote it, fix it: \"In today's fast-paced landscape, our tool serves as a pivotal solution, seamlessly fostering collaboration and empowering teams to unlock their full potential.\""
+    },
+    {
+      "name": "unslop-readme",
+      "prompt": "unslop this README intro: \"Welcome! This project is a testament to the power of open source, delving into the intricate interplay of modern tooling.\""
+    }
+  ],
+  "no_fire": [
+    {
+      "name": "arithmetic",
+      "prompt": "what's 17 * 23? just the number"
+    },
+    {
+      "name": "regex-question",
+      "prompt": "Which regex flag makes . match newlines in JavaScript? Answer with the flag only."
+    },
+    {
+      "name": "yes-no",
+      "prompt": "Is port 5432 the Postgres default? yes or no"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "fire": [
+    {
+      "name": "bare-grill-me",
+      "context": "I want to add a goals page to the wealth-management app.",
+      "prompt": "grill me"
+    },
+    {
+      "name": "grill-this-plan",
+      "prompt": "I'm thinking of moving health-watcher from SQLite to Postgres. grill me on this plan before we start"
+    },
+    {
+      "name": "stress-test-idea",
+      "prompt": "Stress-test my idea: a weekly email digest of spending by category. Ask me questions until it's solid."
+    },
+    {
+      "name": "poke-holes",
+      "prompt": "poke holes in this design: market-data-server caches quotes for 15 minutes and falls back to the last value"
+    }
+  ],
+  "no_fire": [
+    { "name": "review-diff", "prompt": "Review the diff on this branch for bugs." },
+    {
+      "name": "write-plan",
+      "prompt": "Write an implementation plan for the goals page in wealth-management."
+    },
+    { "name": "grilled-chicken", "prompt": "Add a grilled chicken recipe card to the portfolio landpage demo data." },
+    { "name": "explain-skill", "prompt": "tell me about the grill me skill of matt pocock" }
+  ]
+}

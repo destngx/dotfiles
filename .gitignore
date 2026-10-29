@@ -26,3 +26,6 @@ zsh/**
 **/zsh-zimfw
 
 **/.env
+
+# skill eval stages and tool test fixtures
+tmp/

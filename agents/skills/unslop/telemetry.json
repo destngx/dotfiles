@@ -1,0 +1,9 @@
+{
+  "phrases": [
+    "\\bcommit message\\b",
+    "\\bPR (title|description)\\b",
+    "\\bsounds? like (an )?AI\\b",
+    "\\bAI tells?\\b",
+    "\\bun-?slop\\b"
+  ]
+}

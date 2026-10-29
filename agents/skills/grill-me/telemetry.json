@@ -1,0 +1,9 @@
+{
+  "phrases": [
+    "\\bgrill (me|this|it|my)\\b(?! skill)",
+    "stress[- ]test (my|this|the)\\b",
+    "poke holes in",
+    "interview me about",
+    "ask me questions until"
+  ]
+}
