@@ -2,5 +2,5 @@
 - NEVER modify auto-generated files.
 - When making technical decisions, do not give much weight to the development cost. Instead, prefer quality, simplicity, robustness, scalability, and long-term maintainability.
 - Always follow the existing pattern used elsewhere in the codebase (same modules, options, and structure). Do not replace it with your own approach; only suggest an improvement or warn about an issue, and let the user decide.
-- Never self-install anything without confirmation
+- Never self-install anything. Every tool is declared in the dotfiles repo (`~/projects/dotfiles`): Nix packages and Homebrew brews and casks (through nix-homebrew) under `nix/`, and runtimes in `mise/config.toml`. Propose the change in those files and wait for the user to approve it and run the switch (`bin/nix-rebuild <host-dir> switch`) by hand. Never run `brew install`, `pip install`, `npm install -g`, `curl | sh` or any other direct install. Project dependencies in a repo's own lockfile (pnpm, uv) are not tools and follow that repo's rules.
 - Call the unslop skill before writing any of these: the final reply of a turn, commit messages, PR titles and descriptions, docs, code comments, and issue or review comments. Skip it for intermediate messages and other text.
