@@ -1,0 +1,9 @@
+{
+  "phrases": [
+    "\\bnew (freelance )?job\\b",
+    "\\bhandover\\b(?! doc)",
+    "catch me up on .*(project|job|client)",
+    "new (materials?|files|recordings?|docs) for\\b",
+    "\\bstart (working|work) with (the )?company\\b"
+  ]
+}

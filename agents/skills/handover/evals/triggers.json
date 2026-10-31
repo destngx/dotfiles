@@ -1,0 +1,32 @@
+{
+  "fire": [
+    {
+      "name": "start-with-company",
+      "prompt": "let start work with the company acme, project not know yet, from those 2 file 46a63fa8.JPG and 52921dad.MP4 in download folder."
+    },
+    {
+      "name": "new-job-downloads",
+      "prompt": "new job from acme, the guide sent docs, a recording and some screenshots, they're in ~/Downloads/acme"
+    },
+    {
+      "name": "handover-folder",
+      "prompt": "I got a handover for a new project, everything is in ~/Downloads/handover-billing. organise it and tell me where the project stands"
+    },
+    {
+      "name": "catch-me-up",
+      "context": "The job folder ~/projects/acme/billing already exists with a briefing.",
+      "prompt": "catch me up on the billing project again, I forgot where we were"
+    },
+    {
+      "name": "new-materials",
+      "context": "The job folder ~/projects/acme/billing already exists with a briefing.",
+      "prompt": "new materials for billing: the guide sent another meeting recording, it's in Downloads"
+    }
+  ],
+  "no_fire": [
+    { "name": "outgoing-handover-doc", "prompt": "write a handover doc for my replacement on wealth-management" },
+    { "name": "hand-over-merge", "prompt": "hand over the merge to the other session when you're done" },
+    { "name": "ocr-receipt", "prompt": "OCR this receipt image and add it to my expenses" },
+    { "name": "catch-up-main", "prompt": "catch me up on what changed in main today" }
+  ]
+}
