@@ -24,7 +24,7 @@ Run `$HI ingest` in the job folder. It converts only new or changed files and pr
 
 - **Converted**: read every file it lists under `sources/`.
 - **Read these yourself**: text, code and images Claude reads well; read them in `raw/`.
-- **Frames to look at**: video frames at scene changes. Look at the ones that show slides, diagrams or consoles, use what they show in the briefing, cite the recording at the frame's time (`f_hhmmss.jpg`), then run `$HI clean`.
+- **Frames to look at**: video frames at scene changes. Look at the ones that show slides, diagrams or consoles. Copy one frame per distinct slide or screen into `out/figures/<hh-mm-ss>-<topic>.jpg`, cropped to the shared screen with `sips` when the recording films a call on a phone (see section 3). Use what they show in the briefing, cite the recording at the frame's time (`f_hhmmss.jpg`), then run `$HI clean`.
 - **Failed** or **Unsupported**: tell the user which files and why. A missing `mac-ocr` or `hi-media` binary means `pnpm exec nx build mac-ocr` or `pnpm exec nx build handover-intake` in `~/projects/monorepo`. Never install anything; tools go through the dotfiles repo with the user's approval.
 
 Transcripts are machine output. Read them whole, work out misheard names and terms from context, and list the corrections in the glossary.
@@ -54,6 +54,7 @@ Rules:
 
 - Cite every claim in backticks with the path under `raw/`: `` `kickoff.mp4 @ 00:14:32` `` for a moment in a recording, `` `spec.pdf p.3` `` for a page, `` `notes/plan.md` `` for a whole file. The web page turns these into links that open the file at that page or second.
 - Mark anything no source states as inferred. Say plainly when the material does not cover a section.
+- Show the pictures from `out/figures/` in a "Slides and screens from the call" subsection, in recording order: a bold title with the recording citation, a blank line, then `![<title>](figures/<file>.jpg)`. Keep them out of nested lists, where they break the layout. Not in confidential jobs.
 - Add Mermaid diagrams where they explain the business: a flowchart of the system or process, a state chart of the main entity's lifecycle, a sequence diagram of the key interaction, a mind map of the project. Draw what the material shows, not a generic picture.
 - When new material arrives, update the briefing in place: keep what still holds, change what moved, and add the new facts with their citations.
 
