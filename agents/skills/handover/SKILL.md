@@ -54,7 +54,7 @@ Rules:
 
 - Cite every claim in backticks with the path under `raw/`: `` `kickoff.mp4 @ 00:14:32` `` for a moment in a recording, `` `spec.pdf p.3` `` for a page, `` `notes/plan.md` `` for a whole file. The web page turns these into links that open the file at that page or second.
 - Mark anything no source states as inferred. Say plainly when the material does not cover a section.
-- Show the pictures from `out/figures/` in a "Slides and screens from the call" subsection, in recording order: a bold title with the recording citation, a blank line, then `![<title>](figures/<file>.jpg)`. Keep them out of nested lists, where they break the layout. Not in confidential jobs.
+- Show the pictures from `out/figures/` in a "Slides and screens from the call" subsection, in recording order: a bold title with the recording citation, a blank line, then `![<title>](figures/<file>.jpg "<recording> @ hh:mm:ss")`. The image title is the citation: the app shows a button that plays the recording from that moment. Keep them out of nested lists, where they break the layout. Not in confidential jobs.
 - Add Mermaid diagrams where they explain the business: a flowchart of the system or process, a state chart of the main entity's lifecycle, a sequence diagram of the key interaction, a mind map of the project. Draw what the material shows, not a generic picture.
 - The user knows AWS and little else in the cloud. When the material uses another cloud (Azure, GCP, Alibaba, ...), add a "<Cloud> for an AWS engineer" section after "Decisions already made": a table of every service the project uses with its closest AWS service and what differs, then the differences that matter for the user's tasks. At the first mention of each service elsewhere in the briefing, add the AWS name in parentheses, for example "Key Vault (≈ Secrets Manager + KMS)". Mark the mapping as general knowledge, not from the material.
 - When new material arrives, update the briefing in place: keep what still holds, change what moved, and add the new facts with their citations.
@@ -62,5 +62,5 @@ Rules:
 ## 4. Commit and show
 
 - In the job folder: `git add -A && git commit -m "<what arrived>: <what changed in the briefing>"`. The job repo has no remote; never add one.
-- Start the page if it is not running: `$HI serve` in the background, then give the user `http://127.0.0.1:8765/job/<company>/<project>/`.
+- Start the app if it is not running: `$HI serve` in the background. Give the user `http://127.0.0.1:8765/ui/job/<company>/<project>` for the Mac, and the `https://<this mac>.ts.net:8765/ui/...` address that `serve` prints for a phone on the tailnet.
 - Reply with a short summary of the project, the status, and the questions for the guide.
