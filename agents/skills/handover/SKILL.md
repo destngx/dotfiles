@@ -56,6 +56,7 @@ Rules:
 - Mark anything no source states as inferred. Say plainly when the material does not cover a section.
 - Show the pictures from `out/figures/` in a "Slides and screens from the call" subsection, in recording order: a bold title with the recording citation, a blank line, then `![<title>](figures/<file>.jpg)`. Keep them out of nested lists, where they break the layout. Not in confidential jobs.
 - Add Mermaid diagrams where they explain the business: a flowchart of the system or process, a state chart of the main entity's lifecycle, a sequence diagram of the key interaction, a mind map of the project. Draw what the material shows, not a generic picture.
+- The user knows AWS and little else in the cloud. When the material uses another cloud (Azure, GCP, Alibaba, ...), add a "<Cloud> for an AWS engineer" section after "Decisions already made": a table of every service the project uses with its closest AWS service and what differs, then the differences that matter for the user's tasks. At the first mention of each service elsewhere in the briefing, add the AWS name in parentheses, for example "Key Vault (≈ Secrets Manager + KMS)". Mark the mapping as general knowledge, not from the material.
 - When new material arrives, update the briefing in place: keep what still holds, change what moved, and add the new facts with their citations.
 
 ## 4. Commit and show
