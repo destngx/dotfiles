@@ -38,12 +38,15 @@ gated_cask=claude-code@latest
 brew_env=(env HOMEBREW_FORCE_API_AUTO_UPDATE=1)
 
 claude_code_upgrade_allowed() {
-  local outdated new
-  if ! outdated=$("${brew_env[@]}" brew outdated --cask --json=v2 "$gated_cask"); then
+  local outdated new status=0
+  # `brew outdated` exits 1 when the cask is outdated, so only exit codes above 1 are errors.
+  outdated=$("${brew_env[@]}" brew outdated --cask --json=v2 "$gated_cask") || status=$?
+  if (( status > 1 )); then
     echo "Couldn't ask Homebrew whether $gated_cask has a new version." >&2
     return 1
   fi
   # set -e is off in a function called from `if !`, so every failure blocks explicitly.
+  # An exit 1 that is a real error leaves no JSON, and jq -e fails on it.
   if ! new=$(jq -er '.casks[0].current_version // ""' <<<"$outdated"); then
     echo "Couldn't read Homebrew's answer about $gated_cask." >&2
     return 1
