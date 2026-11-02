@@ -29,7 +29,11 @@ in
     (lib.mkIf (config.networking.applicationFirewall.enable == true) ''
       ${socketfilterfw} --listapps | awk '/-tailscale-.*\/bin\/\.tailscaled-wrapped/ {print $3}' \
         | while read -r app; do
-            [ "$app" != "${tailscaled}" ] && ${socketfilterfw} --remove "$app" >/dev/null
+            # An `if`, not `&&`: a false test would end the loop with status 1, and the
+            # activation script's `set -e` would abort on it.
+            if [ "$app" != "${tailscaled}" ]; then
+              ${socketfilterfw} --remove "$app" >/dev/null
+            fi
           done
       ${socketfilterfw} --add ${tailscaled} >/dev/null
       ${socketfilterfw} --unblockapp ${tailscaled} >/dev/null
