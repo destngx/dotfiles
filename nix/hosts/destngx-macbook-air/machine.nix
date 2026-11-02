@@ -13,6 +13,7 @@
   ];
   packages = [
     "awscli2"
+    "azure-cli"
     "aerospace"
     "bat"
     "chafa"
@@ -38,6 +39,7 @@
     taps = [ ];
     brews = [
       "gh"
+      "glab"
       "terminal-notifier"
     ];
     casks = [
