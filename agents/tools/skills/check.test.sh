@@ -197,6 +197,15 @@ test_stage_in_dotfiles_layout() {
   assert_eq "$(find "$stage/evals/trigger" -name prompt.md | wc -l | tr -d ' ')" 6 "trigger cases"
 }
 
+test_repo_without_skills_passes() {
+  T="$ROOT/no-skills"
+  mkdir -p "$T"
+  git init -q "$T"
+  check
+  assert_eq "$code" 0 "exit code: $out" || return
+  assert_contains "$out" "0 skill(s) OK" "summary"
+}
+
 test_real_repo_passes() {
   out="$(bash "$HERE/check.sh" --root "$REPO" 2>&1)"
   assert_eq "$?" 0 "check on the real repo: $out"

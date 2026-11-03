@@ -108,6 +108,7 @@ check_behavior() {
 }
 
 for dir in "$root/$SKILLS_DIR"/*/; do
+  [[ -d "$dir" ]] || continue # a repo with no skills leaves the glob unexpanded
   dir="${dir%/}"
   name="$(basename "$dir")"
   skills=$((skills + 1))
