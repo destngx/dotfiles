@@ -72,7 +72,7 @@ bash ~/.agents/tools/skills/eval.sh rebase-merge --case behavior-conflict -- --k
 bash ~/.agents/tools/skills/eval.sh rebase-merge --stage-only   # build the suite, print its path, run nothing
 ```
 
-In the monorepo, `pnpm exec nx run skills:eval -- rebase-merge` does the same, as do the `skills:check`, `skills:report` and `skills:test` targets.
+In the monorepo, `pnpm exec nx run skills:eval -- <skill>` does the same, as do the `skills:check`, `skills:report` and `skills:test` targets.
 
 Each run starts from an empty Claude config, so your user skills (the dotfiles ones included) are not loaded. The without arm of a global skill is a real baseline.
 
@@ -98,6 +98,8 @@ sandbox_repo                                     # origin.git, primary/ on main 
 sandbox_advance_main feature.txt "v2 from main"  # optional: move main so the branch is behind
 ```
 
+`sandbox_repo` also copies the skill to `~/.agents/skills/<skill>` in the run's temp home, so a global skill that runs its script from there works in the sandbox.
+
 The rebase-merge cases (happy path, rebase conflict, dirty worktree) are working examples. When a real session goes wrong, add its prompt as a case first and keep the case once the skill is fixed.
 
 The eval sandbox on macOS has two quirks:
@@ -116,7 +118,7 @@ A project's `.claude/settings.json` (the monorepo's does) runs `~/.agents/tools/
 | PostToolUse, PostToolUseFailure, Bash | a run of a skill's script, with the subcommand, exit code and `key=value` output                |
 | PreToolUse on Bash                    | a command that matches a skill's `manual` patterns, run within 3 hours of the model invoking it |
 
-The hook logs only the skills of the project it runs in, so the dotfiles skills have no live telemetry. Their `telemetry.json` keeps `check.sh` and the evals in agreement. The hook writes nothing for other prompts or commands. The log is `<git common dir>/skill-telemetry/events.jsonl` (in this checkout, `.git/skill-telemetry/`). Every worktree writes to the same file, and git never tracks it. Hook errors go to `hook-errors.log` in the same directory, and the hook always exits 0.
+The hook reads the skills of the project it runs in and the global skills in `~/.agents/skills` (set `SKILL_GLOBAL_DIR` to read another directory). It logs a global skill's events into the current project's log with `"scope": "global"`. When a project skill and a global skill share a name, the project skill wins. A global skill's script steps match by the path in the command, so `bash ~/.agents/skills/rebase-merge/scripts/rebase-merge.sh prepare` counts as a step. The hook writes nothing for other prompts or commands. The log is `<git common dir>/skill-telemetry/events.jsonl` (in this checkout, `.git/skill-telemetry/`). Every worktree writes to the same file, and git never tracks it. Hook errors go to `hook-errors.log` in the same directory, and the hook always exits 0.
 
 ```sh
 bash ~/.agents/tools/skills/report.sh                    # every skill, all time
@@ -132,6 +134,8 @@ For each skill, the report shows:
 - for a skill with a script, each session's step sequence with exit codes (`prepare:0 land:0 cleanup:0`), how many sessions reached the last step with exit 0, and the commands run by hand that the script owns
 - the last 5 eval runs
 - a note when the skill has no `telemetry.json` or no `evals/triggers.json`
+
+The report lists every project skill. It lists a global skill, marked `(global)`, only when the project's log has events or eval runs for it, or when `--skill` names it. `eval.sh` writes eval history to the log of the repo it runs in, so a global skill's eval runs show in the dotfiles report.
 
 ### Act on the report
 
@@ -150,5 +154,6 @@ Then run `check.sh` and the evals again.
 
 ```sh
 for t in ~/.agents/tools/skills/*.test.sh; do bash "$t"; done   # this tooling
+for t in ~/.agents/skills/*/scripts/*.test.sh; do bash "$t"; done # the global skills' scripts
 pnpm exec nx run skills:test                                    # the monorepo's .agents/skills/*/scripts/*.test.sh
 ```

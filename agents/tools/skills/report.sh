@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Summarises the skill telemetry that hook.sh writes and the eval history that eval.sh writes, per skill of the git
-# repo of the current directory (or --root):
+# repo of the current directory (or --root), plus each global skill (~/.agents/skills) that has events or evals in
+# this repo's log:
 # how often the model invoked it, prompts that matched a trigger phrase but were not followed by a call or a script
 # step (possible misses), model calls with no trigger phrase (possible over-triggering), its script steps with exit codes, how many
 # sessions reached the last step, commands run by hand that the script owns, and the latest eval scores.
 #
 # Usage: bash ~/.agents/tools/skills/report.sh [--root <repo root>] [--skill <name>] [--since <YYYY-MM-DD>] [--json]
-# Env: SKILL_TELEMETRY_DIR overrides the log directory (default: <git common dir>/skill-telemetry).
+# Env: SKILL_TELEMETRY_DIR overrides the log directory (default: <git common dir>/skill-telemetry), SKILL_GLOBAL_DIR
+# the global skills directory.
 set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -21,7 +23,7 @@ while [[ $# -gt 0 ]]; do
     --skill) skill="$2"; shift 2 ;;
     --since) since="$2"; shift 2 ;;
     --json) json=yes; shift ;;
-    -h | --help) sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h | --help) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "report: unknown argument $1" >&2; exit 1 ;;
   esac
 done
@@ -31,14 +33,13 @@ repo="$(skills_root "$root")"
 skills_layout "$repo"
 dir="${SKILL_TELEMETRY_DIR:-$(git -C "$repo" rev-parse --path-format=absolute --git-common-dir)/skill-telemetry}"
 
-catalog="$(for d in "$repo/$SKILLS_DIR"/*/; do
-  [[ -f "$d/SKILL.md" ]] || continue
+catalog="$(skills_dirs "$repo" | while read -r scope d; do
   telemetry='{}'
   [[ -f "$d/telemetry.json" ]] && telemetry="$(cat "$d/telemetry.json")"
-  jq -nc --arg name "$(basename "$d")" --argjson t "$telemetry" \
+  jq -nc --arg name "$(basename "$d")" --arg scope "$scope" --argjson t "$telemetry" \
     --argjson has_telemetry "$([[ -f "$d/telemetry.json" ]] && echo true || echo false)" \
     --argjson has_evals "$([[ -f "$d/evals/triggers.json" ]] && echo true || echo false)" \
-    '{name: $name, has_telemetry: $has_telemetry, has_evals: $has_evals} + $t'
+    '{name: $name, scope: $scope, has_telemetry: $has_telemetry, has_evals: $has_evals} + $t'
 done | jq -sc .)"
 
 read_jsonl() { if [[ -f "$1" ]]; then jq -c . "$1"; fi; }
@@ -58,12 +59,15 @@ summary="$(jq -n --argjson catalog "$catalog" --argjson events "$events" --argjs
       skills: [
         $catalog[] | select($skill == "" or .name == $skill) | . as $s
         | ($ev | map(select(.skill == $s.name))) as $mine
+        # A global skill shows only when this repo has used it or --skill names it.
+        | select($s.scope == "repo" or $skill != "" or ($mine | length) > 0 or any($evals[]; .skill == $s.name))
         | ($mine | map(select(.event == "skill"))) as $calls
         | ($mine | map(select(.event == "prompt"))) as $phrases
         | ($mine | map(select(.event == "step"))) as $steps
         | ($steps | group_by(.session)) as $runs
         | {
             name: $s.name,
+            scope: $s.scope,
             has_telemetry: $s.has_telemetry,
             has_evals: $s.has_evals,
             has_script: ($s.script != null),
@@ -99,7 +103,7 @@ fi
 jq -r --arg since "$since" '
   def list(f): if length == 0 then "    none" else map("    " + f) | join("\n") end;
   (.skills[] |
-    "== \(.name)  (since \($since))",
+    "== \(.name)\(if .scope == "global" then " (global)" else "" end)  (since \($since))",
     (if .has_telemetry then empty else "  no telemetry.json: trigger phrases and script steps are not tracked" end),
     (if .has_evals then empty else "  no evals/triggers.json: run bash ~/.agents/tools/skills/new.sh \(.name) to add one" end),
     "  fired: \(.fired) times",

@@ -21,10 +21,10 @@ fail() {
 
 assert_eq() { [[ "$1" == "$2" ]] || fail "$3: expected '$2', got '$1'"; }
 
-# Fixture repo with one skill "land-it" whose script is scripts/land.sh.
+# Fixture repo with one skill "land-it" whose script is scripts/land.sh, and an empty global skills dir $T/global.
 setup() {
   T="$ROOT/$1"
-  mkdir -p "$T/repo/.agents/skills/land-it" "$T/log"
+  mkdir -p "$T/repo/.agents/skills/land-it" "$T/log" "$T/global"
   git init -q "$T/repo"
   printf -- '---\nname: land-it\ndescription: Land a branch.\n---\n' >"$T/repo/.agents/skills/land-it/SKILL.md"
   cat >"$T/repo/.agents/skills/land-it/telemetry.json" <<'EOF'
@@ -41,13 +41,26 @@ EOF
 hook() {
   local payload
   payload="$(jq -c --arg cwd "$T/repo" '{session_id: "s1", cwd: $cwd} + .' <<<"$1")"
-  CLAUDE_PROJECT_DIR="$T/repo" SKILL_TELEMETRY_DIR="$T/log" bash "$HOOK" <<<"$payload" >"$T/out" 2>&1
+  CLAUDE_PROJECT_DIR="$T/repo" SKILL_TELEMETRY_DIR="$T/log" SKILL_GLOBAL_DIR="$T/global" bash "$HOOK" <<<"$payload" \
+    >"$T/out" 2>&1
   code=$?
 }
 
 events() { [[ -f "$T/log/events.jsonl" ]] && jq -r "$1" "$T/log/events.jsonl"; }
 
-
+# Adds a global skill "ship-it" to $T/global, whose script is scripts/ship.sh.
+add_global_skill() {
+  mkdir -p "$T/global/ship-it"
+  printf -- '---\nname: ship-it\ndescription: Ship a branch.\n---\n' >"$T/global/ship-it/SKILL.md"
+  cat >"$T/global/ship-it/telemetry.json" <<'EOF'
+{
+  "phrases": ["ship it"],
+  "script": "scripts/ship.sh",
+  "steps": ["prepare", "ship"],
+  "manual": ["\\bgh\\s+pr\\s+merge\\b"]
+}
+EOF
+}
 
 test_trigger_phrase_records_a_snippet() {
   setup phrase
@@ -163,9 +176,66 @@ test_the_skill_script_itself_is_not_a_deviation() {
   assert_eq "$(events 'select(.event == "manual") | .skill')" "" "deviation"
 }
 
+test_global_skill_prompt_is_marked_global() {
+  setup global-phrase
+  add_global_skill
+  hook '{"hook_event_name": "UserPromptSubmit", "prompt": "ok, ship it"}'
+  assert_eq "$(events '[.event, .skill, .phrase, .scope] | join(" ")')" "prompt ship-it ship it global" "event"
+}
+
+test_global_skill_call_is_marked_global() {
+  setup global-call
+  add_global_skill
+  hook '{"hook_event_name": "PreToolUse", "tool_name": "Skill", "tool_input": {"skill": "ship-it"}}'
+  assert_eq "$(events '[.event, .skill, .repo, .scope] | map(tostring) | join(" ")')" "skill ship-it false global" "event"
+}
+
+test_global_skill_script_step_matches_the_global_path() {
+  setup global-step
+  add_global_skill
+  hook '{"hook_event_name": "PostToolUse", "tool_name": "Bash",
+    "tool_input": {"command": "bash ~/.agents/skills/ship-it/scripts/ship.sh prepare --base release"},
+    "tool_response": {"stdout": "base=release\nbranch=feat/x"}}'
+  assert_eq "$(events '[.event, .skill, .step, .exit, .scope] | map(tostring) | join(" ")')" \
+    "step ship-it prepare 0 global" "event" || return
+  assert_eq "$(events '.out | tostring')" '{"base":"release","branch":"feat/x"}' "keys"
+}
+
+test_global_skill_manual_command_is_a_deviation() {
+  setup global-manual
+  add_global_skill
+  hook '{"hook_event_name": "PreToolUse", "tool_name": "Skill", "tool_input": {"skill": "ship-it"}}'
+  hook '{"hook_event_name": "PreToolUse", "tool_name": "Bash", "tool_input": {"command": "gh pr merge 12"}}'
+  hook '{"hook_event_name": "PreToolUse", "tool_name": "Bash",
+    "tool_input": {"command": "bash ~/.agents/skills/ship-it/scripts/ship.sh ship # runs gh pr merge"}}'
+  assert_eq "$(events 'select(.event == "manual") | [.skill, .command, .scope] | join(" ")')" \
+    "ship-it gh pr merge 12 global" "deviation"
+}
+
+test_repo_skill_hides_the_global_skill_with_the_same_name() {
+  setup global-shadowed
+  mkdir -p "$T/global/land-it"
+  printf -- '---\nname: land-it\ndescription: x\n---\n' >"$T/global/land-it/SKILL.md"
+  printf '{"phrases": ["land it"]}\n' >"$T/global/land-it/telemetry.json"
+  hook '{"hook_event_name": "PreToolUse", "tool_name": "Skill", "tool_input": {"skill": "land-it"}}'
+  hook '{"hook_event_name": "UserPromptSubmit", "prompt": "land it"}'
+  hook '{"hook_event_name": "UserPromptSubmit", "prompt": "merge rebase"}'
+  assert_eq "$(events '[.event, .skill, .repo, .scope] | map(tostring) | join(" ")')" \
+    "skill land-it true null"$'\n'"prompt land-it null null" "events"
+}
+
+test_global_skills_alone_are_logged() {
+  setup global-only
+  rm -r "$T/repo/.agents"
+  add_global_skill
+  hook '{"hook_event_name": "UserPromptSubmit", "prompt": "ship it"}'
+  assert_eq "$(events '[.skill, .scope] | join(" ")')" "ship-it global" "event"
+}
+
 test_bad_input_never_fails_the_session() {
   setup bad-input
-  CLAUDE_PROJECT_DIR="$T/repo" SKILL_TELEMETRY_DIR="$T/log" bash "$HOOK" <<<"not json" >"$T/out" 2>&1
+  CLAUDE_PROJECT_DIR="$T/repo" SKILL_TELEMETRY_DIR="$T/log" SKILL_GLOBAL_DIR="$T/global" bash "$HOOK" <<<"not json" \
+    >"$T/out" 2>&1
   assert_eq "$?" 0 "exit code" || return
   [[ -s "$T/log/hook-errors.log" ]] || fail "error was not written to hook-errors.log"
 }
@@ -176,7 +246,7 @@ test_default_log_dir_is_shared_by_worktrees() {
   git -C "$T/repo" worktree add -q -b feat/y "$T/wt" 2>/dev/null
   mkdir -p "$T/wt/.agents/skills" && cp -r "$T/repo/.agents/skills/land-it" "$T/wt/.agents/skills/"
   jq -nc --arg cwd "$T/wt" '{session_id: "s1", cwd: $cwd, hook_event_name: "UserPromptSubmit", prompt: "merge rebase"}' |
-    CLAUDE_PROJECT_DIR="$T/wt" bash "$HOOK"
+    CLAUDE_PROJECT_DIR="$T/wt" SKILL_GLOBAL_DIR="$T/global" bash "$HOOK"
   [[ -s "$T/repo/.git/skill-telemetry/events.jsonl" ]] || fail "log not in the common git dir"
 }
 

@@ -23,3 +23,26 @@ skills_root() {
     git rev-parse --show-toplevel
   fi
 }
+
+# Prints the global skills directory: SKILL_GLOBAL_DIR when set, else ~/.agents/skills, which home-manager links to
+# the dotfiles repo's agents/skills.
+skills_global_dir() {
+  echo "${SKILL_GLOBAL_DIR:-$HOME/.agents/skills}"
+}
+
+# Prints "<scope> <dir>" for every skill (a directory with a SKILL.md) the repo at $1 sees: its own skills with scope
+# repo, then the global skills with scope global. A repo skill hides a global skill with the same name. Calls
+# skills_layout, so SKILLS_DIR and SKILL_LINKS_DIR are set afterwards.
+skills_dirs() {
+  local d names=" "
+  skills_layout "$1"
+  for d in "$1/$SKILLS_DIR"/*/; do
+    [[ -f "$d/SKILL.md" ]] || continue
+    names+="$(basename "$d") "
+    echo "repo ${d%/}"
+  done
+  for d in "$(skills_global_dir)"/*/; do
+    [[ -f "$d/SKILL.md" && "$names" != *" $(basename "$d") "* ]] || continue
+    echo "global ${d%/}"
+  done
+}

@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Claude Code hook that records how the project's skills (.agents/skills/<name>, see lib.sh) are used, one JSON line
-# per event in <git common dir>/skill-telemetry/events.jsonl, so every worktree writes to the same log. Read it with
-# report.sh.
+# Claude Code hook that records how the project's skills (.agents/skills/<name>, see lib.sh) and the global skills
+# (~/.agents/skills/<name>) are used, one JSON line per event in <git common dir>/skill-telemetry/events.jsonl, so
+# every worktree writes to the same log. Events of a global skill carry "scope": "global". A project skill hides a
+# global skill with the same name. Read the log with report.sh.
 #
 #   prompt   UserPromptSubmit: a prompt matching one of the skill's trigger phrases, with a 160-character snippet.
 #            Other prompts are not logged.
-#   skill    PreToolUse on Skill: the model invoked a skill (repo=false for skills from outside this repo).
+#   skill    PreToolUse on Skill: the model invoked a skill (repo=false for skills from outside this repo, including
+#            the global ones).
 #   step     PostToolUse / PostToolUseFailure on Bash running a skill's script: subcommand, exit code, key=value output.
 #   manual   PreToolUse on Bash while a skill is active in the session (called in the last 3 hours): a command
 #            matching the skill's "manual" patterns, which its script is meant to run instead.
@@ -14,7 +16,7 @@
 # and manual are case-insensitive regexes (Oniguruma, as jq's test()), script is the skill script's path relative to
 # the skill, steps lists its subcommands. See README.md next to this script.
 #
-# Env: SKILL_TELEMETRY_DIR overrides the log directory. The hook never blocks or fails the session: errors go to
+# Env: SKILL_TELEMETRY_DIR overrides the log directory, SKILL_GLOBAL_DIR the global skills directory. The hook never blocks or fails the session: errors go to
 # hook-errors.log in the log directory and the hook still exits 0.
 set -uo pipefail
 
@@ -34,20 +36,21 @@ log_dir() {
   echo "$common/skill-telemetry"
 }
 
-# Prints the skills catalog: one JSON object per skill (a directory with a SKILL.md), {name} plus its telemetry.json.
+# Prints the skills catalog: one JSON object per skill from skills_dirs, {name, scope} plus its telemetry.json.
 catalog() {
-  local d name
-  skills_layout "$1"
-  for d in "$1/$SKILLS_DIR"/*/; do
-    [[ -f "$d/SKILL.md" ]] || continue
+  local scope d name
+  while read -r scope d; do
     name="$(basename "$d")"
     if [[ -f "$d/telemetry.json" ]]; then
-      jq -c --arg name "$name" '{name: $name} + .' "$d/telemetry.json" || return 1
+      jq -c --arg name "$name" --arg scope "$scope" '{name: $name, scope: $scope} + .' "$d/telemetry.json" || return 1
     else
-      jq -nc --arg name "$name" '{name: $name}'
+      jq -nc --arg name "$name" --arg scope "$scope" '{name: $name, scope: $scope}'
     fi
-  done
+  done < <(skills_dirs "$1")
 }
+
+# The jq definition that marks an event of a global skill. Its input is the skill's catalog entry.
+SCOPE='def scope: if .scope == "global" then {scope: "global"} else {} end;'
 
 emit() {
   jq -c --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg session "$session" '{ts: $ts, session: $session} + .' \
@@ -59,23 +62,25 @@ on_prompt() {
   prompt="$(jq -r '.prompt // ""' <<<"$input")"
   # Background-task notifications arrive as prompts. They are not the user's words.
   [[ "$prompt" != "<task-notification>"* ]] || return 0
-  jq -c --arg p "$prompt" '
+  jq -c --arg p "$prompt" "$SCOPE"'
     first(.phrases[]? as $re | select($p | test($re; "i")) | $re) as $phrase
-    | {event: "prompt", skill: .name, phrase: $phrase, text: ($p | .[:160])}' <<<"$skills"
+    | {event: "prompt", skill: .name, phrase: $phrase, text: ($p | .[:160])} + scope' <<<"$skills"
 }
 
 on_skill() {
-  jq -c --argjson names "$(jq -s 'map(.name)' <<<"$skills")" '
+  jq -c --argjson catalog "$(jq -s . <<<"$skills")" "$SCOPE"'
     (.tool_input.skill // "" | sub("^[\\w-]+:"; "")) as $name
     | select($name != "")
-    | {event: "skill", skill: $name, repo: ($names | index($name) != null)}
-      + (if .tool_input.args then {args: (.tool_input.args | tostring | .[:160])} else {} end)' <<<"$input"
+    | (first($catalog[] | select(.name == $name)) // {}) as $entry
+    | {event: "skill", skill: $name, repo: ($entry.scope == "repo")}
+      + (if .tool_input.args then {args: (.tool_input.args | tostring | .[:160])} else {} end)
+      + ($entry | scope)' <<<"$input"
 }
 
 on_step() {
   local command
   command="$(jq -r '.tool_input.command // ""' <<<"$input")"
-  jq -c --arg cmd "$command" --argjson in "$input" '
+  jq -c --arg cmd "$command" --argjson in "$input" "$SCOPE"'
     select(.script) | .name as $name | (.script | sub("^scripts/"; "")) as $file
     | ([$cmd | capture("skills/" + $name + "/scripts/" + $file + "(?:\\s+(?<step>[\\w-]+))?")] | first) as $m
     | select($m)
@@ -88,6 +93,7 @@ on_step() {
        end) as $r
     | {event: "step", skill: .name, step: ($m.step // ""), exit: $r.exit,
        out: ([$r.text | splits("\n") | capture("^(?<k>[a-z_][\\w.]*)=(?<v>.*)$")? | {(.k): (.v | .[:200])}] | add // {})}
+      + scope
     ' <<<"$skills"
 }
 
@@ -104,11 +110,11 @@ on_bash_pre() {
   command="$(jq -r '.tool_input.command // ""' <<<"$input")"
   active="$(active_skills | jq -R . | jq -sc .)" || return 1
   [[ "$active" != "[]" ]] || return 0
-  jq -c --arg cmd "$command" --argjson active "$active" '
+  jq -c --arg cmd "$command" --argjson active "$active" "$SCOPE"'
     select(.name as $n | $active | index($n))
     | .name as $name | select($cmd | contains("skills/" + $name + "/scripts/") | not)
     | first(.manual[]? as $re | select($cmd | test($re; "i")) | $re) as $re
-    | {event: "manual", skill: .name, pattern: $re, command: ($cmd | .[:300])}' <<<"$skills"
+    | {event: "manual", skill: .name, pattern: $re, command: ($cmd | .[:300])} + scope' <<<"$skills"
 }
 
 main() {

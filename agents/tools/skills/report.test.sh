@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Tests for report.sh against a fixture events log and a fixture repo with one skill (rebase-merge).
+# Tests for report.sh against a fixture events log, a fixture repo with one skill (rebase-merge) and a fixture global
+# skills dir (unslop, which has events, and idle, which has none).
 # Run: bash agents/tools/skills/report.test.sh
 set -uo pipefail
 
@@ -16,6 +17,11 @@ git init -q "$FIXTURE"
 printf -- '---\nname: rebase-merge\ndescription: x\n---\n' >"$FIXTURE/.agents/skills/rebase-merge/SKILL.md"
 printf '{"phrases": ["merge"], "script": "scripts/rebase-merge.sh", "steps": ["prepare", "land", "cleanup"]}\n' \
   >"$FIXTURE/.agents/skills/rebase-merge/telemetry.json"
+export SKILL_GLOBAL_DIR="$T/global"
+for g in unslop idle rebase-merge; do
+  mkdir -p "$SKILL_GLOBAL_DIR/$g"
+  printf -- '---\nname: %s\ndescription: x\n---\n' "$g" >"$SKILL_GLOBAL_DIR/$g/SKILL.md"
+done
 
 passed=0
 failed=0
@@ -43,7 +49,7 @@ cat >"$T/events.jsonl" <<'EOF'
 {"ts":"2026-10-21T09:32:00Z","session":"b","event":"manual","skill":"rebase-merge","pattern":"x","command":"git rebase --continue"}
 {"ts":"2026-10-21T12:00:00Z","session":"d","event":"prompt","skill":"rebase-merge","phrase":"merge","text":"merge"}
 {"ts":"2026-10-21T12:00:20Z","session":"d","event":"step","skill":"rebase-merge","step":"prepare","exit":0,"out":{}}
-{"ts":"2026-10-22T08:01:00Z","session":"c","event":"skill","skill":"unslop","repo":false}
+{"ts":"2026-10-22T08:01:00Z","session":"c","event":"skill","skill":"unslop","repo":false,"scope":"global"}
 EOF
 cat >"$T/evals.jsonl" <<'EOF'
 {"ts":"2026-10-23T08:00:00Z","skill":"rebase-merge","score":0.9,"passed":9,"total":10,"runs":1,"cost_usd":1.2,"tags":""}
@@ -67,6 +73,15 @@ check "--since drops older events" "$(s '"\(.fired) \(.phrase_prompts)"')" "0 0"
 
 text="$(SKILL_TELEMETRY_DIR="$T" bash "$REPORT" --root "$FIXTURE" --skill rebase-merge)"
 check "text report names the skill" "$(head -1 <<<"$text")" "== rebase-merge  (since 1970-01-01)"
+
+r="$(SKILL_TELEMETRY_DIR="$T" bash "$REPORT" --root "$FIXTURE" --json)"
+check "a used global skill is listed after the repo skill, once per name" \
+  "$(jq -r '.skills | map("\(.name):\(.scope)") | join(" ")' <<<"$r")" "rebase-merge:repo unslop:global"
+check "a global skill counts its invocations" "$(jq -r '.skills[1].fired' <<<"$r")" "1"
+r="$(SKILL_TELEMETRY_DIR="$T" bash "$REPORT" --root "$FIXTURE" --skill idle --json)"
+check "--skill shows an unused global skill" "$(jq -r '.skills | map(.name) | join(" ")' <<<"$r")" "idle"
+text="$(SKILL_TELEMETRY_DIR="$T" bash "$REPORT" --root "$FIXTURE" --skill unslop)"
+check "text report marks a global skill" "$(head -1 <<<"$text")" "== unslop (global)  (since 1970-01-01)"
 
 SKILL_TELEMETRY_DIR="$T/empty" bash "$REPORT" --root "$FIXTURE" >/dev/null 2>&1
 check "missing log is not an error" "$?" "0"
