@@ -15,6 +15,7 @@
     ../../modules/home/apps/homebrew.nix
     ../../modules/home/apps/agents.nix
     ../../modules/home/apps/claude.nix
+    ../../modules/home/apps/sous.nix
     ../../modules/home/apps/eza.nix
     ../../modules/home/apps/bat.nix
     ../../modules/home/apps/pnpm.nix

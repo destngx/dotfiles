@@ -1,0 +1,30 @@
+# Machine config for sous (CONTRACTS.md section 7.1 in the monorepo's docs/sous). Home-manager links
+# it to ~/.config/sous/config.toml. Agents never edit it.
+
+[engine]
+port = 9494
+machine = ""          # empty means the short host name
+
+[timing]
+stale_seconds = 240
+heartbeat_seconds = 600
+relaunch_per_hour = 3
+restart_idle_wait_seconds = 300
+block_budget = 3
+
+[workers]
+per_project = 2
+permission_mode = "acceptEdits"
+
+[workers.projects]
+monorepo = 2
+
+[models]
+first_mate = "opus"
+mate = "opus"
+intake = "haiku"
+worker = "sonnet"
+reviewer = "opus"
+
+[paths]
+projects = "~/projects"
