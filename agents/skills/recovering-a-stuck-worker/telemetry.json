@@ -1,0 +1,8 @@
+{
+  "phrases": [
+    "\\b(has been|is|went|marked) stale\\b",
+    "\\bt-[0-9a-z-]+ stale\\b",
+    "\\bworker (keeps|is looping|isn't moving|is stuck|is silent)\\b",
+    "\\b(looping|stuck) on\\b"
+  ]
+}

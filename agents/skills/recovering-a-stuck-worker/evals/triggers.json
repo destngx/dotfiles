@@ -1,0 +1,49 @@
+{
+  "fire": [
+    {
+      "name": "stale-20m",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "t-20261103-4k7q2m has been stale for 20 minutes, the worker isn't moving"
+    },
+    {
+      "name": "keeps-asking",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "the herdr-glance worker keeps asking which branch to use, its brief says feat/task-list"
+    },
+    {
+      "name": "inbox-stale",
+      "context": "You are the sous machine mate on ezmacmini.",
+      "prompt": "[sous] inbox event 41: task t-20261103-9p2xq1 stale, worker idle with no report"
+    },
+    {
+      "name": "looping",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "the claude-quota worker is looping on the same failing test, sort it out"
+    }
+  ],
+  "no_fire": [
+    {
+      "name": "restarted",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "you were restarted, pick up where you left off"
+    },
+    {
+      "name": "blocked-decision",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "the photo-sift worker reported blocked, it needs your call on whether to drop HEIC support"
+    },
+    {
+      "name": "engine-restarted",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "sous inbox shows the engine restarted overnight, what is still running?"
+    },
+    {
+      "name": "stale-cache-bug",
+      "prompt": "fix the stale cache bug in market-data-server"
+    },
+    {
+      "name": "restart-dev-server",
+      "prompt": "restart the market-data-server dev server"
+    }
+  ]
+}

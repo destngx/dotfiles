@@ -1,0 +1,53 @@
+{
+  "fire": [
+    {
+      "name": "my-call",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "what needs my call?"
+    },
+    {
+      "name": "morning-digest",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "morning digest please"
+    },
+    {
+      "name": "approve-merge",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "approve the merge for t-20261103-4k7q2m"
+    },
+    {
+      "name": "pick-option",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "option 2 for the claude-quota decision"
+    },
+    {
+      "name": "inbox-decision",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "[sous] inbox event 57: task t-20261103-77aa01 waits on a decision to merge into main"
+    }
+  ],
+  "no_fire": [
+    {
+      "name": "stale-worker",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "t-20261103-4k7q2m has been stale for 20 minutes"
+    },
+    {
+      "name": "restarted",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "you were restarted, pick up where you left off"
+    },
+    {
+      "name": "decision-card",
+      "prompt": "add a decision card component to herdr-glance"
+    },
+    {
+      "name": "digest-email",
+      "prompt": "write the digest email template for wealth-management"
+    },
+    {
+      "name": "merge-branch",
+      "prompt": "merge feat/csv-export into main"
+    }
+  ]
+}

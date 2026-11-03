@@ -1,0 +1,44 @@
+{
+  "fire": [
+    {
+      "name": "were-restarted",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "you were restarted, pick up where you left off"
+    },
+    {
+      "name": "rebooted",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "the mini rebooted overnight, what is still running?"
+    },
+    {
+      "name": "new-generation",
+      "context": "You are the sous machine mate on ezmacmini.",
+      "prompt": "[sous] inbox event 12: engine generation 4 started, rebuild your picture of the fleet"
+    },
+    {
+      "name": "save-open-work",
+      "context": "You are the sous first mate on ezmacmini. A runbook update just merged.",
+      "prompt": "sous wants you to save your open work before it restarts you"
+    }
+  ],
+  "no_fire": [
+    {
+      "name": "stale-worker",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "t-20261103-4k7q2m has been stale for 20 minutes"
+    },
+    {
+      "name": "restart-dev-server",
+      "prompt": "restart the market-data-server dev server"
+    },
+    {
+      "name": "my-call",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "what needs my call this morning?"
+    },
+    {
+      "name": "restart-button",
+      "prompt": "add a restart button to the herdr-glance task list"
+    }
+  ]
+}

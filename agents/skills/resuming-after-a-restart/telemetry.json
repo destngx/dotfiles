@@ -1,0 +1,10 @@
+{
+  "phrases": [
+    "\\b(were|was|got|been) restarted\\b",
+    "\\bengine restarted\\b",
+    "\\brebooted\\b",
+    "\\bpick up where\\b",
+    "\\bsave (your )?open work\\b",
+    "engine generation [0-9]+ started"
+  ]
+}

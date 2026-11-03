@@ -1,0 +1,10 @@
+{
+  "phrases": [
+    "\\bmy call\\b",
+    "\\bmorning digest\\b",
+    "\\bapprove the merge\\b",
+    "\\bdecision (to|on|for)\\b",
+    "\\b(the|this) [a-z-]+ decision\\b",
+    "\\boption [0-9]\\b"
+  ]
+}
