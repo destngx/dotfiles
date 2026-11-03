@@ -1,0 +1,27 @@
+# Default merge rules for sous (DESIGN.md SO-RULE-4 and SO-RULE-11 in the monorepo's docs/sous).
+# Home-manager links this directory to ~/.agents, so sous reads this file as ~/.agents/fleet.toml.
+# A repo's own .agents/fleet.toml overrides these defaults key by key, and its tables merge entry by
+# entry. A repo without one uses this file as it is.
+#
+# A rule is "auto" or "wait". With "auto", sous merges once the reviewer passes the work. With "wait",
+# the merge waits for you. When several rules apply, "wait" wins. Irreversible actions always wait,
+# whatever this file says.
+#
+# Only you edit this file. The sous Claude Code plugin blocks agents from editing any fleet.toml, and
+# the engine refuses to merge a diff that touches one.
+
+# How sous lands a branch: "rebase-merge" runs the global rebase-merge skill's script, and "gh" merges
+# the pull request on GitHub.
+method = "rebase-merge"
+
+# A merge into the repo's default branch, such as main, waits for you.
+default_branch = "wait"
+
+# A merge into any other branch happens once the reviewer passes the work.
+other_branches = "auto"
+
+# Rules for named target branches. Keys are glob patterns, such as "release/*" = "wait".
+[branch]
+
+# A diff that touches a matching path follows this rule, such as "infra/**" = "wait".
+[path]
