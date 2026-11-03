@@ -1,9 +1,10 @@
 # Machine config for sous (CONTRACTS.md section 7.1 in the monorepo's docs/sous). Home-manager links
-# it to ~/.config/sous/config.toml. Agents never edit it.
+# a read-only copy to ~/.config/sous/config.toml. Agents never edit it.
 
 [engine]
 port = 9494
-machine = ""          # empty means the short host name
+machine = ""              # empty means the short host name
+first_mate = "ezmacmini"  # the always-on machine that runs the one first mate
 
 [timing]
 stale_seconds = 240
@@ -14,7 +15,7 @@ block_budget = 3
 
 [workers]
 per_project = 2
-permission_mode = "acceptEdits"
+permission_mode = "auto"  # Claude Code decides each tool call, so unattended workers never stop at a prompt
 
 [workers.projects]
 monorepo = 2
@@ -28,3 +29,9 @@ reviewer = "opus"
 
 [paths]
 projects = "~/projects"
+
+# "auto" decides on its own and writes each choice to the decision log; "wait" parks every decision
+# for you. A profile not listed here waits.
+[profiles]
+code = "auto"
+knowledge = "auto"

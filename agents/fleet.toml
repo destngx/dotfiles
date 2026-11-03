@@ -4,8 +4,9 @@
 # entry. A repo without one uses this file as it is.
 #
 # A rule is "auto" or "wait". With "auto", sous merges once the reviewer passes the work. With "wait",
-# the merge waits for you. When several rules apply, "wait" wins. Irreversible actions always wait,
-# whatever this file says.
+# the merge waits for you. A [branch] rule that matches the target replaces default_branch and
+# other_branches for it. When several rules apply, "wait" wins, and a task whose profile is "wait"
+# always waits. Irreversible actions always wait, whatever this file says.
 #
 # Only you edit this file. The sous Claude Code plugin blocks agents from editing any fleet.toml, and
 # the engine refuses to merge a diff that touches one.
@@ -20,7 +21,7 @@ default_branch = "wait"
 # A merge into any other branch happens once the reviewer passes the work.
 other_branches = "auto"
 
-# Rules for named target branches. Keys are glob patterns, such as "release/*" = "wait".
+# Rules for named target branches. Keys are glob patterns, such as "dev" = "auto" or "release/*" = "wait".
 [branch]
 
 # A diff that touches a matching path follows this rule, such as "infra/**" = "wait".
