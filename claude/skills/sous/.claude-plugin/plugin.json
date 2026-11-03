@@ -1,0 +1,5 @@
+{
+  "name": "sous",
+  "description": "Hooks that report a sous worker's state to the sous engine, guard its turn end, and block edits to fleet.toml. They do nothing outside a sous worker.",
+  "author": { "name": "destnguyxn" }
+}
