@@ -1,0 +1,87 @@
+{
+  "fire": [
+    {
+      "name": "bare-merge",
+      "context": "The feat/wm-goals work is finished and committed in its worktree, and the checks pass.",
+      "prompt": "merge"
+    },
+    {
+      "name": "commit-push-and-merge",
+      "context": "The feat/wm-goals change is done in its worktree but not committed yet.",
+      "prompt": "commit push and merge"
+    },
+    {
+      "name": "commit-push-merge-clean",
+      "context": "The feat/wm-goals change is done in its worktree but not committed yet.",
+      "prompt": "commit push merge rebase and clean up"
+    },
+    {
+      "name": "land-linear",
+      "prompt": "Land feat/market-cache on main and keep the history linear, no merge commit."
+    },
+    {
+      "name": "merge-it",
+      "context": "The feat/wm-goals work is finished and committed in its worktree, and the checks pass.",
+      "prompt": "merge it"
+    },
+    {
+      "name": "merge-no-ff",
+      "prompt": "merge no ff feat/ui-tokens into main"
+    },
+    {
+      "name": "merge-rebase",
+      "prompt": "PR for feat/wm-goals looks good. merge rebase"
+    },
+    {
+      "name": "merge-rebase-all",
+      "context": "feat/wm-goals and feat/hw-import are both finished and committed in their worktrees, and the checks pass.",
+      "prompt": "merge rebase all"
+    },
+    {
+      "name": "proceed-merge",
+      "prompt": "All checks are green on feat/hw-import. proceed merge"
+    },
+    {
+      "name": "rebase-merge-words",
+      "prompt": "rebase-merge this branch please"
+    },
+    {
+      "name": "ship-without-button",
+      "prompt": "PR #212 is approved. Get it onto main without using the GitHub merge button, then clean up the worktree."
+    }
+  ],
+  "no_fire": [
+    {
+      "name": "auto-merge-rules",
+      "prompt": "What are my rules for when a branch gets merged automatically? Just tell me, don't merge anything."
+    },
+    {
+      "name": "explain-rebase",
+      "prompt": "What is the difference between git rebase and git merge, and when should I use each?"
+    },
+    {
+      "name": "merge-main-in",
+      "prompt": "Merge main into my feature branch feat/x so I get the latest fixes."
+    },
+    {
+      "name": "merge-two-pages",
+      "prompt": "The settings page and the profile page show almost the same fields. Merge the two pages into one."
+    },
+    {
+      "name": "open-pr",
+      "prompt": "Open a pull request for feat/x against main with a short description."
+    },
+    {
+      "name": "rebase-onto-main",
+      "prompt": "My branch feat/x is behind main. Rebase it onto origin/main so I can keep working on it; do not merge anything yet."
+    },
+    {
+      "name": "resolve-conflict",
+      "prompt": "I'm in the middle of a rebase and have conflicts in package.json. Help me resolve them."
+    },
+    {
+      "name": "review-pr",
+      "prompt": "Review PR 42 for bugs before I merge it."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "phrases": [
+    "(^|[\\s\"'(`])rebase[- ]?merge(?![/\\w-]|\\.\\w)",
+    "merge rebase",
+    "^\\s*merge( it| all| this| now)?[.!]?\\s*$",
+    "\\b(commit|push)\\b.*\\bmerge\\b",
+    "proceed (with )?(the )?merge",
+    "merge (--)?no[- ]?ff",
+    "\\bland\\b.*\\bmain\\b",
+    "\\b(onto|into) main\\b"
+  ],
+  "script": "scripts/rebase-merge.sh",
+  "steps": ["prepare", "land", "deploy", "cleanup"],
+  "manual": [
+    "\\bgit\\b[^|;&]*\\b(push|rebase)\\b",
+    "\\bgit\\b[^|;&]*\\bmerge(\\s|$)",
+    "\\bgit\\b[^|;&]*\\bworktree\\s+remove\\b",
+    "\\bgit\\b[^|;&]*\\bbranch\\s+-[dD]\\b",
+    "\\bgh\\s+pr\\s+merge\\b",
+    "\\bgwf\\s+rm\\b",
+    "\\bvercel\\s+(ls|inspect)\\b"
+  ]
+}

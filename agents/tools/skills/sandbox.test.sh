@@ -34,6 +34,7 @@ ws="$ROOT/ws"
 check "worktree is on the branch" "$(git -C "$ws/wt" branch --show-current)" "feat/demo"
 check "branch is one commit ahead of its base" "$(git -C "$ws/wt" rev-list --count HEAD ^"$(git -C "$ws/wt" merge-base HEAD origin/main)")" 1
 check "skill is installed in the primary checkout" "$(test -f "$ws/primary/.agents/skills/demo/scripts/run.sh" && echo yes)" yes
+check "skill is installed in the temp home" "$(test -f "$ROOT/home/.agents/skills/demo/scripts/run.sh" && echo yes)" yes
 check "evals are not installed" "$(test -e "$ws/primary/.agents/skills/demo/evals" && echo yes || echo no)" no
 git -C "$ws/wt" fetch -q origin
 check "main moved ahead of the branch" "$(git -C "$ws/wt" show origin/main:other.txt)" "from main"

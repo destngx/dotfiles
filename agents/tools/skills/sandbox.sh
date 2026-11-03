@@ -32,6 +32,8 @@ sandbox_real_git() {
 #   primary/    the primary checkout on main, with the skill under test committed at .agents/skills/<skill>
 #               (without its evals) and a feature.txt
 #   wt/         a worktree on <branch> (default feat/x) with one commit that changes feature.txt
+# It also copies the skill (without its evals) to $HOME/.agents/skills/<skill>, where a global skill's SKILL.md
+# points its scripts.
 sandbox_repo() {
   local branch="${1:-feat/x}" ws
   ws="$(pwd)"
@@ -44,6 +46,8 @@ sandbox_repo() {
   mkdir -p "$ws/primary/.agents/skills"
   cp -R "$SANDBOX_SKILL_DIR" "$ws/primary/.agents/skills/$SANDBOX_SKILL"
   rm -rf "$ws/primary/.agents/skills/$SANDBOX_SKILL/evals"
+  mkdir -p "$HOME/.agents/skills"
+  cp -R "$ws/primary/.agents/skills/$SANDBOX_SKILL" "$HOME/.agents/skills/$SANDBOX_SKILL"
   printf '# demo\n' >"$ws/primary/README.md"
   printf 'v1\n' >"$ws/primary/feature.txt"
   git -C "$ws/primary" add -A
