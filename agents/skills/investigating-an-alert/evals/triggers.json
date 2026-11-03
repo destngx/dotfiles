@@ -1,0 +1,44 @@
+{
+  "fire": [
+    {
+      "name": "cpu-alert-task",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-c9u1aa from dev-cpu-watch. Goal: find why node used 380% CPU for 10 minutes on ezmacmini."
+    },
+    {
+      "name": "alert-from",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "alert from dev-cpu-watch: kernel_task at 95% CPU since 14:10"
+    },
+    {
+      "name": "disk-watch",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261104-d15k01 source=disk-watch. Goal: ezmacmini disk is 96% full, find what filled it."
+    },
+    {
+      "name": "fired-again",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "dev-cpu-watch fired again for the same pnpm process, look into it"
+    }
+  ],
+  "no_fire": [
+    {
+      "name": "add-threshold",
+      "prompt": "add an alert threshold flag to dev-cpu-watch"
+    },
+    {
+      "name": "kill-process",
+      "prompt": "stop the runaway node process on ezmacmini"
+    },
+    {
+      "name": "slow-build",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-5r3pqz. Goal: find out why the nightly build got slower. Report only."
+    },
+    {
+      "name": "stale-alert-worker",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "the worker on the CPU alert task has been stale for 20 minutes"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "phrases": [
+    "\\bfrom [a-z-]+-watch\\b",
+    "\\balert from\\b",
+    "\\bsource=[a-z-]+",
+    "\\b[a-z-]+-watch (fired|says|reported|alerted)\\b"
+  ]
+}

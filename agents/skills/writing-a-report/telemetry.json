@@ -1,0 +1,7 @@
+{
+  "phrases": [
+    "\\breport (only|the cause)\\b",
+    "\\bshape: investigate\\b",
+    "goal: (summarise|summarize|compare|explain|find out)\\b"
+  ]
+}
