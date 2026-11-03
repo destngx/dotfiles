@@ -4,7 +4,7 @@
 [engine]
 port = 9696
 machine = ""                  # empty means the Tailscale name, else the host name
-first_mate = "ez2s-mac-mini"  # the always-on machine that runs the one first mate
+first_mate = "ez2s-mac-mini"  # whose first mate leads from milestone 2; every Mac runs its own until then
 
 [timing]
 stale_seconds = 240
