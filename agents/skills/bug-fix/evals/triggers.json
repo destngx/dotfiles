@@ -1,0 +1,46 @@
+{
+  "fire": [
+    {
+      "name": "rounding",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-77aa01. Goal: fix the rounding bug in the wealth-management portfolio total. Done when a 0.105 holding shows as 0.11. Verify: pnpm exec nx test wealth-management"
+    },
+    {
+      "name": "stale-quotes",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-q8w7e6. Goal: market-data-server returns stale quotes after midnight, fix it. Done when a quote fetched at 00:05 is from today."
+    },
+    {
+      "name": "regression",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261104-z9y8x7. Goal: fix the regression where health-watcher stops logging after the Mac sleeps and wakes."
+    },
+    {
+      "name": "repro-then-fix",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set. Brief goal: photo-sift skips HEIC files during import.",
+      "prompt": "the repro fails on main as the brief says, now fix the bug"
+    }
+  ],
+  "no_fire": [
+    {
+      "name": "feature-brief",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-4k7q2m. Goal: add a CSV export button to the wealth-management transactions page."
+    },
+    {
+      "name": "cause-only",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-5r3pqz. Goal: find out why the portfolio total rounds wrong. Report the cause only, change no code."
+    },
+    {
+      "name": "cpu-alert",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-c9u1aa from dev-cpu-watch. Goal: find why node used 380% CPU for 10 minutes on ezmacmini."
+    },
+    {
+      "name": "open-pr-for-fix",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "open the PR for the rounding fix"
+    }
+  ]
+}

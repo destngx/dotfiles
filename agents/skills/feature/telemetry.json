@@ -1,0 +1,6 @@
+{
+  "phrases": [
+    "goal: (add|build|support|implement|extend|create)\\b",
+    "\\bimplement the (feature|brief)\\b"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "fire": [
+    {
+      "name": "bare-open-pr",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set. The CSV export is committed on feat/csv-export and the tests pass.",
+      "prompt": "open the PR"
+    },
+    {
+      "name": "push-and-open",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "push the branch and open a pull request against main"
+    },
+    {
+      "name": "ready-pr-and-report",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "the fix is committed, open a ready PR and file the report"
+    },
+    {
+      "name": "done-in-worktree",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "t-20261103-9p2xq1 is done in the worktree, push it and open the PR"
+    }
+  ],
+  "no_fire": [
+    {
+      "name": "merge-pr",
+      "prompt": "merge the PR for feat/csv-export"
+    },
+    {
+      "name": "review-pr",
+      "prompt": "review PR 482 for bugs"
+    },
+    {
+      "name": "pr-status",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "what's the status of the PR for t-20261103-4k7q2m?"
+    },
+    {
+      "name": "land-branch",
+      "prompt": "land feat/csv-export on main"
+    },
+    {
+      "name": "feature-brief",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-4k7q2m. Goal: add a CSV export button to the wealth-management transactions page."
+    }
+  ]
+}

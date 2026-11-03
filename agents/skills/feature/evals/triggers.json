@@ -1,0 +1,50 @@
+{
+  "fire": [
+    {
+      "name": "csv-export",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-4k7q2m. Goal: add a CSV export button to the wealth-management transactions page. Done when the button downloads the visible rows as CSV. Verify: pnpm exec nx test wealth-management"
+    },
+    {
+      "name": "json-flag",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-9p2xq1. Goal: support a --json flag on claude-quota status. Done when the flag prints valid JSON and the text output is byte-identical. Verify: go test ./apps/claude-quota/..."
+    },
+    {
+      "name": "task-list-screen",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261104-a1b2c3. Goal: build the task list screen in herdr-glance from GET /api/tasks. Done when it lists each task's ID, goal and state."
+    },
+    {
+      "name": "implement-brief",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set. Brief goal: cache quotes for 15 minutes in market-data-server.",
+      "prompt": "implement the feature in your brief"
+    }
+  ],
+  "no_fire": [
+    {
+      "name": "bug-brief",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-77aa01. Goal: fix the rounding bug in the wealth-management portfolio total. Done when a 0.105 holding shows as 0.11."
+    },
+    {
+      "name": "open-pr-after-build",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "the CSV export is committed and the tests pass, open the PR"
+    },
+    {
+      "name": "report-brief",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-5r3pqz. Goal: find out why the market-data-server nightly build got slower. Report only, change no code."
+    },
+    {
+      "name": "owner-question",
+      "prompt": "what does the posturify app do?"
+    },
+    {
+      "name": "mate-note",
+      "context": "You are the sous first mate on ezmacmini.",
+      "prompt": "add a note to t-20261103-4k7q2m that the owner wants semicolons in the CSV"
+    }
+  ]
+}

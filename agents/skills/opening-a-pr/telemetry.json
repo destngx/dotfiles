@@ -1,0 +1,5 @@
+{
+  "phrases": [
+    "\\bopen (a |the )?(ready )?(pr|pull request)\\b"
+  ]
+}

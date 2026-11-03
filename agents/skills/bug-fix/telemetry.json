@@ -1,0 +1,8 @@
+{
+  "phrases": [
+    "goal: fix\\b",
+    "goal: .{0,120}\\bfix it\\b",
+    "\\bfix the (bug|regression)\\b",
+    "goal: .{0,40}\\bfix the regression\\b"
+  ]
+}
