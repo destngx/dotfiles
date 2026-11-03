@@ -1,0 +1,20 @@
+{
+  "fire": [
+    { "name": "fix-bug", "prompt": "fix the rounding bug in the wealth-management portfolio total" },
+    { "name": "add-flag", "prompt": "add a --json flag to claude-quota status" },
+    { "name": "rename-package", "prompt": "rename the fleet package in herdr-glance to machines" },
+    { "name": "update-readme", "prompt": "update the photo-sift README with the new install steps" },
+    {
+      "name": "implement-plan",
+      "context": "We agreed on the plan: cache quotes for 15 minutes in market-data-server.",
+      "prompt": "ok implement it"
+    }
+  ],
+  "no_fire": [
+    { "name": "explain-gc", "prompt": "explain how gwf gc decides a worktree is stale" },
+    { "name": "what-app-does", "prompt": "what does the posturify app do?" },
+    { "name": "review-diff", "prompt": "review the diff on this branch for bugs" },
+    { "name": "show-log", "prompt": "show me the last 10 commits on main" },
+    { "name": "count-worktrees", "prompt": "how many worktrees do I have open right now?" }
+  ]
+}

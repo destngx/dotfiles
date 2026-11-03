@@ -1,0 +1,5 @@
+{
+  "phrases": [
+    "\\b(fix|add|implement|refactor|rename|update|change|remove|delete|write|create|build|bump|migrate)\\b"
+  ]
+}
