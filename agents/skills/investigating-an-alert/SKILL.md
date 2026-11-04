@@ -31,7 +31,7 @@ Use this runbook when `SOUS_TASK_ID` is set and `sous task show "$SOUS_TASK_ID" 
    - the masking condition, the state that makes it happen now and not always, such as a large cache, a sleep and wake or a second copy of the same job
    - the symptom, the reading the monitor saw
 
-   Compare with a time it was healthy. Look for an earlier alert with the same source in `sous task ls`, and read the project's recent history with `git -C <repo> log --since "<alert time minus 2 days>" --oneline`. Name what would prove your explanation wrong, and check it.
+   Compare with a time it was healthy. Look for an earlier alert with the same source in `sous task ls --all`, and read the project's recent history with `git -C <repo> log --since "<alert time minus 2 days>" --oneline`. Name what would prove your explanation wrong, and check it.
 5. **Do not act on it.** Do not kill or renice a process, restart a service, delete files, clear a cache or change code, even when the fix is obvious. Those are fixes, and some cannot be undone.
 6. **Record progress.** At each finding, run `sous task note "$SOUS_TASK_ID" "<one line>"`.
 7. **Write the report** to `report="${TMPDIR:-/tmp}/sous-$SOUS_TASK_ID-report.md"` with these sections:
