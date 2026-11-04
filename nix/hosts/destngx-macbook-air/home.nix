@@ -31,5 +31,6 @@
     ../../modules/home/apps/k8s.nix
     ../../modules/home/apps/opentofu.nix
     ../../modules/home/apps/bt-battery-alert.nix
+    ../../modules/home/apps/ssh.nix
   ];
 }
