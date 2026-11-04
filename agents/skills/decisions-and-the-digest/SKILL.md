@@ -127,7 +127,7 @@ An `owner-note` event is something the owner typed into a shell with `sous note`
 
 ## Done when
 
-- `sous task ls --state waiting` lists only tasks whose decision was sent, is held for the digest, or was deferred with a note.
+- `sous task ls --state waiting` lists only tasks whose decision was sent, is held for the digest, or was held with `sous decide <id> later --until <date>`.
 - Every answered decision was recorded with `sous decide` and the owner's words, and `sous task show <id> | jq .state` shows the task moved on.
 - No two unrelated decisions went out in one message, and nothing that is not urgent went out between 23:00 and 07:00.
 - Every owner message was marked with `sous owner mark`, and a due catch-up got its recap before the answer.
@@ -141,8 +141,7 @@ sous inbox
 sous task ls --state waiting
 sous task ls --state blocked
 sous task show <id> | jq '{state, urgent, decision, notes: .notes[-3:]}'
-sous owner mark
-sous digest --since <since from the mark>
+sous digest
 sous away show
 ```
 
