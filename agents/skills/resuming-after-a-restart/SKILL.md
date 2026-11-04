@@ -9,7 +9,7 @@ description: Pick up the fleet when the first mate or a machine mate starts a fr
 
 A restart loses nothing, because sous keeps every task, note, decision and inbox event on disk. When the first mate or a machine mate starts a fresh session, it rebuilds its picture of the fleet from `sous`, not from memory, and goes on from there. The engine resumes supervising the workers on its own, so the mate does not restart or redo anything just because it restarted.
 
-Use only these commands: `sous status`, `sous inbox`, `sous task ls`, `sous task show`, `sous task note`, `sous restart`.
+Use only these commands: `sous status`, `sous inbox`, `sous task ls`, `sous task show`, `sous task note`, `sous restart`, and for the first mate `sous owner mark`, `sous away show` and `sous digest`.
 
 ## When to use it
 
@@ -28,7 +28,10 @@ Use it at the start of a mate session that follows a crash, a planned `sous rest
    - `waiting`, and `blocked` with a decision, wait on the owner and go to `decisions-and-the-digest`.
    - `partial` and `blocked` without a decision need the first mate to read the report and tell the owner what is left.
 7. **Pick up your saved open work.** For each `open work:` note, do the next step it names, unless the task record shows it is done already. Trust the records. Do not rerun checks or redo work that a report or a note says is finished.
-8. **Tell the owner once, if anything needs them.** The first mate sends one message that names each task waiting on the owner, with its ID and what it waits for. During quiet hours (23:00 to 07:00) it holds that message for the morning digest unless a task is urgent. When nothing needs the owner, it says nothing.
+8. **Check away mode (first mate).** Run `sous away show`. Away mode survives a restart, because the engine keeps the away words in `owner.json`. While it is on, answer a decision only as `decisions-and-the-digest` allows, with the `per your away instructions:` marker. A machine mate never reads away words and never runs `sous away`.
+9. **Handle held decisions (first mate).** A decision held with `later` re-raises on its date, as a `decision` event in your inbox, and you ask the owner again. A decision held to a future date stays held after the restart. Do not ask it early and do not answer it.
+10. **Mark the owner's next message (first mate).** Run `sous owner mark` on the owner's next message, before you answer. When it prints `catch_up: true`, run `sous digest --since <since from the mark>`, recap with the Attention list first, then walk the waiting decisions one per message, as in `decisions-and-the-digest`.
+11. **Tell the owner once, if anything needs them.** The first mate sends one message that names each task waiting on the owner, with its ID and what it waits for. During quiet hours (23:00 to 07:00) it holds that message for the morning digest unless a task is urgent. When nothing needs the owner, it says nothing.
 
 ## When sous asks you to save open work
 
@@ -44,6 +47,7 @@ Before a planned `sous restart <you>`, such as after a runbook update, sous puts
 - `sous status` answers.
 - `sous inbox` prints no events after your acknowledgement.
 - Every open task from `sous task ls` has been read and sorted into step 6's groups, and every task that waits on the owner is in a message or the digest queue.
+- The first mate has checked `sous away show` and marked the owner's next message.
 - Every `open work:` note is either done or has a next step under way.
 
 ## Verify commands
@@ -52,6 +56,8 @@ Before a planned `sous restart <you>`, such as after a runbook update, sous puts
 sous status
 echo "$SOUS_AGENT"
 sous inbox                          # empty after the ack
+sous away show                      # first mate only
+sous digest --since <since from the mark>   # first mate, when the mark says catch_up
 sous task ls --state stale
 sous task ls --state waiting
 sous task show <id> | jq '.notes[] | select(.text | startswith("open work:"))'
@@ -63,4 +69,7 @@ sous task show <id> | jq '.notes[] | select(.text | startswith("open work:"))'
 - **Acknowledging the inbox too early.** An event acknowledged and then lost in a second crash is gone. Acknowledge after handling.
 - **Redoing finished work.** The records are the source of truth. A "let me check everything from scratch" pass costs tokens and can push duplicate notes or tasks.
 - **Losing open work in a planned restart.** Anything you did not write with `sous task note` is gone after the restart. Write it before you go idle.
+- **Forgetting away mode.** It outlives a restart. A first mate that does not run `sous away show` may answer as if the owner is present, or hold what the away words cover.
+- **Asking a held decision early.** A decision held to a future date stays held across a restart. It comes back by itself on its date.
+- **Reading away words as a machine mate.** A machine mate never reads them, and the engine refuses an answer from it that carries the marker.
 - **Treating a sleeping machine as dead.** A task bound to the Air waits while the Air sleeps. Tell the owner which machine it waits for. Never move it to another machine.
