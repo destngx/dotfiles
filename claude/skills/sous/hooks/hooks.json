@@ -20,6 +20,17 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/sous-hook.sh wake",
+            "async": true,
+            "asyncRewake": true,
+            "timeout": 28800
+          }
+        ]
       }
     ],
     "StopFailure": [
