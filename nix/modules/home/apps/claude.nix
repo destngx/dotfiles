@@ -17,6 +17,7 @@ in
   launchd.agents.claude-quota = {
     enable = true;
     config = {
+      Label = "com.destngx.claude-quota";
       ProgramArguments = [
         "${machine.homeDirectory}/.local/bin/claude-quota"
         "service"
