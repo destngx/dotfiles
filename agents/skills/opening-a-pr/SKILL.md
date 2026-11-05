@@ -44,7 +44,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
    - `## Scope` says what the PR covers and what it leaves out.
    - `## Verification` names each command run and its result.
 
-   Use the `unslop` skill on the title and body. Then read the PR back with `gh pr view <branch> --json url,state,isDraft,baseRefName,headRefOid` and check that it is open, not a draft, on the right base, and that its head is your SHA.
+   Read the PR back with `gh pr view <branch> --json url,state,isDraft,baseRefName,headRefOid` and check that it is open, not a draft, on the right base, and that its head is your SHA.
 9. **File the report.**
 
    ```sh

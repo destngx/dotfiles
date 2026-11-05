@@ -41,8 +41,6 @@ Use this runbook when `SOUS_TASK_ID` is set and `sous task show "$SOUS_TASK_ID" 
    - `## Evidence` holds the exact commands and the output that matters.
    - `## Recommended fix` is a draft brief for a separate task: the goal, the repo or machine, the done condition and the verify commands. When the alert was noise, recommend the monitor change instead, such as a threshold or an excluded process.
    - `## Decisions for the owner` lists each question with what it is, why it matters now, the real options and your recommendation with a one-line reason. Write `None.` when there are none.
-
-   Use the `unslop` skill on the report.
 8. **File the report.**
 
    ```sh

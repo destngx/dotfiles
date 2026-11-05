@@ -40,6 +40,15 @@ fi
 # Claude Code hook
 # ---------------------------------------------------------
 
+# Only the sous mate and the owner's own sessions notify. Sous workers,
+# reviewers and machine mates stay silent.
+if [ -n "${SOUS_TASK_ID:-}" ]; then
+  exit 0
+fi
+if [ -n "${SOUS_AGENT:-}" ] && [ "$SOUS_AGENT" != "sous-mate" ]; then
+  exit 0
+fi
+
 INPUT="$(cat)"
 
 EVENT="$(jq -r '.hook_event_name // ""' <<< "$INPUT")"

@@ -29,8 +29,6 @@ When the brief's shape is `ship` and it asks for the report as a file in a repo,
    - `## Recommendation` names the change you would make, if any, as a draft brief: the goal, the repo, the done condition and the verify commands. For a choice between options, add a table of options and their costs.
    - `## Decisions for the owner` lists each open question with what it is, why it matters now, the real options and your recommendation with a one-line reason. When there are none, write `None.`
    - `## Unknowns` lists what you could not check and how that could change the answer.
-
-   Use the `unslop` skill on the report.
 7. **File the report.**
 
    ```sh
