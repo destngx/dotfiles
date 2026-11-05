@@ -14,11 +14,10 @@ restart_idle_wait_seconds = 300
 block_budget = 3
 
 [workers]
-per_project = 2
+per_project = 5
 permission_mode = "auto"  # Claude Code decides each tool call, so unattended workers never stop at a prompt
 
 [workers.projects]
-monorepo = 2
 
 [models]
 first_mate = "opus"
