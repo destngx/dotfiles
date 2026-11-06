@@ -30,8 +30,33 @@ Use it at the start of a mate session that follows a crash, a planned `sous rest
 7. **Pick up your saved open work.** For each `open work:` note, do the next step it names, unless the task record shows it is done already. Trust the records. Do not rerun checks or redo work that a report or a note says is finished.
 8. **Check away mode (first mate).** Run `sous away show`. Away mode survives a restart, because the engine keeps the away words in `owner.json`. While it is on, answer a decision only as `decisions-and-the-digest` allows, with the `per your away instructions:` marker. A machine mate never reads away words and never runs `sous away`.
 9. **Handle held decisions (first mate).** A decision held with `later` re-raises on its date, as a `decision` event in your inbox, and you ask the owner again. A decision held to a future date stays held after the restart. Do not ask it early and do not answer it.
-10. **Mark the owner's next message (first mate).** Run `sous owner mark` on the owner's next message, before you answer. When it prints `catch_up: true`, run `sous digest --since <since from the mark>`, recap with the Attention list first, then walk the waiting decisions one per message, as in `decisions-and-the-digest`.
-11. **Tell the owner once, if anything needs them.** The first mate sends one message that names each task waiting on the owner, with its ID and what it waits for. During quiet hours (23:00 to 07:00) it holds that message for the morning digest unless a task is urgent. When nothing needs the owner, it says nothing.
+10. **Mark the owner's next message (first mate).** Run `sous owner mark` on the owner's next message, before you answer. When it prints `catch_up: true`, run `sous digest --since <since from the mark>`, recap with the Attention list first, then walk the waiting decisions one per message, as in `decisions-and-the-digest`. Build the status recap (next section) and send it with your answer to that first message, without being asked.
+11. **Tell the owner once, if anything needs them.** The first mate sends one message that names each task waiting on the owner, with its ID and what it waits for. During quiet hours (23:00 to 07:00) it holds that message for the morning digest unless a task is urgent. The status recap below covers this, so its "To do" section is that message, not a second one.
+
+## Status recap on the owner's first message (first mate)
+
+The owner should not have to ask "what happened, and what do I do next". After a restart, build this recap from records and send it on the owner's first message. Reading records changes nothing, so it needs no approval.
+
+Gather:
+
+```sh
+sous digest --since <since from the mark>     # merged and finished work, and what waits
+sous task ls                                  # everything running or open
+sous task ls --state ready                    # finished tasks, to find lookups
+sous task show <id> | jq '{state, shape: .brief.shape, brief: .brief.goal, report, notes}'
+```
+
+Send these five sections, in this order, each as short bullets. Leave out a section only when it is empty:
+
+1. **Merged since we last talked.** Each PR merged after the `since` time, as its full URL (`https://github.com/<owner>/<repo>/pull/<n>`, not `#<n>`), with one line on what it changed. Take the URL from the task's report or the digest.
+2. **Running.** Each task in `queued`, `starting`, `running`, `reviewing` or `landing`, with its ID, what it does and its state.
+3. **To do (you).** Everything that waits on the owner: each `waiting` task, each `blocked` task with a decision, and every `open work:` note on a task that asks the owner to do something. Quote the note's text, with the task ID.
+4. **Lookups with no follow-up.** Each task with state `ready` and shape `investigate` whose report recommends a fix, when no other task exists for that fix (check `sous task ls` for a task whose goal names it). Give the task ID, the recommended fix in one line, and say there is no follow-up task. Never start the follow-up yourself. Offer it as a suggestion.
+5. **Next step.** One suggested next step, and the reason in one sentence. Pick the most blocking item from sections 3 and 4, or the oldest. Suggest; do not act.
+
+When every section is empty, send only: `Nothing new. All quiet.` That is the only silent case. When anything is in sections 1 to 4, send the recap even if the owner only said hello.
+
+Use records only, not memory. Keep hostnames, IPs and ssh details out of the recap. During quiet hours, still answer the owner's message, since the owner wrote first.
 
 ## When sous asks you to save open work
 
@@ -47,7 +72,7 @@ Before a planned `sous restart <you>`, such as after a runbook update, sous puts
 - `sous status` answers.
 - `sous inbox` prints no events after your acknowledgement.
 - Every open task from `sous task ls` has been read and sorted into step 6's groups, and every task that waits on the owner is in a message or the digest queue.
-- The first mate has checked `sous away show` and marked the owner's next message.
+- The first mate has checked `sous away show`, marked the owner's next message and sent the status recap (or `Nothing new. All quiet.`).
 - Every `open work:` note is either done or has a next step under way.
 
 ## Verify commands
@@ -65,6 +90,9 @@ sous task show <id> | jq '.notes[] | select(.text | startswith("open work:"))'
 
 ## Known pitfalls
 
+- **Waiting to be asked for a recap.** The first mate sends the recap on the owner's first message after a restart. Do not wait for "what's the status" or "what should I do next".
+- **Short PR links.** Use the full PR URL. `#123` is not tappable on a phone.
+- **Dropping a lookup's fix.** A finished `investigate` task whose fix has no task yet gets lost. List it in section 4 every time until a follow-up exists.
 - **Restarting workers after your own restart.** The engine rebuilt its state and resumed supervision when it started. Only a task the engine reports as stale or stuck needs recovery.
 - **Acknowledging the inbox too early.** An event acknowledged and then lost in a second crash is gone. Acknowledge after handling.
 - **Redoing finished work.** The records are the source of truth. A "let me check everything from scratch" pass costs tokens and can push duplicate notes or tasks.
