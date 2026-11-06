@@ -43,7 +43,7 @@ Gather:
 sous digest --since <since from the mark>     # merged and finished work, and what waits
 sous task ls                                  # everything running or open
 sous task ls --state ready                    # finished tasks, to find lookups
-sous task show <id> | jq '{state, shape: .brief.shape, brief: .brief.goal, report, notes}'
+sous task show <id> | jq '{state, shape: .shape, brief: .brief.goal, report, notes}'
 ```
 
 Send these five sections, in this order, each as short bullets. Leave out a section only when it is empty:
@@ -51,7 +51,7 @@ Send these five sections, in this order, each as short bullets. Leave out a sect
 1. **Merged since we last talked.** Each PR merged after the `since` time, as its full URL (`https://github.com/<owner>/<repo>/pull/<n>`, not `#<n>`), with one line on what it changed. Take the URL from the task's report or the digest.
 2. **Running.** Each task in `queued`, `starting`, `running`, `reviewing` or `landing`, with its ID, what it does and its state.
 3. **To do (you).** Everything that waits on the owner: each `waiting` task, each `blocked` task with a decision, and every `open work:` note on a task that asks the owner to do something. Quote the note's text, with the task ID.
-4. **Lookups with no follow-up.** Each task with state `ready` and shape `investigate` whose report recommends a fix, when no other task exists for that fix (check `sous task ls` for a task whose goal names it). Give the task ID, the recommended fix in one line, and say there is no follow-up task. Never start the follow-up yourself. Offer it as a suggestion.
+4. **Lookups with no follow-up.** Each task with state `ready` and shape `investigate` whose report recommends a fix, when no other task exists for that fix (check `sous task ls --all` for a task, landed or open, whose goal names it). Give the task ID, the recommended fix in one line, and say there is no follow-up task. Never start the follow-up yourself. Offer it as a suggestion.
 5. **Next step.** One suggested next step, and the reason in one sentence. Pick the most blocking item from sections 3 and 4, or the oldest. Suggest; do not act.
 
 When every section is empty, send only: `Nothing new. All quiet.` That is the only silent case. When anything is in sections 1 to 4, send the recap even if the owner only said hello.
