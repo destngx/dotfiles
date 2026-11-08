@@ -16,7 +16,8 @@
       };
     })
   ];
-  # Opt out of the floating sidebar appearance in AppKit split views, in the global domain.
+  # Global-domain tweaks: opt out of the floating sidebar appearance in AppKit split views,
+  # and set the NSConvolutionOverride1 value (float).
   system.defaults.CustomUserPreferences.NSGlobalDomain = {
     NSSplitViewItemSidebarDefaultsToFloatingAppearance = false;
     NSConvolutionOverride1 = 6.0;
