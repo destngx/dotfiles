@@ -16,8 +16,11 @@
       };
     })
   ];
-  # Opt out of the floating sidebar appearance in AppKit split views.
-  system.defaults.CustomUserPreferences.NSSplitViewItem.sidebarDefaultToFloatingAppearance = false;
+  # Opt out of the floating sidebar appearance in AppKit split views, in the global domain.
+  system.defaults.CustomUserPreferences.NSGlobalDomain = {
+    NSSplitViewItemSidebarDefaultsToFloatingAppearance = false;
+    NSConvolutionOverride1 = 6.0;
+  };
 
   # The user's zsh (home-manager) owns completion, prompt and Homebrew env; skip the system-wide
   # versions so /etc/zshrc does no redundant work on every interactive shell.
