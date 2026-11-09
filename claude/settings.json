@@ -1,6 +1,5 @@
 {
   "syncClaudeAiSkills": false,
-  "autoMemoryDirectory": "~/.local/share/sous/memory",
   "env": {
     "DISABLE_TELEMETRY": "1",
     "DISABLE_ERROR_REPORTING": "1",
@@ -178,9 +177,9 @@
       {
         "hooks": [
           {
-            "async": true,
+            "type": "command",
             "command": "$HOME/.local/bin/claude-quota hook stop-failure",
-            "type": "command"
+            "async": true
           }
         ]
       }
@@ -204,10 +203,16 @@
     }
   },
   "autoMemoryEnabled": true,
+  "autoMemoryDirectory": "~/.local/share/sous/memory",
   "theme": "auto",
   "editorMode": "vim",
   "preferredNotifChannel": "auto",
   "autoCompactEnabled": true,
   "autoDreamedEnabled": true,
-  "ultracodeKeywordTrigger": false
+  "ultracodeKeywordTrigger": false,
+  "voiceEnabled": true,
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  }
 }
