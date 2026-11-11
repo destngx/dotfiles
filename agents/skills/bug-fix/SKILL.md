@@ -69,4 +69,4 @@ sous task show "$SOUS_TASK_ID" | jq '{state, report}'
 - **A test that passes before the fix.** If the new test passes on the old code, it does not test the bug. Fix the test before you touch the code.
 - **Ending the turn without a report.** The Stop hook blocks your turn while the task is open, and after three blocks the engine marks the task stale. File a report, even `blocked` or `partial`.
 - **Widening the scope.** Other bugs you find go in the report as follow-ups, not in this diff.
-- **Editing `fleet.toml`, installing tools, or merging.** The plugin blocks `fleet.toml` edits. Never install a tool or run `nix-rebuild`. Never run `gh pr merge`, push to the base branch or run the `rebase-merge` skill.
+- **Editing `fleet.toml`, installing tools, or merging.** The plugin blocks `fleet.toml` edits. Never install a tool or run `nix-rebuild`. Never run `gh pr merge`, push to the base branch or run the `rebase-merge` skill, except its "Rerun after a landing conflict" section on a rerun after a failed landing.

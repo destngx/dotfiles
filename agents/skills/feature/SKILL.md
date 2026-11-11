@@ -71,4 +71,4 @@ sous task show "$SOUS_TASK_ID" | jq '{state, report}'
 - **Widening the scope.** A refactor you noticed, a dependency bump or a fix to nearby code is a follow-up. Put it in the report summary as a proposal, not in this diff. A lesson about the repo or this runbook is also a follow-up, proposed as its own PR.
 - **Editing `fleet.toml`.** The plugin blocks edits to any `fleet.toml`, and the engine refuses to merge a diff that touches one. Never work around the block.
 - **Installing tools.** Never install a tool or run `nix-rebuild`. When a tool is missing, report `blocked` and name it.
-- **Merging.** Never run `gh pr merge`, push to the base branch, or run the `rebase-merge` skill. The engine lands the work.
+- **Merging.** Never run `gh pr merge`, push to the base branch, or run the `rebase-merge` skill, except its "Rerun after a landing conflict" section on a rerun after a failed landing. The engine lands the work.

@@ -130,9 +130,16 @@ with the script: prepare force-pushes the branch, and a rerun never force-pushes
 4. **Verify.** Rerun every verify command from the brief, plus the repo's checks for the projects the branch and
    `main`'s new commits touch, from the worktree root. Do not report a red branch.
 5. **Push without force.** The rebased branch no longer fast-forwards from its pushed copy, so it cannot go onto
-   the old branch name without a force. Push it as a new branch instead (for example `<branch>-rebased`), and leave
-   the old branch alone. A sous worker holds no push credential: it names the new branch in its report, and the
-   machine mate pushes it. Never `--force` or `--force-with-lease`.
+   the old branch name without a force. Keep the local branch name and push the rebased head to a new remote
+   branch, leaving the old one alone:
+
+   ```sh
+   git push -u origin HEAD:refs/heads/<branch>-rebased
+   ```
+
+   Whoever pushes for the task runs it: the worker through `opening-a-pr`, or the machine mate when the brief says
+   the worker does not push, in which case the worker names the new branch in its report. Never `--force` or
+   `--force-with-lease`.
 6. **Report.** The new head SHA (`git rev-parse HEAD`), the new branch name and that it replaces the old one, the
    list of conflicted files with one line each on how it was resolved, and the verify output. A conflict that the
    report does not list counts as resolved silently.
