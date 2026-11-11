@@ -33,6 +33,10 @@ Decide a choice yourself only when the brief, the repo's patterns or the code se
 - a product choice the brief leaves open, where either answer changes what the owner gets
 - anything irreversible: a production change, a message sent, money spent, data deleted, a force-push
 
+### Rerun after a failed landing
+
+When the task is a rerun because the landing rebase conflicted (`rebase-merge` prepare exit 3), follow "Rerun after a landing conflict" in the `rebase-merge` skill instead of building again: fetch, rebase onto `origin/<base>`, resolve, rerun the verify commands, and report the new head with the conflicted files listed. Use only that section, not the script, and never force-push.
+
 ### Timebox
 
 The brief's `timebox` is a hard stop. When it runs out, or your inbox says "timebox reached, report what you have", commit what works, push it, and file `--status partial` with what is done, what is left and the evidence so far. Do not run on. When the doorbell `[sous] inbox` arrives, read it with `sous inbox --agent "task-$SOUS_TASK_ID"` and acknowledge the events you handled with `--ack <seq>`.

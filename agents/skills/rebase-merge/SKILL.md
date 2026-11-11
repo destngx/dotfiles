@@ -50,7 +50,8 @@ changing the script.
    PR merged, and lets `git branch -d` in cleanup check against the pushed copy.
    - Exit 2 means a precondition failed. Report it. For uncommitted changes, ask the user to commit first.
    - Exit 3 means the rebase conflicted. The script aborted it, so the branch is unchanged. Report the
-     `conflict=` files and stop. Do not resolve conflicts silently.
+     `conflict=` files and stop. Do not resolve conflicts silently. The fix is a rerun of the task, which follows
+     "Rerun after a landing conflict" below.
    - `rewritten=yes` means `main` moved and the commits changed. Decide which checks the new base affects (the
      tests, lint and build of the projects the branch touches, plus any project that `main`'s new commits change
      under it). Run them in the worktree before landing. Fix or report failures, and do not land a red branch.
@@ -113,3 +114,25 @@ changing the script.
 
 5. **Report.** The new `main` SHA, the PR state, the deploy URL and status, what the live check covered, what was
    cleaned up, and whether the primary checkout was pulled.
+
+## Rerun after a landing conflict
+
+When a landing stopped at prepare with exit 3, the branch is unchanged and the task is rerun to fix the conflict.
+The rerun worker (a sous worker running `feature` or `bug-fix`) does this in the branch's worktree, by hand, not
+with the script: prepare force-pushes the branch, and a rerun never force-pushes.
+
+1. **Fetch.** `git fetch origin`.
+2. **Rebase.** `git rebase origin/main` (or the brief's base). Write down every file git reports as conflicted.
+3. **Resolve.** Resolve each conflict so that both `main`'s change and the branch's change survive. When the two
+   cannot both hold, or the right answer is a product choice, stop and ask (`sous task ask`) instead of picking a
+   side. Then `git add` the file and `git rebase --continue`. Never use `-X ours`, `-X theirs` or
+   `git checkout --ours/--theirs` to make a conflict go away.
+4. **Verify.** Rerun every verify command from the brief, plus the repo's checks for the projects the branch and
+   `main`'s new commits touch, from the worktree root. Do not report a red branch.
+5. **Push without force.** The rebased branch no longer fast-forwards from its pushed copy, so it cannot go onto
+   the old branch name without a force. Push it as a new branch instead (for example `<branch>-rebased`), and leave
+   the old branch alone. A sous worker holds no push credential: it names the new branch in its report, and the
+   machine mate pushes it. Never `--force` or `--force-with-lease`.
+6. **Report.** The new head SHA (`git rev-parse HEAD`), the new branch name and that it replaces the old one, the
+   list of conflicted files with one line each on how it was resolved, and the verify output. A conflict that the
+   report does not list counts as resolved silently.

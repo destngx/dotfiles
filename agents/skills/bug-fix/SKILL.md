@@ -35,6 +35,10 @@ Use this runbook when `SOUS_TASK_ID` is set and the brief says something is brok
 
 Decide a choice yourself only when the brief, the repo or the evidence settles it, and record it with `sous task note "$SOUS_TASK_ID" "decision: <what you chose>, because <why>. To reverse: <how>"`. Report `blocked` with the question, the real options and your recommendation when the fix needs a path outside the scope, changes behaviour the owner may rely on, or needs anything irreversible, such as a data migration in production or a force-push.
 
+### Rerun after a failed landing
+
+When the task is a rerun because the landing rebase conflicted (`rebase-merge` prepare exit 3), follow "Rerun after a landing conflict" in the `rebase-merge` skill instead of fixing again: fetch, rebase onto `origin/<base>`, resolve, rerun the verify commands and the repro, and report the new head with the conflicted files listed. Use only that section, not the script, and never force-push.
+
 ### Timebox
 
 When the brief's timebox runs out, or your inbox says "timebox reached, report what you have", stop. Commit what you have, push it, and file `--status partial` with the repro, what you ruled out, what is left and the evidence so far. When the doorbell `[sous] inbox` arrives, read it with `sous inbox --agent "task-$SOUS_TASK_ID"` and acknowledge the events you handled with `--ack <seq>`.
