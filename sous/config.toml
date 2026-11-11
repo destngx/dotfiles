@@ -23,8 +23,14 @@ permission_mode = "auto"  # Claude Code decides each tool call, so unattended wo
 first_mate = "opus"
 mate = "opus"
 intake = "haiku"
-worker = "sonnet"
+ship = "opus"
+investigate = "sonnet"
 reviewer = "opus"
+
+[effort]
+ship = "medium"
+investigate = "medium"
+reviewer = "high"
 
 [paths]
 projects = "~/projects"
