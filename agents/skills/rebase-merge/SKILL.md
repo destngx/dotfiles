@@ -140,6 +140,14 @@ with the script: prepare force-pushes the branch, and a rerun never force-pushes
    Whoever pushes for the task runs it: the worker through `opening-a-pr`, or the machine mate when the brief says
    the worker does not push, in which case the worker names the new branch in its report. Never `--force` or
    `--force-with-lease`.
+
+   A worker that follows `opening-a-pr` reads `<branch>` as `<branch>-rebased` in its push, PR and done steps:
+   - step 7 pushes with the command above, not `git push -u origin <branch>`
+   - step 8 checks `gh pr view <branch>-rebased` and opens a new PR with
+     `gh pr create --base <base> --head <branch>-rebased`. It never reuses the old PR, whose head is the old branch.
+   - the done checks compare `git ls-remote origin refs/heads/<branch>-rebased` with `git rev-parse HEAD`
+
+   Leave the old PR and the old branch as they are. Closing them is for whoever lands the work, not the rerun.
 6. **Report.** The new head SHA (`git rev-parse HEAD`), the new branch name and that it replaces the old one, the
-   list of conflicted files with one line each on how it was resolved, and the verify output. A conflict that the
-   report does not list counts as resolved silently.
+   new PR URL and the old PR it replaces, the list of conflicted files with one line each on how it was resolved,
+   and the verify output. A conflict that the report does not list counts as resolved silently.
