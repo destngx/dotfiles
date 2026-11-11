@@ -17,6 +17,7 @@
   },
   "permissions": {
     "allow": [
+      "Bash(sous force-ok:*)",
       "Read(~/projects/**)",
       "Edit(~/projects/**)"
     ],
