@@ -112,6 +112,15 @@ changing the script.
      cleanup. It also works after the local branch is gone, using origin's copy, and deletes what is left. Never
      delete the remote branch by hand.
 
+   When the branch was rerun after a landing conflict ("Rerun after a landing conflict" below), the rerun pushed
+   its head to `<branch>-rebased` (or `<branch>-rebased-<n>`) and opened a PR from it, and cleanup `<branch>` does
+   not touch those. List them with `git ls-remote --heads origin '<branch>-rebased*'`, then for each one run
+   cleanup with that name (the script handles a branch with no local copy). Then close every PR from `<branch>`
+   or one of those branches that `gh pr view <name> --json state` does not show as `MERGED`, with
+   `gh pr close <name> --comment "Landed on main from <branch>."`. Exit 6 for a `-rebased` branch means prepare
+   rewrote the commits after the rerun, so that branch's tip is not on `main`. Report it and leave the branch;
+   never delete it by hand.
+
 5. **Report.** The new `main` SHA, the PR state, the deploy URL and status, what the live check covered, what was
    cleaned up, and whether the primary checkout was pulled.
 
@@ -131,23 +140,32 @@ with the script: prepare force-pushes the branch, and a rerun never force-pushes
    `main`'s new commits touch, from the worktree root. Do not report a red branch.
 5. **Push without force.** The rebased branch no longer fast-forwards from its pushed copy, so it cannot go onto
    the old branch name without a force. Keep the local branch name and push the rebased head to a new remote
-   branch, leaving the old one alone:
+   branch, leaving the old one alone. The new name is the first of `<branch>-rebased`, `<branch>-rebased-2`,
+   `<branch>-rebased-3` and so on that origin does not have yet, because an earlier rerun may already hold
+   `<branch>-rebased` and a push onto it would need a force too:
 
    ```sh
-   git push -u origin HEAD:refs/heads/<branch>-rebased
+   new=<branch>-rebased; n=1
+   while git ls-remote -q --exit-code --heads origin "$new" >/dev/null; rc=$?; [ "$rc" -eq 0 ]; do
+     n=$((n + 1)); new=<branch>-rebased-$n
+   done
+   [ "$rc" -eq 2 ] && git push -u origin "HEAD:refs/heads/$new"
    ```
 
-   Whoever pushes for the task runs it: the worker through `opening-a-pr`, or the machine mate when the brief says
-   the worker does not push, in which case the worker names the new branch in its report. Never `--force` or
+   `git ls-remote --exit-code` exits 2 when origin has no such branch. Any other non-zero exit is a network or auth
+   error, so the push does not run: stop and ask rather than guess a name. Whoever pushes for the task runs it: the worker through
+   `opening-a-pr`, or the machine mate when the brief says the worker does not push, in which case the worker
+   names the old branch and says that the push goes to a new branch picked this way. Never `--force` or
    `--force-with-lease`.
 
-   A worker that follows `opening-a-pr` reads `<branch>` as `<branch>-rebased` in its push, PR and done steps:
-   - step 7 pushes with the command above, not `git push -u origin <branch>`
-   - step 8 checks `gh pr view <branch>-rebased` and opens a new PR with
-     `gh pr create --base <base> --head <branch>-rebased`. It never reuses the old PR, whose head is the old branch.
-   - the done checks compare `git ls-remote origin refs/heads/<branch>-rebased` with `git rev-parse HEAD`
+   A worker that follows `opening-a-pr` reads `<branch>` as `$new` (the name picked above) in its push, PR and
+   done steps:
+   - step 7 pushes with the commands above, not `git push -u origin <branch>`
+   - step 8 checks `gh pr view "$new"` and opens a new PR with `gh pr create --base <base> --head "$new"`. It never
+     reuses an older PR, whose head is the old branch or an earlier rerun's branch.
+   - the done checks compare `git ls-remote origin "refs/heads/$new"` with `git rev-parse HEAD`
 
-   Leave the old PR and the old branch as they are. Closing them is for whoever lands the work, not the rerun.
+   Leave the old PRs and branches as they are. The lander removes them after landing (step 4 above).
 6. **Report.** The new head SHA (`git rev-parse HEAD`), the new branch name and that it replaces the old one, the
    new PR URL and the old PR it replaces, the list of conflicted files with one line each on how it was resolved,
    and the verify output. A conflict that the report does not list counts as resolved silently.
