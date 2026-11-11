@@ -28,7 +28,8 @@ investigate = "sonnet"
 reviewer = "opus"
 
 [effort]
-ship = "medium"
+first_mate = "high"
+ship = "high"
 investigate = "medium"
 reviewer = "high"
 
