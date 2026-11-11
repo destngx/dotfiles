@@ -117,9 +117,16 @@ changing the script.
    not touch those. List them with `git ls-remote --heads origin '<branch>-rebased*'`, then for each one run
    cleanup with that name (the script handles a branch with no local copy). Then close every PR from `<branch>`
    or one of those branches that `gh pr view <name> --json state` does not show as `MERGED`, with
-   `gh pr close <name> --comment "Landed on main from <branch>."`. Exit 6 for a `-rebased` branch means prepare
-   rewrote the commits after the rerun, so that branch's tip is not on `main`. Report it and leave the branch;
-   never delete it by hand.
+   `gh pr close <name> --comment "Landed on main from <branch>."`. Exit 6 for a `-rebased` branch is read by
+   which rerun pushed it:
+   - A branch that a later rerun replaced (any but the highest-numbered one) always exits 6. Its tip is the
+     rebase that conflicted again on the next landing, so it is never on `main`. That is expected, not a failure.
+   - The newest one (`<branch>-rebased` alone, or the highest `<n>`) exits 6 only when prepare rewrote the
+     commits after the rerun, because `main` moved again.
+
+   Either way, close its PR with the rest and leave the branch. Never delete it by hand: an unmerged branch is
+   data, so report each one left behind (name, tip SHA and which of the two cases it is) and let the owner decide
+   whether to delete it.
 
 5. **Report.** The new `main` SHA, the PR state, the deploy URL and status, what the live check covered, what was
    cleaned up, and whether the primary checkout was pulled.
