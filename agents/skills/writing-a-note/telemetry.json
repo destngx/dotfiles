@@ -1,0 +1,7 @@
+{
+  "phrases": [
+    "\\bprofile: knowledge\\b",
+    "goal: (write|draft) (a |an |the )?(note|notes|study material|study notes)\\b",
+    "\\bwrite the note in your brief\\b"
+  ]
+}

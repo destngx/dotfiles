@@ -1,0 +1,46 @@
+{
+  "fire": [
+    {
+      "name": "mvcc-note",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261112-n0te01. Shape: ship. Profile: knowledge. Repo: obsidian-vaults. Goal: write a note on how Postgres MVCC works in obsidian-vaults/tech/databases. Done when the note explains snapshots, xmin and vacuum with a source for each claim."
+    },
+    {
+      "name": "study-material",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261112-st0dy2. Shape: ship. Profile: knowledge. Goal: write study material on AWS VPC networking in obsidian-vaults/study/aws, with ten practice questions and their answers."
+    },
+    {
+      "name": "backup-report-note",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261112-bk0p33. Shape: ship. Profile: knowledge. Goal: compare restic, borg and kopia for home backups and keep the comparison as a report note in obsidian-vaults/reports. Commit the note."
+    },
+    {
+      "name": "note-from-brief",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set. Brief: shape ship, profile knowledge, repo obsidian-vaults, goal: write a note on the Raft consensus algorithm in obsidian-vaults/tech/distributed.",
+      "prompt": "write the note in your brief"
+    }
+  ],
+  "no_fire": [
+    {
+      "name": "vault-lookup",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261112-l00k44. Shape: investigate. Goal: find out which notes in obsidian-vaults mention the backup schedule and list them. Report only, change no file."
+    },
+    {
+      "name": "feature-brief",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261103-4k7q2m. Shape: ship. Profile: code. Goal: add a CSV export button to the wealth-management transactions page. Done when the button downloads the visible rows as CSV."
+    },
+    {
+      "name": "bug-brief",
+      "context": "You are the sous worker for this task. SOUS_TASK_ID and SOUS_TASK_TOKEN are set.",
+      "prompt": "sous task t-20261112-b0g555. Shape: ship. Profile: code. Goal: fix the markdown exporter so it keeps wikilink aliases. Done when [[note|alias]] exports as alias."
+    },
+    {
+      "name": "mate-note",
+      "context": "You are the sous first mate.",
+      "prompt": "add a note to t-20261112-n0te01 that the owner wants the MVCC note to cover HOT updates too"
+    }
+  ]
+}
