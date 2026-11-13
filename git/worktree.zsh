@@ -10,7 +10,9 @@
 #                                 optionally deleting their branches
 #   gwf remove|rm -y [-D] <worktree>...
 #                                 remove the named worktrees (path, branch, or directory name) without
-#                                 prompts; dirty or in-use ones are skipped, -D deletes merged branches
+#                                 prompts; dirty or in-use ones are skipped. -D also deletes each branch
+#                                 whose commits are all on origin's default branch, under any commit ID
+#                                 (fetched first), and skips the worktree when they are not
 #   gwf gc [-y] [-D] [days]       offer stale worktrees for removal: branch merged into origin's default
 #                                 branch, upstream gone, or clean and idle for [days] (default 14).
 #                                 Without a terminal it only lists them; -y removes them without prompts
@@ -275,6 +277,8 @@ _gwf_remove() {
     targets=(${(f)"$(_gwf_pick --multi --prompt='remove> ' --query="$*" \
       --header='tab: mark multiple | main worktree cannot be removed')"})
   fi
+  # Deciding whether a branch is merged needs origin's current default branch.
+  (( ${flags[(Ie)-D]} || ! ${flags[(Ie)-y]} )) && (( $#targets )) && _gwf_fetch
   _gwf_remove_paths $flags -- $targets
 }
 
@@ -356,11 +360,21 @@ _gwf_gc() {
   _gwf_remove_paths $flags -- $targets
 }
 
+# Whether every commit on branch $1 is on $2, under the same commit ID or as the same patch under
+# another one (a rebase or cherry-pick merge), i.e. `git cherry` lists no '+' commit. Runs in the main
+# worktree $3, so a base of HEAD means its checkout.
+_gwf_merged() {
+  local out
+  out=$(command git -C "$3" cherry "$2" "$1" 2>/dev/null) || return
+  [[ $'\n'$out != *$'\n+'* ]]
+}
+
 # Remove the given worktree paths. Interactively: confirm, then offer to remove in-use or dirty
 # worktrees anyway and to delete their branches. With -y: no prompts, in-use and dirty worktrees are
-# skipped, and -D deletes branches that are fully merged.
+# skipped, and -D deletes branches whose commits are all on origin's default branch; a worktree whose
+# branch has other commits is skipped, so its branch and checkout both stay.
 _gwf_remove_paths() {
-  local yes=0 delete_branch=0 failed=0 main=$(_gwf_main) wt branch cwds users
+  local yes=0 delete_branch=0 failed=0 main=$(_gwf_main) base=$(_gwf_default_base) wt branch cwds users
   while [[ $1 != -- ]]; do
     case $1 in -y) yes=1 ;; -D) delete_branch=1 ;; esac
     shift
@@ -398,6 +412,11 @@ _gwf_remove_paths() {
       read -q "?gwf: $wt is in use. Remove anyway? [y/N] " || { print; continue; }
       print
     fi
+    if (( yes && delete_branch )) && [[ -n $branch ]] && ! _gwf_merged "$branch" "$base" "$main"; then
+      print -u2 "gwf: skipping $wt, '$branch' has commits not on $base"
+      failed=1
+      continue
+    fi
     [[ $PWD == $wt || $PWD == $wt/* ]] && cd -- "$main"
 
     if ! command git worktree remove -- "$wt" 2>/dev/null; then
@@ -415,11 +434,11 @@ _gwf_remove_paths() {
     [[ -n $branch ]] || continue
 
     if (( yes )); then
-      (( delete_branch )) && { command git branch -d -- "$branch" || failed=1 }
+      (( delete_branch )) && { command git branch -D -- "$branch" || failed=1 }
     elif read -q "?Delete branch '$branch'? [y/N] "; then
       print
-      command git branch -d -- "$branch" ||
-        { read -q "?'$branch' is not fully merged. Force delete? [y/N] " && command git branch -D -- "$branch"; print; }
+      _gwf_merged "$branch" "$base" "$main" && command git branch -D -- "$branch" ||
+        { read -q "?'$branch' has commits not on $base. Force delete? [y/N] " && command git branch -D -- "$branch"; print; }
     else
       print
     fi
