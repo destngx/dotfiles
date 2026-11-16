@@ -93,7 +93,7 @@ in
     };
     historySubstringSearch.enable = true;
     shellAliases = {
-      "nix-clean" = "nix-collect-garbage -d && nix-store --optimise";
+      "nix-clean" = "nix-collect-garbage -d && nix-store --optimise && if command -v go >/dev/null; then go clean -cache -testcache -fuzzcache; fi";
       "..." = "cd ../../";
       "...." = "cd ../../../";
       redo = "sudo !!";
