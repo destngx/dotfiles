@@ -18,7 +18,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
 1. **Check the branch and base.** Run `sous task show "$SOUS_TASK_ID" | jq '.brief | {repo, branch, base, verify}'`. Then check that `git branch --show-current` prints the brief's branch and that `pwd` is inside the task's worktree. If either differs, file `--status blocked` with what differs and stop.
 2. **Check the tree.** `git status --short` must print nothing. Commit any finished work. Leave out debug edits, scratch files and generated output the repo does not track.
 3. **Check the commits.** Run `git log --oneline "origin/<base>..HEAD"`. Each commit is a conventional commit in the repo's style, such as `feat(wealth-management): add CSV export to transactions`, and tells one step of the story. Commits, the branch and the PR carry no agent name, no task ID and no `Co-Authored-By` line. Before the first push you may reorder or squash commits with `git rebase origin/<base>` and fixups. After the branch is on the remote, add commits instead. The only rewrite of a pushed branch is the rebase in step 4, and you never force-push yourself.
-4. **Rebase onto the latest base before every ready report.** Run `git fetch origin` and `git rebase origin/<base>`, even when you rebased earlier, because the base may have moved since. The branch then already holds the latest base when it goes to review and landing. When the sandbox refuses the fetch, rebase onto the `origin/<base>` you have, which the engine's own fetch keeps current. Write down every file git reports as conflicted. Resolve each one so that both the base's change and yours survive, then `git add` it and `git rebase --continue`. Never use `-X ours`, `-X theirs` or `git checkout --ours/--theirs` to make a conflict go away. When the two changes cannot both hold, or the fix is a product choice, ask with `sous task ask` instead of picking a side. Step 6 then reruns the verify commands on the rebased head. List the conflicted files in the report summary. When the branch is already pushed, the rebase rewrites it: skip the push in step 7 and file the report in step 9 with `--force-push`, so your machine mate pushes it with `sous task push --force-with-lease`, which fails if anyone else pushed there since.
+4. **Rebase onto the latest base before every ready report.** Run `git fetch origin` and `git rebase origin/<base>`, even when you rebased earlier, because the base may have moved since. The branch then already holds the latest base when it goes to review and landing. When the sandbox refuses the fetch, rebase onto the `origin/<base>` you have, which the engine's own fetch keeps current. Write down every file git reports as conflicted. Resolve each one so that both the base's change and yours survive, then `git add` it and `git rebase --continue`. Never use `-X ours`, `-X theirs` or `git checkout --ours/--theirs` to make a conflict go away. When the two changes cannot both hold, or the fix is a product choice, ask with `sous task ask` instead of picking a side. Step 6 then reruns the verify commands on the rebased head. List the conflicted files in the report summary. When the branch is already on the remote, whoever pushed it (sous or you in step 7 of an earlier round), the rebase rewrites it: skip the push in step 7 and file the report in step 9 with `--force-push`, so your machine mate pushes it with `sous task push --force-with-lease`, which fails if anyone else pushed there since.
 5. **Check the scope.** `git diff --name-only "origin/<base>...HEAD"` must list only paths inside the brief's `scope.write`, none in `scope.deny`, and no `fleet.toml`.
 6. **Rerun the verify commands at the final commit.** Run every command in the brief's `verify` list and the repo's own checks for the projects you touched, from the worktree root, exactly as written. Write each command, its exit code and the end of its output to an evidence file outside the repo:
 
@@ -31,7 +31,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
    ```
 
    Add the done-condition check from the feature or bug-fix runbook, such as the repro before and after. Any command that exits non-zero means the task is not ready. Fix it, or report `partial` or `blocked`.
-7. **Push the branch.** Run `git push -u origin <branch>`. Never push to the base branch and never use `--force` or `--force-with-lease` yourself. When step 4 rewrote a branch that is already pushed, do not push here; the machine mate's lease push from step 9 takes its place. Otherwise check that `git ls-remote origin "refs/heads/<branch>"` prints the same SHA as `git rev-parse HEAD`.
+7. **Push the branch.** Run `git push -u origin <branch>`. Never push to the base branch and never use `--force` or `--force-with-lease` yourself. When step 4 rewrote a branch that is already on the remote, do not push here; the machine mate's lease push from step 9 takes its place. Otherwise check that `git ls-remote origin "refs/heads/<branch>"` prints the same SHA as `git rev-parse HEAD`.
 8. **Open the PR.** If `gh pr view <branch> --json url,state` already shows an open PR, reuse it and update its body with `gh pr edit`. Otherwise write the body to a file and run:
 
    ```sh
@@ -44,7 +44,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
    - `## Scope` says what the PR covers and what it leaves out.
    - `## Verification` names each command run and its result.
 
-   Read the PR back with `gh pr view <branch> --json url,state,isDraft,baseRefName,headRefOid` and check that it is open, not a draft, on the right base, and that its head is your SHA. When step 4 rewrote a pushed branch, the PR head stays the old SHA until the machine mate's lease push after step 9, so check here only that the PR is open, ready and on the right base.
+   Read the PR back with `gh pr view <branch> --json url,state,isDraft,baseRefName,headRefOid` and check that it is open, not a draft, on the right base, and that its head is your SHA. When step 4 rewrote a branch that is already on the remote, the PR head stays the old SHA until the machine mate's lease push after step 9, so check here only that the PR is open, ready and on the right base.
 9. **File the report.**
 
    ```sh
@@ -55,7 +55,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
      --pr "<PR URL>"
    ```
 
-   Add `--force-push` when step 4 rewrote a branch that is already pushed. The command prints one line. Check it with `sous task show "$SOUS_TASK_ID" | jq '{state, report}'`.
+   Add `--force-push` when step 4 rewrote a branch that is already on the remote. The command prints one line. Check it with `sous task show "$SOUS_TASK_ID" | jq '{state, report}'`.
 10. **Stop.** Do not merge, do not wait on CI, and do not run `gwf rm`. The reviewer reruns your verify commands, and the engine lands the work and cleans up.
 
 ## Done when
