@@ -47,7 +47,7 @@ The brief's `timebox` is a hard stop. When it runs out, or your inbox says "time
 All of these hold, and anyone can check them:
 
 - `sous task show "$SOUS_TASK_ID" | jq -r .state` prints `ready` or a later state (`reviewing`, `landing`, `landed`, `waiting`).
-- `.report.head` equals `git rev-parse HEAD` in the worktree and `git ls-remote origin "refs/heads/<branch>"`.
+- `.report.head` equals `git rev-parse HEAD` in the worktree and `git ls-remote origin "refs/heads/<branch>"`. After a `--force-push` report, the remote matches once the machine mate's lease push has run.
 - `gh pr view <branch> --json state,isDraft,baseRefName` shows `OPEN`, `false` and the brief's base.
 - `.report.evidence` lists every verify command with its exit code and output, and each one exited 0.
 - `git diff --name-only "origin/<base>...HEAD"` lists only paths inside `scope.write`, none inside `scope.deny`, and no `fleet.toml`.

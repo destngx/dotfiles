@@ -49,7 +49,7 @@ When the brief's timebox runs out, or your inbox says "timebox reached, report w
 - `sous task show "$SOUS_TASK_ID" | jq -r .state` prints `ready` or a later state.
 - `.report.evidence` holds the repro command with its failing output before the fix and its passing output after it, and every verify command with exit code 0.
 - `git log --oneline "origin/<base>..HEAD"` shows the commit with the failing check before the commit with the fix, or the report says why there is no separate check.
-- `.report.head` equals `git rev-parse HEAD` and the pushed branch, and `gh pr view <branch> --json state,isDraft,baseRefName` shows `OPEN`, `false` and the brief's base.
+- `.report.head` equals `git rev-parse HEAD` and the pushed branch (after a `--force-push` report, once the machine mate's lease push has run), and `gh pr view <branch> --json state,isDraft,baseRefName` shows `OPEN`, `false` and the brief's base.
 - `git diff --name-only "origin/<base>...HEAD"` lists only paths in scope and no `fleet.toml`.
 
 ## Verify commands

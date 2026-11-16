@@ -44,7 +44,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
    - `## Scope` says what the PR covers and what it leaves out.
    - `## Verification` names each command run and its result.
 
-   Read the PR back with `gh pr view <branch> --json url,state,isDraft,baseRefName,headRefOid` and check that it is open, not a draft, on the right base, and that its head is your SHA.
+   Read the PR back with `gh pr view <branch> --json url,state,isDraft,baseRefName,headRefOid` and check that it is open, not a draft, on the right base, and that its head is your SHA. When step 4 rewrote a pushed branch, the PR head stays the old SHA until the machine mate's lease push after step 9, so check here only that the PR is open, ready and on the right base.
 9. **File the report.**
 
    ```sh
@@ -61,7 +61,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
 ## Done when
 
 - `sous task show "$SOUS_TASK_ID" | jq -r .state` prints `ready` or a later state.
-- `.report.head`, `git rev-parse HEAD` and `git ls-remote origin "refs/heads/<branch>"` show the same SHA.
+- `.report.head`, `git rev-parse HEAD` and `git ls-remote origin "refs/heads/<branch>"` show the same SHA. After a `--force-push` report, the remote shows it once the machine mate's lease push has run.
 - `.report.pr` is the URL that `gh pr view <branch> --json url` prints, and the PR is `OPEN`, not a draft, against the brief's base.
 - `.report.evidence` lists every verify command with `exit=0`, and ends with `head=<the same SHA>`.
 
