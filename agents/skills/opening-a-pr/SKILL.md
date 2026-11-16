@@ -17,8 +17,8 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
 
 1. **Check the branch and base.** Run `sous task show "$SOUS_TASK_ID" | jq '.brief | {repo, branch, base, verify}'`. Then check that `git branch --show-current` prints the brief's branch and that `pwd` is inside the task's worktree. If either differs, file `--status blocked` with what differs and stop.
 2. **Check the tree.** `git status --short` must print nothing. Commit any finished work. Leave out debug edits, scratch files and generated output the repo does not track.
-3. **Check the commits.** Run `git log --oneline "origin/<base>..HEAD"`. Each commit is a conventional commit in the repo's style, such as `feat(wealth-management): add CSV export to transactions`, and tells one step of the story. Commits, the branch and the PR carry no agent name, no task ID and no `Co-Authored-By` line. Before the first push you may reorder or squash commits with `git rebase origin/<base>` and fixups. After the branch is on the remote, add commits instead, because force-pushing is forbidden.
-4. **Update from the base before the first push.** Run `git fetch origin <base>`. If `git merge-base --is-ancestor origin/<base> HEAD` fails and the branch is not pushed yet, run `git rebase origin/<base>`. Stop and report `blocked` with the conflicting files if the rebase conflicts, after `git rebase --abort`.
+3. **Check the commits.** Run `git log --oneline "origin/<base>..HEAD"`. Each commit is a conventional commit in the repo's style, such as `feat(wealth-management): add CSV export to transactions`, and tells one step of the story. Commits, the branch and the PR carry no agent name, no task ID and no `Co-Authored-By` line. Before the first push you may reorder or squash commits with `git rebase origin/<base>` and fixups. After the branch is on the remote, add commits instead. The only rewrite of a pushed branch is the rebase in step 4, and you never force-push yourself.
+4. **Rebase onto the latest base before every ready report.** Run `git fetch origin` and `git rebase origin/<base>`, even when you rebased earlier, because the base may have moved since. The branch then already holds the latest base when it goes to review and landing. When the sandbox refuses the fetch, rebase onto the `origin/<base>` you have, which the engine's own fetch keeps current. Write down every file git reports as conflicted. Resolve each one so that both the base's change and yours survive, then `git add` it and `git rebase --continue`. Never use `-X ours`, `-X theirs` or `git checkout --ours/--theirs` to make a conflict go away. When the two changes cannot both hold, or the fix is a product choice, ask with `sous task ask` instead of picking a side. Step 6 then reruns the verify commands on the rebased head. List the conflicted files in the report summary. When the branch is already pushed, the rebase rewrites it: skip the push in step 7 and file the report in step 9 with `--force-push`, so your machine mate pushes it with `sous task push --force-with-lease`, which fails if anyone else pushed there since.
 5. **Check the scope.** `git diff --name-only "origin/<base>...HEAD"` must list only paths inside the brief's `scope.write`, none in `scope.deny`, and no `fleet.toml`.
 6. **Rerun the verify commands at the final commit.** Run every command in the brief's `verify` list and the repo's own checks for the projects you touched, from the worktree root, exactly as written. Write each command, its exit code and the end of its output to an evidence file outside the repo:
 
@@ -31,7 +31,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
    ```
 
    Add the done-condition check from the feature or bug-fix runbook, such as the repro before and after. Any command that exits non-zero means the task is not ready. Fix it, or report `partial` or `blocked`.
-7. **Push the branch.** Run `git push -u origin <branch>`. Never push to the base branch and never use `--force` or `--force-with-lease`. Check that `git ls-remote origin "refs/heads/<branch>"` prints the same SHA as `git rev-parse HEAD`.
+7. **Push the branch.** Run `git push -u origin <branch>`. Never push to the base branch and never use `--force` or `--force-with-lease` yourself. When step 4 rewrote a branch that is already pushed, do not push here; the machine mate's lease push from step 9 takes its place. Otherwise check that `git ls-remote origin "refs/heads/<branch>"` prints the same SHA as `git rev-parse HEAD`.
 8. **Open the PR.** If `gh pr view <branch> --json url,state` already shows an open PR, reuse it and update its body with `gh pr edit`. Otherwise write the body to a file and run:
 
    ```sh
@@ -55,7 +55,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
      --pr "<PR URL>"
    ```
 
-   The command prints one line. Check it with `sous task show "$SOUS_TASK_ID" | jq '{state, report}'`.
+   Add `--force-push` when step 4 rewrote a branch that is already pushed. The command prints one line. Check it with `sous task show "$SOUS_TASK_ID" | jq '{state, report}'`.
 10. **Stop.** Do not merge, do not wait on CI, and do not run `gwf rm`. The reviewer reruns your verify commands, and the engine lands the work and cleans up.
 
 ## Done when
@@ -81,6 +81,6 @@ sous task show "$SOUS_TASK_ID" | jq '{state, report}'
 - **Evidence from an older commit.** If you commit after running the checks, run them again. The reviewer checks the head you report.
 - **A draft PR.** `gh pr create` with `--draft` or a repo template that opens drafts leaves the PR in draft. Run `gh pr ready <branch>` and read it back.
 - **No GitHub remote.** When `gh repo view` fails because the repo has no GitHub remote, you cannot open a PR. Report `blocked` with that reason. Do not create a remote or a repo.
-- **A rejected push.** A branch protection or hook that rejects the push is a refusal. Report its exact message as `blocked`. Never bypass it with `--no-verify` or a force-push.
+- **A rejected push.** A branch protection or hook that rejects the push is a refusal. Report its exact message as `blocked`. Never bypass it with `--no-verify` or a force-push of your own.
 - **The `sous` command fails.** When the engine does not answer, `sous task report` fails with a message on stderr. Wait a minute and run it again. Do not end the turn until a report is filed, and never write to `~/.local/state/sous/` yourself.
 - **Merging.** Never run `gh pr merge`, `gh pr merge --auto`, the `rebase-merge` skill or a push to the base branch, even when the checks are green.
