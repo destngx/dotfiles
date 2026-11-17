@@ -30,6 +30,42 @@ first_mate = "high"
 [paths]
 projects = "~/projects"
 
+# The guard floor (D-guard-config): what every session is kept from, whatever
+# its grants, role or profile open. Every key is required, and with no [guard]
+# table every launch fails. apps/sous/internal/guardtest/guard.toml in the
+# monorepo is the tests' copy.
+[guard]
+# Folders no grant, link target or variable reaches: absolute or under ~/.
+hard_limits = ["~/.kube", "~/.aws", "~/.ssh", "~/.claude", "~/Library/Keychains", "/Library/Keychains"]
+# Patterns, relative to the projects folder, for what no session writes in any
+# project. **/NAME also protects every NAME folder found at launch. The
+# owner's global skills (dotfiles/agents) run unsandboxed in the mates'
+# sessions, and dotfiles/claude is Claude's own config.
+protect = ["**/.claude", "dotfiles/agents", "dotfiles/claude"]
+# Folders that hold a repo's git hooks: protected everywhere, and the files
+# their scripts name are protected in every checkout but the session's own.
+hook_folders = [".husky", ".githooks"]
+# What a commit-hook runner reads, protected in every checkout but the
+# session's own: its config, the code eslint and prettier load, node_modules.
+hook_inputs = [
+  "package.json", ".lintstagedrc*", "lint-staged.config.*", "lefthook*", ".lefthook*",
+  ".pre-commit-config.yaml", ".simple-git-hooks*", ".huskyrc*", "commitlint.config.*", ".commitlintrc*",
+  "eslint.config.*", ".eslintrc*", ".prettierrc*", "prettier.config.*", "node_modules",
+]
+# The parts of a git directory no session writes, relative to it.
+git_internals = [
+  "config", "hooks", "config.worktree", "commondir",
+  "modules/**/config", "modules/**/hooks",
+  "worktrees/*/commondir", "worktrees/*/gitdir", "worktrees/*/config.worktree",
+]
+# File names that hold credentials; one git does not track stays closed.
+secret_names = [
+  ".env*", "*.pem", "*.key", "*.p12", "*.pfx", "*.keystore",
+  "id_rsa*", "id_ed25519*", "id_ecdsa*", "id_dsa*",
+  ".netrc", ".npmrc", ".pypirc", ".htpasswd", "credentials", "credentials.json",
+  "secrets.*", "*.secret", "service-account*.json",
+]
+
 # Sous sandbox grants (D62, D-guard-config): everything a worker, reviewer or
 # lookup session may reach beyond the engine's fixed core. The core is not in
 # this list: the task's worktree and its git deny set, the sous state, Claude
@@ -277,6 +313,11 @@ capabilities = ["pr-manage"]
 #   grants, capabilities, tools
 #                       narrow every role: a session gets what both its role
 #                       and its profile list. Leave a key out to narrow nothing.
+#   unprotect           [guard] protect patterns (or **/NAME of a hook folder)
+#                       the profile's sessions may write; every other profile
+#                       stays under the whole floor. Hard limits, git internals
+#                       and secrets cannot be dropped. Only a brief the owner
+#                       approved may name such a profile.
 
 [profiles.code]
 why = "a change to code, tests or docs in a repo"
@@ -298,6 +339,19 @@ ship-worker = "opus"
 lookup = "sonnet"
 reviewer = "opus"
 [profiles.knowledge.effort]
+ship-worker = "high"
+lookup = "medium"
+reviewer = "high"
+
+[profiles.butler]
+why = "maintaining sous itself and the Claude config it runs under: the .claude folders and git hooks of the task's own worktree, which every other profile leaves alone"
+runtime = "seatbelt"
+unprotect = ["**/.claude", "**/.husky", "**/.githooks"]
+[profiles.butler.models]
+ship-worker = "opus"
+lookup = "sonnet"
+reviewer = "opus"
+[profiles.butler.effort]
 ship-worker = "high"
 lookup = "medium"
 reviewer = "high"
