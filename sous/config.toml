@@ -18,10 +18,10 @@ per_project = 5
 
 [workers.projects]
 
-# The mates' models and effort; a worker's and a reviewer's are its profile's, below.
+# The sous mate's and intake's models and effort; a worker's and a reviewer's are
+# its profile's, and the machine mate's is [helper]'s, below.
 [models]
 first_mate = "opus"
-mate = "opus"
 intake = "haiku"
 
 [effort]
@@ -206,7 +206,7 @@ domains = ["api.anthropic.com"]
 #                   interpreter, env or sudo as argv[0]. An element is a literal
 #                   or exactly one {slot}.
 #   builtin         instead of argv: a named engine function (herdr-manage; and,
-#                   for the mate role alone, pr-manage)
+#                   for the helper alone, pr-manage)
 #   cwd             repo (the brief's primary checkout) or worktree (the task's
 #                   own copy); builtins have none
 #   timeout         e.g. "60s"; the process group is killed at the limit
@@ -214,7 +214,7 @@ domains = ["api.anthropic.com"]
 #   rate            "N/second", "N/minute" or "N/hour", per task and capability
 #   roles           the roles that may run it (each role lists it back)
 #   states          the task states in which it may run (leave it out for a
-#                   capability only the mate role runs: a mate has no task)
+#                   capability of the helper: it has no task)
 #   args.NAME       a typed slot: type ref | herdr-id | enum | int, optional,
 #                   values (enum), min and max (int). There is no free-form
 #                   type. A slot of type ref or herdr-id must come after a "--"
@@ -223,9 +223,11 @@ domains = ["api.anthropic.com"]
 # Every git command runs with core.hooksPath=/dev/null and core.fsmonitor off,
 # and with GIT_DIR and GIT_COMMON_DIR pinned to the repo's own .git folder.
 #
-# The mate role (D68) is the machine mate's: it calls with the operator key and
-# no task token (`sous run`), and its capabilities are builtins only. A
-# pr-manage listed by any other role fails the load. herdr-manage (D74) and
+# The helper (D68) is the machine mate: it calls with the operator key and no
+# task token (`sous run`), its capabilities are builtins only, and it is the
+# [helper] table, not a role. A capability of the helper lists roles =
+# ["helper"] and nothing else, so the helper and the worker roles share none;
+# a pr-manage listed by any role fails the load. herdr-manage (D74) and
 # pr-manage (D73) entries declare no args: the engine adds them.
 #
 # A role:
@@ -267,13 +269,13 @@ roles = ["ship-worker", "reviewer", "lookup"]
 states = ["starting", "running", "stale", "reviewing"]
 
 [capabilities.pr-manage]
-why = "manage the PRs of sous tasks, through an action argument. create opens a PR from a task's branch (it must be on origin, with no open PR) against that task's base, with a title and optional body. edit changes the title or body of a task's open PR, or adds a comment. rerun reruns the failed jobs of a finished workflow run whose branch is a sous task's branch (gh run rerun RUN --failed, 3 per branch per hour). delete-branch deletes a finished sous task's branch on origin once every commit on it is on the task's base (git cherry shows no '+'), never a trunk, base, default or protected branch or one no sous task owns, with a lease on the checked commit. close closes a PR with one fixed comment, and only when it is stored on a cancelled sous task; or, for a PR no task stores, when the owner's OK for that number is recorded (sous pr-ok N --words ...; 24 hours, one use). Every action refuses unless the PR is in the repo of that task's origin, from that task's own branch, and still open"
+why = "read and manage the PRs of sous tasks, through an action argument. view, diff, checks, list, runs and run-view read GitHub, each one fixed gh command in the repo of the sous task named with task=ID, and change nothing; they are how the machine mate reads GitHub, since its session holds no gh. create opens a PR from a task's branch (it must be on origin, with no open PR) against that task's base, with a title and optional body. edit changes the title or body of a task's open PR, or adds a comment. rerun reruns the failed jobs of a finished workflow run whose branch is a sous task's branch (gh run rerun RUN --failed, 3 per branch per hour). delete-branch deletes a finished sous task's branch on origin once every commit on it is on the task's base (git cherry shows no '+'), never a trunk, base, default or protected branch or one no sous task owns, with a lease on the checked commit. close closes a PR with one fixed comment, and only when it is stored on a cancelled sous task; or, for a PR no task stores, when the owner's OK for that number is recorded (sous pr-ok N --words ...; 24 hours, one use). Every action refuses unless the PR is in the repo of that task's origin, from that task's own branch, and still open"
 decision = "D73"
 builtin = "pr-manage"
 timeout = "60s"
 max_output = 65536
 rate = "20/minute"
-roles = ["mate"]
+roles = ["helper"]
 
 [roles.ship-worker]
 why = "the worker of a ship task: it writes a branch in its own worktree"
@@ -289,10 +291,6 @@ tools = ["Agent", "Bash", "Edit", "Glob", "Grep", "Monitor", "NotebookEdit", "Re
 [roles.lookup]
 why = "the worker of an investigate or review task: it reads and reports; with no tools line it gets the default tools plus WebFetch and WebSearch (D74)"
 capabilities = ["git-ls-remote", "herdr-manage"]
-
-[roles.mate]
-why = "a machine mate: it holds the operator key and no task token, and cleans up after finished tasks (D68)"
-capabilities = ["pr-manage"]
 
 # Sous profiles (D-guard-config): a task's kind, and what its sessions get. A
 # task names its profile (code when it names none); its shape picks the role
@@ -355,3 +353,35 @@ reviewer = "opus"
 ship-worker = "high"
 lookup = "medium"
 reviewer = "high"
+
+# The helper (D-guard-config): the machine mate, which is not a worker and
+# shares no table with them. It holds the operator key and no task token, runs
+# unconfined as the owner's macOS user, and gets exactly what this table lists.
+# With no [helper] the machine mate does not start.
+# apps/sous/internal/guardtest/helper.toml in the monorepo is the tests' copy.
+#
+#   why             what it is for (required)
+#   model, effort   its Claude model (required) and reasoning effort
+#   tools           its whole --allowedTools list: Read, Glob, Grep and
+#                   Bash(PATTERN) entries only, Bash(sous *) among them. No
+#                   pattern may allow every command or run gh: it reads GitHub
+#                   through pr-manage.
+#   capabilities    the builtins it runs through `sous run`; each lists
+#                   roles = ["helper"] and nothing else
+#
+# The Bash entries past sous: the self-update's steps that are not sous
+# commands (D97; the pull fetches and fast-forwards rather than running git
+# pull, which pull.rebase can break), and the fetch for a worker, which has no
+# git credential (D-fetch-by-machine-mate; no -C, no -c, no other remote).
+
+[helper]
+why = "the machine mate: it supervises this Mac's workers, cleans up after finished tasks, fetches for workers and runs the self-update"
+model = "opus"
+effort = "high"
+tools = [
+  "Bash(sous *)", "Read", "Glob", "Grep",
+  "Bash(git fetch origin main)", "Bash(git merge --ff-only origin/main)", "Bash(git merge-base --is-ancestor *)",
+  "Bash(pnpm install --frozen-lockfile)", "Bash(pnpx nx run sous:install)", "Bash(pnpx nx run sous:load-agent)",
+  "Bash(git fetch origin)",
+]
+capabilities = ["pr-manage"]
