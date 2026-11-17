@@ -1,6 +1,6 @@
 ---
 name: rebase-merge
-description: Land a feature branch on main locally with linear history - rebase the branch onto origin/main, fast-forward main to it (no merge commit), push, watch the deploy, then remove the worktree and branch. Use whenever the user asks to merge finished work into main, in any wording - "merge", "merge it", "merge rebase", "rebase-merge", "proceed merge", "merge no ff" (main takes no merge commits, so no-ff requests land here too), "commit push and merge" (commit first, then run this skill) - or to land a branch/PR on main without the GitHub merge button. Not for merging main into a feature branch.
+description: Land a feature branch on main locally with linear history as exactly one commit - squash the branch to one commit, rebase it onto origin/main, fast-forward main to it (no merge commit), push, watch the deploy, then remove the worktree and branch. Use whenever the user asks to merge finished work into main, in any wording - "merge", "merge it", "merge rebase", "rebase-merge", "proceed merge", "merge no ff" (main takes no merge commits, so no-ff requests land here too), "commit push and merge" (commit first, then run this skill) - or to land a branch/PR on main without the GitHub merge button. Not for merging main into a feature branch.
 argument-hint: '[branch] (defaults to the current branch)'
 ---
 
@@ -8,10 +8,11 @@ argument-hint: '[branch] (defaults to the current branch)'
 
 Lands a branch on `main` the way GitHub's "Rebase and merge" would, but from the local checkout. `main` only
 fast-forwards: the repo ruleset rejects merge commits ("Merge commits are not allowed in this repository"), so
-`git merge --no-ff` is never used, even when the user says "no ff". The user asking for a rebase merge (by
-slash command or in plain words such as "merge rebase") is their approval to push to `main`, to force-push the
-feature branch with `--force-with-lease`, and to delete the branch (local and remote) and its worktree once the
-merge and deploy are verified.
+`git merge --no-ff` is never used, even when the user says "no ff". Every branch lands as exactly one new commit on
+`main` (or `develop`, or whichever base it targets), so a branch with more than one commit is squashed first. The
+user asking for a rebase merge (by slash command or in plain words such as "merge rebase") is their approval to
+push to `main`, to force-push the feature branch with `--force-with-lease`, and to delete the branch (local and
+remote) and its worktree once the merge and deploy are verified.
 
 Branch: `$ARGUMENTS`, or the current branch when empty.
 
@@ -24,9 +25,10 @@ When the request also asks for a commit ("commit push and merge"), commit the fi
 worktree first, then start at step 1. The script pushes the branch itself, so do not push by hand.
 
 `scripts/rebase-merge.sh` (installed at `~/.agents/skills/rebase-merge/scripts/rebase-merge.sh`) runs every git, gh
-and Vercel command. Do not run those steps by hand. Each subcommand prints `key=value` lines and exits with a code that
-says what to do next. Your part is the decisions between subcommands: which checks to rerun, whether the live site
-is right, and which leftover processes to stop. The header of the script lists every exit code.
+and Vercel command except the squash in step 1, whose commit message is yours to write. Do not run the other steps
+by hand. Each subcommand prints `key=value` lines and exits with a code that says what to do next. Your part is the
+decisions between subcommands: which checks to rerun, whether the live site is right, and which leftover processes
+to stop. The header of the script lists every exit code.
 
 Run it exactly as written below, from a checkout's root, with no `cd` or env prefix in the same command. This is a
 global skill, so each repo grants the push permission in its own `.claude/settings.json` with the allow rule
@@ -37,7 +39,26 @@ changing the script.
 
 ## Steps
 
-1. **Prepare.** From the branch's worktree (or from anywhere, naming the branch):
+1. **Squash to one commit.** The branch lands as one commit, so squash it before prepare rebases it and the land
+   fast-forwards `main` to it. In the branch's worktree, with `main` read as the base:
+
+   ```sh
+   git fetch origin
+   git log --oneline origin/main..HEAD
+   ```
+
+   When it lists more than one commit, squash them into one:
+
+   ```sh
+   git reset --soft "$(git merge-base origin/main HEAD)"
+   git commit
+   ```
+
+   The message is one conventional commit in the repo's style that names the whole change, such as the PR title.
+   It carries no agent name, no task ID and no `Co-Authored-By` or generated-by line. When it lists exactly one
+   commit, skip the squash. The squash rewrites a pushed branch, and prepare pushes it with `--force-with-lease`.
+
+2. **Prepare.** From the branch's worktree (or from anywhere, naming the branch):
 
    ```sh
    bash ~/.agents/skills/rebase-merge/scripts/rebase-merge.sh prepare [branch] [--base <branch>]
@@ -52,11 +73,13 @@ changing the script.
    - Exit 3 means the rebase conflicted. The script aborted it, so the branch is unchanged. Report the
      `conflict=` files and stop. Do not resolve conflicts silently. The fix is a rerun of the task, which follows
      "Rerun after a landing conflict" below.
+   - `commits=` must be `1`. Any other count means the squash in step 1 was skipped. Go back to step 1, and do not
+     land.
    - `rewritten=yes` means `main` moved and the commits changed. Decide which checks the new base affects (the
      tests, lint and build of the projects the branch touches, plus any project that `main`'s new commits change
      under it). Run them in the worktree before landing. Fix or report failures, and do not land a red branch.
 
-2. **Land.**
+3. **Land.**
 
    ```sh
    bash ~/.agents/skills/rebase-merge/scripts/rebase-merge.sh land [branch] [--base <branch>]
@@ -65,7 +88,7 @@ changing the script.
    It pushes the branch tip to `main`. The push is a fast-forward or nothing, because there is no force. Then it
    checks that `origin/main` equals the tip and waits for the PR to show `MERGED`.
    - Exit 4 means `origin/main` moved after prepare, or another session's push to `main` landed during this one
-     (GitHub answers that with `cannot lock ref`). Go back to step 1.
+     (GitHub answers that with `cannot lock ref`). Go back to step 2.
    - Exit 5 means a ruleset rejected the push (for example, required reviews or status checks). Report the exact
      message and stop. Do not try to bypass it.
    - `pr_state=OPEN` after the retries usually means GitHub is slow. Check again with
@@ -73,7 +96,7 @@ changing the script.
 
    Keep `old_main` and `vercel_apps` from the output for the next steps.
 
-3. **Watch the deploy.** If `vercel_apps` is empty, go to step 4.
+4. **Watch the deploy.** If `vercel_apps` is empty, go to step 5.
 
    ```sh
    bash ~/.agents/skills/rebase-merge/scripts/rebase-merge.sh deploy
@@ -89,7 +112,7 @@ changing the script.
    return 200 and show the change. If the deploy failed or the site is wrong, stop, report it, and skip cleanup,
    so the worktree stays available for a fix.
 
-4. **Clean up.** Only after the merge is verified and the deploy (if any) is good. First `cd` to the primary
+5. **Clean up.** Only after the merge is verified and the deploy (if any) is good. First `cd` to the primary
    checkout, so your shell is not inside the worktree being removed:
 
    ```sh
@@ -128,8 +151,17 @@ changing the script.
    data, so report each one left behind (name, tip SHA and which of the two cases it is) and let the owner decide
    whether to delete it.
 
-5. **Report.** The new `main` SHA, the PR state, the deploy URL and status, what the live check covered, what was
-   cleaned up, and whether the primary checkout was pulled.
+6. **Report.** The new `main` SHA, the one landed commit (`git log --oneline <old_main>..origin/main`), the PR state,
+   the deploy URL and status, what the live check covered, what was cleaned up, and whether the primary checkout was
+   pulled.
+
+## Done when
+
+- `git log --oneline <old_main>..origin/main` prints exactly one commit, with `old_main` from the land output: the
+  branch landed as one new commit on `main`.
+- `origin/main` equals the branch tip that land pushed, and the PR shows `MERGED`.
+- The deploy of every app in `vercel_apps` is `READY` or `SKIPPED`, and the live check passed.
+- The worktree, the local branch and the remote branch are gone, or the report names what was left and why.
 
 ## Rerun after a landing conflict
 
@@ -172,7 +204,7 @@ with the script: prepare force-pushes the branch, and a rerun never force-pushes
      reuses an older PR, whose head is the old branch or an earlier rerun's branch.
    - the done checks compare `git ls-remote origin "refs/heads/$new"` with `git rev-parse HEAD`
 
-   Leave the old PRs and branches as they are. The lander removes them after landing (step 4 above).
+   Leave the old PRs and branches as they are. The lander removes them after landing (step 5 above).
 6. **Report.** The new head SHA (`git rev-parse HEAD`), the new branch name and that it replaces the old one, the
    new PR URL and the old PR it replaces, the list of conflicted files with one line each on how it was resolved,
    and the verify output. A conflict that the report does not list counts as resolved silently.
