@@ -268,8 +268,6 @@ capabilities = ["pr-manage"]
 #
 # A profile:
 #   why                 what kind of task it is for (required)
-#   decide              auto: its decisions are taken on their own and logged;
-#                       wait: each one waits for the owner (SO-RULE-7)
 #   runtime             what confines its sessions: seatbelt (Claude Code's
 #                       sandbox on macOS) is the only one for now
 #   models.ROLE         the Claude model of each worker role (ship-worker,
@@ -282,7 +280,6 @@ capabilities = ["pr-manage"]
 
 [profiles.code]
 why = "a change to code, tests or docs in a repo"
-decide = "auto"
 runtime = "seatbelt"
 [profiles.code.models]
 ship-worker = "opus"
@@ -295,7 +292,6 @@ reviewer = "high"
 
 [profiles.knowledge]
 why = "a note, report or study material in a knowledge repo; a copy of code until it needs its own limits"
-decide = "auto"
 runtime = "seatbelt"
 [profiles.knowledge.models]
 ship-worker = "opus"

@@ -43,7 +43,7 @@ All of these hold, and anyone can check them:
 
 - `sous task show "$SOUS_TASK_ID" | jq -r .state` prints `ready` or a later state (`reviewing`, `landing`, `landed`, `waiting`).
 - `.report.head` equals `git rev-parse HEAD` in the worktree, and `git status --short` is empty.
-- `git diff --name-only "<base>...HEAD"` lists only paths inside `scope.write`, none inside `scope.deny`, and no `fleet.toml`.
+- `git diff --name-only "<base>...HEAD"` lists only paths inside `scope.write`, and none inside `scope.deny`.
 - Every link in the note resolves to a file in the vault, and every claim names a source or is marked inferred.
 - `.report.checks` answers every numbered check of the done condition, each with a source.
 

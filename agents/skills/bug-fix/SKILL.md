@@ -51,7 +51,7 @@ When the brief's timebox runs out, or your inbox says "timebox reached, report w
 - `.report.evidence` holds the repro command with its failing output before the fix and its passing output after it, and every verify command with exit code 0.
 - `git log --oneline "origin/<base>..HEAD"` prints exactly one commit, and `.report.evidence` names the check commit that failed before the fix commit was made, or the report says why there is no separate check.
 - `.report.head` equals `git rev-parse HEAD` and the pushed branch (after a `--force-push` report, once the machine mate's lease push has run), and `gh pr view <branch> --json state,isDraft,baseRefName` shows `OPEN`, `false` and the brief's base.
-- `git diff --name-only "origin/<base>...HEAD"` lists only paths in scope and no `fleet.toml`.
+- `git diff --name-only "origin/<base>...HEAD"` lists only paths in scope.
 
 ## Verify commands
 
@@ -71,4 +71,4 @@ sous task show "$SOUS_TASK_ID" | jq '{state, report}'
 - **A test that passes before the fix.** If the new test passes on the old code, it does not test the bug. Fix the test before you touch the code.
 - **Ending the turn without a report.** The Stop hook blocks your turn while the task is open, and after three blocks the engine marks the task stale. File a report, even `blocked` or `partial`.
 - **Widening the scope.** Other bugs you find go in the report as follow-ups, not in this diff.
-- **Editing `fleet.toml`, installing tools, or merging.** The plugin blocks `fleet.toml` edits. Never install a tool or run `nix-rebuild`. Never run `gh pr merge`, push to the base branch or run the `rebase-merge` skill, except its "Rerun after a landing conflict" section on a rerun after a failed landing.
+- **Installing tools, or merging.** Never install a tool or run `nix-rebuild`. Never run `gh pr merge`, push to the base branch or run the `rebase-merge` skill, except its "Rerun after a landing conflict" section on a rerun after a failed landing.

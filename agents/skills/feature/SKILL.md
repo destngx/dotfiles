@@ -51,7 +51,7 @@ All of these hold, and anyone can check them:
 - `.report.head` equals `git rev-parse HEAD` in the worktree and `git ls-remote origin "refs/heads/<branch>"`. After a `--force-push` report, the remote matches once the machine mate's lease push has run.
 - `gh pr view <branch> --json state,isDraft,baseRefName` shows `OPEN`, `false` and the brief's base.
 - `.report.evidence` lists every verify command with its exit code and output, and each one exited 0.
-- `git diff --name-only "origin/<base>...HEAD"` lists only paths inside `scope.write`, none inside `scope.deny`, and no `fleet.toml`.
+- `git diff --name-only "origin/<base>...HEAD"` lists only paths inside `scope.write`, and none inside `scope.deny`.
 - `git log --oneline "origin/<base>..HEAD"` prints exactly one commit.
 
 ## Verify commands
@@ -73,6 +73,6 @@ sous task show "$SOUS_TASK_ID" | jq '{state, report}'
 - **Ending the turn without a report.** While the task is open, the Stop hook blocks your turn from ending. After three blocks it lets one stop through and the engine marks the task stale. File a report, even `blocked` or `partial`, before you stop.
 - **Your own claim is not evidence.** The reviewer reruns your verify commands in a fresh session. Paste the commands you ran and their real output, and make sure they run from the worktree root with no setup that only your session had.
 - **Widening the scope.** A refactor you noticed, a dependency bump or a fix to nearby code is a follow-up. Put it in the report summary as a proposal, not in this diff. A lesson about the repo or this runbook is also a follow-up, proposed as its own PR.
-- **Editing `fleet.toml`.** The plugin blocks edits to any `fleet.toml`, and the engine refuses to merge a diff that touches one. Never work around the block.
+- **Working around a block.** When the sandbox or the path guard refuses a write, report it; never work around the block.
 - **Installing tools.** Never install a tool or run `nix-rebuild`. When a tool is missing, report `blocked` and name it.
 - **Merging.** Never run `gh pr merge`, push to the base branch, or run the `rebase-merge` skill, except its "Rerun after a landing conflict" section on a rerun after a failed landing. The engine lands the work.

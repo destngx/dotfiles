@@ -9,7 +9,8 @@
 #   stop:     Stop, which may print {"decision": "block", ...} to keep the turn going
 #   wake:     Stop, async with asyncRewake: blocks until the mate has an unread event, then prints one
 #             stderr line and exits 2 to wake Claude; exits 0 on session end
-#   pre-tool: PreToolUse on Edit, Write, MultiEdit and NotebookEdit, which may deny an edit to a fleet.toml
+#   pre-tool: PreToolUse on Edit, Write, MultiEdit and NotebookEdit, which may deny an edit outside what the
+#             worker's sandbox allows
 # Claude's hook JSON on stdin goes to sous unchanged.
 
 { [ -n "${SOUS_TASK_ID:-}" ] && [ -n "${SOUS_TASK_TOKEN:-}" ]; } ||

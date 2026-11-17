@@ -107,8 +107,7 @@ While they are set, answer a decision or a worker's question only when the words
 Away words never authorise:
 
 - an irreversible action: production changes, sending messages, spending money, deleting data, force-pushing
-- a change to `fleet.toml` or `.agents/rules.md`
-- a landing, unless the trust conditions hold. The engine checks them and refuses otherwise: the task is a ship task with a done condition and a verify command, the reviewer's PASS is pinned to the exact head being landed (a new commit after the PASS needs a fresh review), and the reviewer stated that every verify command passed at that head. A merge that `fleet.toml` makes wait stays a wait unless you answer it under the owner's away words, and the log then records it.
+- a landing, unless the trust conditions hold. The engine checks them and refuses otherwise: the task is a ship task with a done condition and a verify command, the reviewer's PASS is pinned to the exact head being landed (a new commit after the PASS needs a fresh review), and the reviewer stated that every verify command passed at that head. Every passed task waits to land; land it under the owner's away words only when they cover it, and the log then records it.
 
 The owner's next message ends away mode, and `sous owner mark` says so with `away_cleared`. Then recap as in "When the owner writes".
 
