@@ -206,7 +206,7 @@ domains = ["api.anthropic.com"]
 #                   interpreter, env or sudo as argv[0]. An element is a literal
 #                   or exactly one {slot}.
 #   builtin         instead of argv: a named engine function (herdr-manage; and,
-#                   for the helper alone, pr-manage)
+#                   for the helper alone, pr-manage and land)
 #   cwd             repo (the brief's primary checkout) or worktree (the task's
 #                   own copy); builtins have none
 #   timeout         e.g. "60s"; the process group is killed at the limit
@@ -227,8 +227,8 @@ domains = ["api.anthropic.com"]
 # task token (`sous run`), its capabilities are builtins only, and it is the
 # [helper] table, not a role. A capability of the helper lists roles =
 # ["helper"] and nothing else, so the helper and the worker roles share none;
-# a pr-manage listed by any role fails the load. herdr-manage (D74) and
-# pr-manage (D73) entries declare no args: the engine adds them.
+# a pr-manage or land listed by any role fails the load. herdr-manage (D74),
+# pr-manage (D73) and land entries declare no args: the engine adds them.
 #
 # A role:
 #   why, capabilities   what it is for, and the capabilities it may run
@@ -275,6 +275,15 @@ builtin = "pr-manage"
 timeout = "60s"
 max_output = 65536
 rate = "20/minute"
+roles = ["helper"]
+
+[capabilities.land]
+why = "land a task the engine cleared after a land decision, from the repo's landing runbook: the engine checks everything again (the review PASS at the head, every check met, one commit beyond the base, the owner's gates while away) and lands it with rebase-merge in the background; a landed event, or the question the task parks on, follows"
+decision = "D-guard-config"
+builtin = "land"
+timeout = "60s"
+max_output = 4096
+rate = "30/hour"
 roles = ["helper"]
 
 [roles.ship-worker]
@@ -401,4 +410,4 @@ tools = [
   "Bash(pnpm install --frozen-lockfile)", "Bash(pnpx nx run sous:install)", "Bash(pnpx nx run sous:load-agent)",
   "Bash(git fetch origin)",
 ]
-capabilities = ["pr-manage"]
+capabilities = ["pr-manage", "land"]
