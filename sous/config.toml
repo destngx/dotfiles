@@ -18,28 +18,17 @@ per_project = 5
 
 [workers.projects]
 
+# The mates' models and effort; a worker's and a reviewer's are its profile's, below.
 [models]
 first_mate = "opus"
 mate = "opus"
 intake = "haiku"
-ship = "opus"
-investigate = "sonnet"
-reviewer = "opus"
 
 [effort]
 first_mate = "high"
-ship = "high"
-investigate = "medium"
-reviewer = "high"
 
 [paths]
 projects = "~/projects"
-
-# "auto" decides on its own and writes each choice to the decision log; "wait" parks every decision
-# for you. A profile not listed here waits.
-[profiles]
-code = "auto"
-knowledge = "auto"
 
 # Sous sandbox grants (D62, D-guard-config): everything a worker, reviewer or
 # lookup session may reach beyond the engine's fixed core. The core is not in
@@ -213,6 +202,9 @@ domains = ["api.anthropic.com"]
 #                       not know fails the launch. WebFetch and WebSearch belong
 #                       to the lookup role only (D65): any other role that lists
 #                       them fails the load.
+#   write_source        false: its sessions may not change a file git tracks
+#                       in their worktree, or commit; tmp, build output and
+#                       caches stay writable (D-guard-config). Default true.
 
 [capabilities.git-ls-remote]
 why = "a worker's sandbox reaches no git credential; this reads a ref from origin of the task's repo"
@@ -253,7 +245,8 @@ capabilities = ["git-ls-remote", "herdr-manage"]
 tools = ["Agent", "Bash", "Edit", "Glob", "Grep", "Monitor", "NotebookEdit", "Read", "Skill", "Write"]
 
 [roles.reviewer]
-why = "the fresh reviewer of a ready ship task"
+why = "the fresh reviewer of a ready ship task: it runs the checks and writes tmp, build output and caches, but changes no tracked file and makes no commit (D-guard-config)"
+write_source = false
 capabilities = ["git-ls-remote", "herdr-manage"]
 tools = ["Agent", "Bash", "Edit", "Glob", "Grep", "Monitor", "NotebookEdit", "Read", "Skill", "Write"]
 
@@ -264,3 +257,51 @@ capabilities = ["git-ls-remote", "herdr-manage"]
 [roles.mate]
 why = "a machine mate: it holds the operator key and no task token, and cleans up after finished tasks (D68)"
 capabilities = ["pr-manage"]
+
+# Sous profiles (D-guard-config): a task's kind, and what its sessions get. A
+# task names its profile (code when it names none); its shape picks the role
+# (ship-worker, lookup, reviewer). They are [profiles.NAME] tables of the
+# owner's config.toml, read at every launch and every capability call. None is
+# built into the engine: a task whose profile has no table is refused, and so
+# is its launch. apps/sous/internal/guardtest/profiles.toml in the monorepo is
+# the tests' copy.
+#
+# A profile:
+#   why                 what kind of task it is for (required)
+#   decide              auto: its decisions are taken on their own and logged;
+#                       wait: each one waits for the owner (SO-RULE-7)
+#   runtime             what confines its sessions: seatbelt (Claude Code's
+#                       sandbox on macOS) is the only one for now
+#   models.ROLE         the Claude model of each worker role (ship-worker,
+#                       lookup, reviewer); all three are required
+#   effort.ROLE         the reasoning effort of a role: low, medium, high,
+#                       xhigh or max; leave it out for none
+#   grants, capabilities, tools
+#                       narrow every role: a session gets what both its role
+#                       and its profile list. Leave a key out to narrow nothing.
+
+[profiles.code]
+why = "a change to code, tests or docs in a repo"
+decide = "auto"
+runtime = "seatbelt"
+[profiles.code.models]
+ship-worker = "opus"
+lookup = "sonnet"
+reviewer = "opus"
+[profiles.code.effort]
+ship-worker = "high"
+lookup = "medium"
+reviewer = "high"
+
+[profiles.knowledge]
+why = "a note, report or study material in a knowledge repo; a copy of code until it needs its own limits"
+decide = "auto"
+runtime = "seatbelt"
+[profiles.knowledge.models]
+ship-worker = "opus"
+lookup = "sonnet"
+reviewer = "opus"
+[profiles.knowledge.effort]
+ship-worker = "high"
+lookup = "medium"
+reviewer = "high"
