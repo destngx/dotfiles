@@ -15,7 +15,6 @@ block_budget = 3
 
 [workers]
 per_project = 5
-permission_mode = "auto"  # Claude Code decides each tool call, so unattended workers never stop at a prompt
 
 [workers.projects]
 
@@ -41,3 +40,227 @@ projects = "~/projects"
 [profiles]
 code = "auto"
 knowledge = "auto"
+
+# Sous sandbox grants (D62, D-guard-config): everything a worker, reviewer or
+# lookup session may reach beyond the engine's fixed core. The core is not in
+# this list: the task's worktree and its git deny set, the sous state, Claude
+# and memory folders, the untracked secrets, and the allow lists of D60 (the
+# brief).
+#
+# The grants are [grants.NAME] tables of the owner's config.toml, read at every
+# launch. None is built into the engine: a config with no grants opens nothing.
+# apps/sous/internal/guardtest/grants.toml in the monorepo is the tests' copy.
+# A grant that fails a check fails the launch. config.toml must be writable by
+# its owner only; no session can write it.
+#
+# A grant:
+#   why, decision    what it is for, and the recorded decision (why is required)
+#   read, write      folders or files; a folder is open with everything under it;
+#                    the last name may end in a prefix and * (D87): "/tmp/e-*",
+#                    which opens each matching folder with everything under it
+#   sockets          unix sockets that must exist
+#   socket_dirs      folders in which sockets are made later
+#   exec             executable files the session runs (readable, link target
+#                    too, and unwritable; D90)
+#   domains          host names, or host:port for one port (no wildcard)
+#   env              environment variables for the session
+#   only_if_exists   paths that must all exist, or the grant is left out
+#   follow_links     list a link's target too
+#   skip_missing     leave out a read or write entry that does not exist
+#   deny_write       the read entries stay unwritable
+#
+# Paths are absolute or start with a token: {home}, {sys_tmp} (/tmp/claude-UID
+# and its /private name), {task_tmp} (the task's own folder in it), {user_tmp}
+# (the macOS per-user temp folder), {main_root} (the repo's main checkout),
+# {worktree} (the task's worktree) and {sous_config} (config.toml). A token with
+# no value for the task drops the entry. Refused: "/", the home folder, "..",
+# any other wildcard, anything inside .git, the sous state, Claude config and
+# memory folders, a project folder outside the task's own repo, a socket that
+# does not exist, a domain that is not a host name. Hard limits (D90), refused
+# for every entry, link target and env value: ~/.kube, ~/.aws, ~/.ssh,
+# ~/.claude, ~/Library/Keychains, /Library/Keychains and Claude's config folder.
+
+[grants.toolchains]
+why = "toolchains and their shared caches (the monorepo keeps these global)"
+read = [
+  "{home}/.local/bin", "{home}/.local/share/mise", "{home}/.local/share/uv", "{home}/.local/share/pnpm",
+  "{home}/.cache/pnpm", "{home}/.cache/uv", "{home}/.cache/mise", "{home}/go",
+  "{home}/Library/Caches/go-build", "{home}/Library/Application Support/go", "{home}/.config/git",
+]
+write = [
+  "{home}/.local/share/pnpm", "{home}/.cache/pnpm", "{home}/.cache/uv", "{home}/.cache/mise",
+  "{home}/.local/share/uv", "{home}/go/pkg/mod", "{home}/Library/Caches/go-build",
+  "{home}/Library/Application Support/go",
+]
+
+[grants.package-registries]
+why = "where packages come from, and GitHub for reading"
+domains = [
+  "files.pythonhosted.org", "github.com", "proxy.golang.org", "pypi.org",
+  "registry.npmjs.org", "sum.golang.org",
+]
+
+[grants.owner-config-files]
+why = "the session reads the owner's git config and the sous config; neither can be rewritten"
+read = [
+  "{home}/.gitconfig", "{home}/.config/git/ignore", "{home}/.config/git/config",
+  "{home}/.config/git/attributes", "{sous_config}",
+]
+follow_links = true
+skip_missing = true
+deny_write = true
+
+[grants.nx-cache-read]
+why = "Nx keeps one cache in the main checkout for every worktree"
+read = ["{main_root}/.nx"]
+
+[grants.nx-cache-write]
+why = "a task with a worktree writes that cache"
+write = ["{main_root}/.nx"]
+only_if_exists = ["{worktree}"]
+
+[grants.session-tmp]
+why = "the system temp folder and the task's own folder in it; sockets (Nx) are made there"
+decision = "D52"
+read = ["{sys_tmp}", "{task_tmp}"]
+write = ["{sys_tmp}", "{task_tmp}"]
+socket_dirs = ["{sys_tmp}", "{task_tmp}"]
+
+[grants.task-tmp-env]
+why = "pnpm's store lock and Nx's socket and native cache go in the task's own folder, so a JavaScript install and build run"
+decision = "D52"
+[grants.task-tmp-env.env]
+TMPDIR = "{task_tmp}"
+XDG_RUNTIME_DIR = "{task_tmp}"
+NX_SOCKET_DIR = "{task_tmp}/nx"
+NX_NATIVE_FILE_CACHE_DIRECTORY = "{task_tmp}/nx-native"
+
+[grants.user-tmp]
+why = "mktemp and many scripts use the macOS per-user temp folder whatever TMPDIR says"
+decision = "D53"
+read = ["{user_tmp}"]
+write = ["{user_tmp}"]
+
+[grants.nix-build]
+why = "nix build talks to the nix daemon and keeps its fetch and eval caches in ~/.cache/nix; sudo and switching stay closed"
+decision = "D61"
+sockets = ["/nix/var/nix/daemon-socket/socket"]
+read = ["{home}/.cache/nix"]
+write = ["{home}/.cache/nix"]
+only_if_exists = ["/nix/var/nix/daemon-socket/socket"]
+follow_links = true
+
+[grants.global-agents-read]
+why = "the owner's global skills and tools (~/.agents, a link into the dotfiles); sessions read them through the link and write nothing there"
+decision = "D79"
+read = ["{home}/.agents"]
+follow_links = true
+skip_missing = true
+deny_write = true
+
+[grants.skill-evals]
+why = "~/.agents/tools/skills/eval.sh runs claude plugin eval, which calls the Anthropic API and on macOS works in a folder it makes with mkdtemp(\"/tmp/e-\") whatever TMPDIR says; nothing else of /tmp opens"
+decision = "D87"
+write = ["/tmp/e-*"]
+domains = ["api.anthropic.com"]
+
+# Sous capabilities (D63, D-guard-config): the commands a confined session may
+# ask the engine to run for it, outside its sandbox, with the owner's own local
+# credentials (the SSH key, the gh login). A session holds none of them and the
+# owner makes no extra token. They are [capabilities.NAME] and [roles.NAME]
+# tables of the owner's config.toml, read at every call and every launch. None
+# is built into the engine: a config with none allows nothing, and a session
+# whose role it lacks does not start. apps/sous/internal/guardtest/capabilities.toml
+# in the monorepo is the tests' copy. A table that fails a check fails every call:
+# nothing runs on a half-read file.
+#
+# A capability:
+#   why             what it is for (required)
+#   argv            the fixed command, one array element per argument. No shell:
+#                   the engine runs argv directly and refuses a shell, an
+#                   interpreter, env or sudo as argv[0]. An element is a literal
+#                   or exactly one {slot}.
+#   builtin         instead of argv: a named engine function (herdr-manage; and,
+#                   for the mate role alone, pr-manage)
+#   cwd             repo (the brief's primary checkout) or worktree (the task's
+#                   own copy); builtins have none
+#   timeout         e.g. "60s"; the process group is killed at the limit
+#   max_output      bytes kept from the output; the process is killed past it
+#   rate            "N/second", "N/minute" or "N/hour", per task and capability
+#   roles           the roles that may run it (each role lists it back)
+#   states          the task states in which it may run (leave it out for a
+#                   capability only the mate role runs: a mate has no task)
+#   args.NAME       a typed slot: type ref | herdr-id | enum | int, optional,
+#                   values (enum), min and max (int). There is no free-form
+#                   type. A slot of type ref or herdr-id must come after a "--"
+#                   element, so it can never be read as an option.
+#
+# Every git command runs with core.hooksPath=/dev/null and core.fsmonitor off,
+# and with GIT_DIR and GIT_COMMON_DIR pinned to the repo's own .git folder.
+#
+# The mate role (D68) is the machine mate's: it calls with the operator key and
+# no task token (`sous run`), and its capabilities are builtins only. A
+# pr-manage listed by any other role fails the load. herdr-manage (D74) and
+# pr-manage (D73) entries declare no args: the engine adds them.
+#
+# A role:
+#   why, capabilities   what it is for, and the capabilities it may run
+#   grants              the sandbox grants its sessions get; leave it out
+#                       for every grant
+#   tools               the Claude tools its sessions may use, the whole list
+#                       (D64). Leave it out for the ten below. Others the engine
+#                       knows: TodoWrite, WebFetch, WebSearch. A name it does
+#                       not know fails the launch. WebFetch and WebSearch belong
+#                       to the lookup role only (D65): any other role that lists
+#                       them fails the load.
+
+[capabilities.git-ls-remote]
+why = "a worker's sandbox reaches no git credential; this reads a ref from origin of the task's repo"
+decision = "D62"
+argv = ["git", "ls-remote", "--", "origin", "{ref}"]
+cwd = "repo"
+timeout = "60s"
+max_output = 1048576
+rate = "30/minute"
+roles = ["ship-worker", "reviewer", "lookup"]
+states = ["starting", "running", "stale", "reviewing"]
+[capabilities.git-ls-remote.args.ref]
+type = "ref"
+optional = true
+
+[capabilities.herdr-manage]
+why = "look at herdr, never change it, through an action argument: panes lists the panes (optionally of one workspace), agents lists the agents with name, pane and state, read reads one pane's screen or recent scrollback as text. It has no action that sends keys or text, focuses or closes a pane"
+decision = "D74"
+builtin = "herdr-manage"
+timeout = "10s"
+max_output = 1048576
+rate = "60/minute"
+roles = ["ship-worker", "reviewer", "lookup"]
+states = ["starting", "running", "stale", "reviewing"]
+
+[capabilities.pr-manage]
+why = "manage the PRs of sous tasks, through an action argument. create opens a PR from a task's branch (it must be on origin, with no open PR) against that task's base, with a title and optional body. edit changes the title or body of a task's open PR, or adds a comment. rerun reruns the failed jobs of a finished workflow run whose branch is a sous task's branch (gh run rerun RUN --failed, 3 per branch per hour). delete-branch deletes a finished sous task's branch on origin once every commit on it is on the task's base (git cherry shows no '+'), never a trunk, base, default or protected branch or one no sous task owns, with a lease on the checked commit. close closes a PR with one fixed comment, and only when it is stored on a cancelled sous task; or, for a PR no task stores, when the owner's OK for that number is recorded (sous pr-ok N --words ...; 24 hours, one use). Every action refuses unless the PR is in the repo of that task's origin, from that task's own branch, and still open"
+decision = "D73"
+builtin = "pr-manage"
+timeout = "60s"
+max_output = 65536
+rate = "20/minute"
+roles = ["mate"]
+
+[roles.ship-worker]
+why = "the worker of a ship task: it writes a branch in its own worktree"
+capabilities = ["git-ls-remote", "herdr-manage"]
+tools = ["Agent", "Bash", "Edit", "Glob", "Grep", "Monitor", "NotebookEdit", "Read", "Skill", "Write"]
+
+[roles.reviewer]
+why = "the fresh reviewer of a ready ship task"
+capabilities = ["git-ls-remote", "herdr-manage"]
+tools = ["Agent", "Bash", "Edit", "Glob", "Grep", "Monitor", "NotebookEdit", "Read", "Skill", "Write"]
+
+[roles.lookup]
+why = "the worker of an investigate or review task: it reads and reports; with no tools line it gets the default tools plus WebFetch and WebSearch (D74)"
+capabilities = ["git-ls-remote", "herdr-manage"]
+
+[roles.mate]
+why = "a machine mate: it holds the operator key and no task token, and cleans up after finished tasks (D68)"
+capabilities = ["pr-manage"]
