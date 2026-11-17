@@ -7,7 +7,7 @@ description: Build a new feature as a sous worker, from the brief to a pushed br
 
 # feature
 
-A sous worker builds one feature for one task. The task starts from a brief that sous wrote, and it ends at ready: a pushed branch, an open PR and a report with evidence. The worker never merges. After a reviewer passes the work, the engine applies the merge rules and lands it or asks the owner.
+A sous worker builds one feature for one task. The task starts from a brief that sous wrote, and it ends at ready: a pushed branch with one commit on top of its base, an open PR and a report with evidence. The worker never merges. After a reviewer passes the work, the engine applies the merge rules and lands it or asks the owner.
 
 ## When to use it
 
@@ -19,12 +19,13 @@ Use this runbook when `SOUS_TASK_ID` is set and the brief asks for new or extend
 2. **Get the worktree with the `gwf` skill.** When `.worker.worktree` in `sous task show` names a worktree and your working directory is inside it, stay there. Otherwise run `cd "$(gwf create <branch> <base>)"` with the brief's branch and base. If `gwf` prints `skipped untrusted .gwf/setup` or `.gwf/setup failed`, report `blocked` with the command the owner runs from the worktree, `gwf trust`. Do not install dependencies another way.
 3. **Read the repo's rules.** Read the repo's `AGENTS.md` and the files the goal touches. Find how the repo already solves the nearest problem, and follow that pattern. Note which of the repo's own verify commands cover the code you will change, such as its test, lint, typecheck and build targets. You run those as well as the brief's `verify` list.
 4. **Decide the design before you write code.** Name the data shape, the files you will change and how you will prove the feature works. Keep every change inside the brief's `scope.write` paths and outside `scope.deny`. When the goal needs a path outside the scope, or a choice the brief does not settle, see "Decisions" below.
-5. **Build in small units.** Make one change, run the narrowest check that covers it, then commit. Write conventional commits in the repo's style. Commits carry no agent name, no task ID and no `Co-Authored-By` line. Add tests for the new behaviour next to the existing tests for that code.
+5. **Build in small units.** Make one change, run the narrowest check that covers it, then commit. Write conventional commits in the repo's style. Commits carry no agent name, no task ID and no `Co-Authored-By` line. Add tests for the new behaviour next to the existing tests for that code. Step 7 squashes these commits into one before the report.
 6. **Record progress.** At each real decision or finished unit, run `sous task note "$SOUS_TASK_ID" "<one line>"`. A relaunched worker and the reviewer read these notes.
-7. **Rebase onto the latest base.** Before every ready report, including one after a reviewer sends issues back, ask your machine mate for a fetch with `sous task ask "$SOUS_TASK_ID" "Please fetch origin in this task's repo" --short "Get the latest code from GitHub"`, wait for its answer in `sous inbox`, then run `git rebase origin/<base>`, so the branch already holds the latest base when it goes to review and landing. Your sandbox holds no git credential, so never run `git fetch` yourself: the machine mate runs `git fetch origin` in the task's repo with the owner's credentials and answers with its exit code. When the fetch fails, rebase onto the `origin/<base>` you have and say so in the report. Write down every file git reports as conflicted. Resolve each one so that both the base's change and yours survive, then `git add` it and `git rebase --continue`. Never use `-X ours`, `-X theirs` or `git checkout --ours/--theirs` to make a conflict go away. When the two changes cannot both hold, or the fix is a product choice, ask with `sous task ask` instead of picking a side. Then run step 8 on the rebased head, and list the conflicted files in the report. When the branch is already on the remote, whoever pushed it, the rebase rewrites it. Never force-push it yourself: file the ready report with `--force-push --head <sha>`, and your machine mate pushes it with `sous task push --force-with-lease`, which fails if anyone else pushed there since.
-8. **Verify on the real thing.** Run every command in the brief's `verify` list and the repo's own verify commands from the worktree root, exactly as written. Then check the done condition itself against the running code: run the CLI, call the endpoint, or drive the screen with the app's verify skill when the repo has one. A build that compiles proves nothing about the feature. When a check cannot run, say so in the report. Do not count it as a pass.
-9. **Open the PR and report.** Follow the `opening-a-pr` runbook. It reruns the verify commands at the final commit, pushes the branch, opens a ready PR and files `sous task report "$SOUS_TASK_ID" --status ready` with the evidence, head SHA and PR URL.
-10. **Stop.** Do not merge, do not watch the PR, and do not remove the worktree. The engine lands the work after review and cleans up.
+7. **Squash to one commit.** Every PR lands as exactly one new commit on its base. After your last commit, including the commits that fix a reviewer's issues, check that `git status --short` prints nothing and run `git log --oneline "origin/<base>..HEAD"`. When it lists more than one commit, run `git reset --soft "$(git merge-base origin/<base> HEAD)"` and make one `git commit`. Its message is a conventional commit in the repo's style that names the whole change, with no agent name, no task ID and no `Co-Authored-By` line. When a later step changes a file, fold the change into that commit with `git commit --amend` instead of adding a second one. When the branch is already on the remote, whoever pushed it, the squash rewrites it like the rebase in step 8, so file the ready report with `--force-push --head <sha>`.
+8. **Rebase onto the latest base.** Before every ready report, including one after a reviewer sends issues back, ask your machine mate for a fetch with `sous task ask "$SOUS_TASK_ID" "Please fetch origin in this task's repo" --short "Get the latest code from GitHub"`, wait for its answer in `sous inbox`, then run `git rebase origin/<base>`, so the branch already holds the latest base when it goes to review and landing. Your sandbox holds no git credential, so never run `git fetch` yourself: the machine mate runs `git fetch origin` in the task's repo with the owner's credentials and answers with its exit code. When the fetch fails, rebase onto the `origin/<base>` you have and say so in the report. Write down every file git reports as conflicted. Resolve each one so that both the base's change and yours survive, then `git add` it and `git rebase --continue`. Never use `-X ours`, `-X theirs` or `git checkout --ours/--theirs` to make a conflict go away. When the two changes cannot both hold, or the fix is a product choice, ask with `sous task ask` instead of picking a side. Then run step 9 on the rebased head, and list the conflicted files in the report. When the branch is already on the remote, whoever pushed it, the rebase rewrites it. Never force-push it yourself: file the ready report with `--force-push --head <sha>`, and your machine mate pushes it with `sous task push --force-with-lease`, which fails if anyone else pushed there since.
+9. **Verify on the real thing.** Run every command in the brief's `verify` list and the repo's own verify commands from the worktree root, exactly as written. Then check the done condition itself against the running code: run the CLI, call the endpoint, or drive the screen with the app's verify skill when the repo has one. A build that compiles proves nothing about the feature. When a check cannot run, say so in the report. Do not count it as a pass.
+10. **Open the PR and report.** Follow the `opening-a-pr` runbook. It checks for the one commit, reruns the verify commands at the final commit, pushes the branch, opens a ready PR and files `sous task report "$SOUS_TASK_ID" --status ready` with the evidence, head SHA and PR URL.
+11. **Stop.** Do not merge, do not watch the PR, and do not remove the worktree. The engine lands the work after review and cleans up.
 
 ### Decisions
 
@@ -32,11 +33,11 @@ Decide a choice yourself only when the brief, the repo's patterns or the code se
 
 - a change outside the brief's scope, or a goal that grew
 - a product choice the brief leaves open, where either answer changes what the owner gets
-- anything irreversible: a production change, a message sent, money spent, data deleted, a force-push other than the lease push your machine mate runs after step 7
+- anything irreversible: a production change, a message sent, money spent, data deleted, a force-push other than the lease push your machine mate runs after steps 7 and 8
 
 ### Rerun after a failed landing
 
-When the task is a rerun because the landing rebase conflicted (`rebase-merge` prepare exit 3), follow "Rerun after a landing conflict" in the `rebase-merge` skill instead of building again: ask your machine mate for a fetch as in step 7, rebase onto `origin/<base>`, resolve, rerun the verify commands, and report the new head with the conflicted files listed. Use only that section, not the script, and never force-push yourself.
+When the task is a rerun because the landing rebase conflicted (`rebase-merge` prepare exit 3), follow "Rerun after a landing conflict" in the `rebase-merge` skill instead of building again: ask your machine mate for a fetch as in step 8, rebase onto `origin/<base>`, resolve, rerun the verify commands, and report the new head with the conflicted files listed. Use only that section, not the script, and never force-push yourself.
 
 ### Timebox
 
@@ -51,6 +52,7 @@ All of these hold, and anyone can check them:
 - `gh pr view <branch> --json state,isDraft,baseRefName` shows `OPEN`, `false` and the brief's base.
 - `.report.evidence` lists every verify command with its exit code and output, and each one exited 0.
 - `git diff --name-only "origin/<base>...HEAD"` lists only paths inside `scope.write`, none inside `scope.deny`, and no `fleet.toml`.
+- `git log --oneline "origin/<base>..HEAD"` prints exactly one commit.
 
 ## Verify commands
 
@@ -60,6 +62,7 @@ Run these from the worktree root. `<base>` and `<branch>` come from the brief.
 sous task show "$SOUS_TASK_ID" | jq '.brief.verify[]'        # the brief's verify list; run each one as written
 git status --short                                            # empty: everything is committed
 git diff --name-only "origin/<base>...HEAD"                   # every path is in scope
+git log --oneline "origin/<base>..HEAD"                       # exactly one commit
 git rev-parse HEAD; git ls-remote origin "refs/heads/<branch>" # the same SHA twice
 gh pr view <branch> --json url,state,isDraft,baseRefName,headRefOid
 sous task show "$SOUS_TASK_ID" | jq '{state, report}'

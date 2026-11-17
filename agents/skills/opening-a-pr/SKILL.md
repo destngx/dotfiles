@@ -1,13 +1,13 @@
 ---
 name: opening-a-pr
-description: Open the pull request for a sous ship task and file its ready report. Check the branch and base against the brief, rerun the verify commands at the final commit, push the branch, open a ready PR with gh, and report the head SHA and PR URL with sous task report. Use at the end of the feature and bug-fix runbooks, or when a sous worker is told "open the PR" or "push the branch and open a pull request". Not for merging or landing a branch, which the engine does after review, and not for reviewing a PR.
+description: Open the pull request for a sous ship task and file its ready report. Check the branch and base against the brief, squash the branch to one commit, rerun the verify commands at the final commit, push the branch, open a ready PR with gh, and report the head SHA and PR URL with sous task report. Use at the end of the feature and bug-fix runbooks, or when a sous worker is told "open the PR" or "push the branch and open a pull request". Not for merging or landing a branch, which the engine does after review, and not for reviewing a PR.
 ---
 
 <!-- Adapted from the opening-a-PR playbook (skills/poteto-mode/playbooks/opening-a-pr.md) in pstack, https://github.com/cursor/plugins/tree/main/pstack, MIT License, Copyright (c) 2026 Lauren Tan. -->
 
 # opening-a-pr
 
-The last step of every sous ship task. The worker pushes its branch, opens one ready PR against the brief's base, and files the report that moves the task to ready. It does not merge. After the reviewer passes the work, the engine applies the merge rules and lands it with `rebase-merge` or `gh`, or parks a decision for the owner.
+The last step of every sous ship task. The worker pushes its branch with one commit on top of the base, opens one ready PR against the brief's base, and files the report that moves the task to ready. It does not merge. After the reviewer passes the work, the engine applies the merge rules and lands it with `rebase-merge` or `gh`, or parks a decision for the owner.
 
 ## When to use it
 
@@ -17,7 +17,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
 
 1. **Check the branch and base.** Run `sous task show "$SOUS_TASK_ID" | jq '.brief | {repo, branch, base, verify}'`. Then check that `git branch --show-current` prints the brief's branch and that `pwd` is inside the task's worktree. If either differs, file `--status blocked` with what differs and stop.
 2. **Check the tree.** `git status --short` must print nothing. Commit any finished work. Leave out debug edits, scratch files and generated output the repo does not track.
-3. **Check the commits.** Run `git log --oneline "origin/<base>..HEAD"`. Each commit is a conventional commit in the repo's style, such as `feat(wealth-management): add CSV export to transactions`, and tells one step of the story. Commits, the branch and the PR carry no agent name, no task ID and no `Co-Authored-By` line. Before the first push you may reorder or squash commits with `git rebase origin/<base>` and fixups. After the branch is on the remote, add commits instead. The only rewrite of a pushed branch is the rebase in step 4, and you never force-push yourself.
+3. **Squash to one commit.** Every PR lands as exactly one new commit on its base. Run `git log --oneline "origin/<base>..HEAD"`. When it lists more than one commit, run `git reset --soft "$(git merge-base origin/<base> HEAD)"` and make one `git commit`. Its message is a conventional commit in the repo's style that names the whole change, such as `feat(wealth-management): add CSV export to transactions`. The commit, the branch and the PR carry no agent name, no task ID and no `Co-Authored-By` line. Squash again before every ready report, including after the commits that fix a reviewer's issues, and fold any later change into the one commit with `git commit --amend` instead of adding a second one. When the branch is already on the remote, whoever pushed it, the squash rewrites it like the rebase in step 4: skip the push in step 7 and file the report in step 9 with `--force-push`. You never force-push yourself.
 4. **Rebase onto the latest base before every ready report.** Ask your machine mate for a fetch with `sous task ask "$SOUS_TASK_ID" "Please fetch origin in this task's repo" --short "Get the latest code from GitHub"`, wait for its answer in `sous inbox`, then run `git rebase origin/<base>`, even when you rebased earlier, because the base may have moved since. The branch then already holds the latest base when it goes to review and landing. Your sandbox holds no git credential, so never run `git fetch` yourself: the machine mate runs `git fetch origin` in the task's repo with the owner's credentials and answers with its exit code. When the fetch fails, rebase onto the `origin/<base>` you have and say so in the report. Write down every file git reports as conflicted. Resolve each one so that both the base's change and yours survive, then `git add` it and `git rebase --continue`. Never use `-X ours`, `-X theirs` or `git checkout --ours/--theirs` to make a conflict go away. When the two changes cannot both hold, or the fix is a product choice, ask with `sous task ask` instead of picking a side. Step 6 then reruns the verify commands on the rebased head. List the conflicted files in the report summary. When the branch is already on the remote, whoever pushed it (sous or you in step 7 of an earlier round), the rebase rewrites it: skip the push in step 7 and file the report in step 9 with `--force-push`, so your machine mate pushes it with `sous task push --force-with-lease`, which fails if anyone else pushed there since.
 5. **Check the scope.** `git diff --name-only "origin/<base>...HEAD"` must list only paths inside the brief's `scope.write`, none in `scope.deny`, and no `fleet.toml`.
 6. **Rerun the verify commands at the final commit.** Run every command in the brief's `verify` list and the repo's own checks for the projects you touched, from the worktree root, exactly as written. Write each command, its exit code and the end of its output to an evidence file outside the repo:
@@ -31,7 +31,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
    ```
 
    Add the done-condition check from the feature or bug-fix runbook, such as the repro before and after. Any command that exits non-zero means the task is not ready. Fix it, or report `partial` or `blocked`.
-7. **Push the branch.** Run `git push -u origin <branch>`. Never push to the base branch and never use `--force` or `--force-with-lease` yourself. When step 4 rewrote a branch that is already on the remote, do not push here; the machine mate's lease push from step 9 takes its place. Otherwise check that `git ls-remote origin "refs/heads/<branch>"` prints the same SHA as `git rev-parse HEAD`.
+7. **Push the branch.** Run `git push -u origin <branch>`. Never push to the base branch and never use `--force` or `--force-with-lease` yourself. When step 3 or 4 rewrote a branch that is already on the remote, do not push here; the machine mate's lease push from step 9 takes its place. Otherwise check that `git ls-remote origin "refs/heads/<branch>"` prints the same SHA as `git rev-parse HEAD`.
 8. **Open the PR.** If `gh pr view <branch> --json url,state` already shows an open PR, reuse it and update its body with `gh pr edit`. Otherwise write the body to a file and run:
 
    ```sh
@@ -44,7 +44,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
    - `## Scope` says what the PR covers and what it leaves out.
    - `## Verification` names each command run and its result.
 
-   Read the PR back with `gh pr view <branch> --json url,state,isDraft,baseRefName,headRefOid` and check that it is open, not a draft, on the right base, and that its head is your SHA. When step 4 rewrote a branch that is already on the remote, the PR head stays the old SHA until the machine mate's lease push after step 9, so check here only that the PR is open, ready and on the right base.
+   Read the PR back with `gh pr view <branch> --json url,state,isDraft,baseRefName,headRefOid` and check that it is open, not a draft, on the right base, and that its head is your SHA. When step 3 or 4 rewrote a branch that is already on the remote, the PR head stays the old SHA until the machine mate's lease push after step 9, so check here only that the PR is open, ready and on the right base.
 9. **File the report.**
 
    ```sh
@@ -55,13 +55,14 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
      --pr "<PR URL>"
    ```
 
-   Add `--force-push` when step 4 rewrote a branch that is already on the remote. The command prints one line. Check it with `sous task show "$SOUS_TASK_ID" | jq '{state, report}'`.
+   Add `--force-push` when step 3 or 4 rewrote a branch that is already on the remote. The command prints one line. Check it with `sous task show "$SOUS_TASK_ID" | jq '{state, report}'`.
 10. **Stop.** Do not merge, do not wait on CI, and do not run `gwf rm`. The reviewer reruns your verify commands, and the engine lands the work and cleans up.
 
 ## Done when
 
 - `sous task show "$SOUS_TASK_ID" | jq -r .state` prints `ready` or a later state.
 - `.report.head`, `git rev-parse HEAD` and `git ls-remote origin "refs/heads/<branch>"` show the same SHA. After a `--force-push` report, the remote shows it once the machine mate's lease push has run.
+- `git log --oneline "origin/<base>..HEAD"` prints exactly one commit.
 - `.report.pr` is the URL that `gh pr view <branch> --json url` prints, and the PR is `OPEN`, not a draft, against the brief's base.
 - `.report.evidence` lists every verify command with `exit=0`, and ends with `head=<the same SHA>`.
 
@@ -70,6 +71,7 @@ Use it at the end of the `feature` and `bug-fix` runbooks, at the end of a ship 
 ```sh
 git branch --show-current
 git status --short
+git log --oneline "origin/<base>..HEAD"   # exactly one commit
 git diff --name-only "origin/<base>...HEAD"
 git rev-parse HEAD; git ls-remote origin "refs/heads/<branch>"
 gh pr view <branch> --json url,state,isDraft,baseRefName,headRefOid
@@ -78,7 +80,7 @@ sous task show "$SOUS_TASK_ID" | jq '{state, report}'
 
 ## Known pitfalls
 
-- **Evidence from an older commit.** If you commit after running the checks, run them again. The reviewer checks the head you report.
+- **Evidence from an older commit.** If you change a file after running the checks, amend it into the one commit and run them again. The reviewer checks the head you report.
 - **A draft PR.** `gh pr create` with `--draft` or a repo template that opens drafts leaves the PR in draft. Run `gh pr ready <branch>` and read it back.
 - **No GitHub remote.** When `gh repo view` fails because the repo has no GitHub remote, you cannot open a PR. Report `blocked` with that reason. Do not create a remote or a repo.
 - **A rejected push.** A branch protection or hook that rejects the push is a refusal. Report its exact message as `blocked`. Never bypass it with `--no-verify` or a force-push of your own.
