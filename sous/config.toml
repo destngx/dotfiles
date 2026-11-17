@@ -316,10 +316,23 @@ capabilities = ["git-ls-remote", "herdr-manage"]
 #                       stays under the whole floor. Hard limits, git internals
 #                       and secrets cannot be dropped. Only a brief the owner
 #                       approved may name such a profile.
+#   domains             the profile's one web list: each host becomes a
+#                       WebFetch(domain:HOST) rule and a sandbox domain of
+#                       every session of the profile, so it limits WebFetch
+#                       and Bash alike. "*" alone lets WebFetch reach any host
+#                       and opens no sandbox domain. Leave it out and WebFetch
+#                       reaches nothing.
+#   web_search          true lets a role that lists WebSearch use it; false
+#                       or left out, no session of the profile has it
+#
+# Each profile keeps today's web reach with domains = ["*"] and web_search =
+# true; replace "*" with a host list to limit a profile's WebFetch.
 
 [profiles.code]
 why = "a change to code, tests or docs in a repo"
 runtime = "seatbelt"
+domains = ["*"]
+web_search = true
 [profiles.code.models]
 ship-worker = "opus"
 lookup = "sonnet"
@@ -332,6 +345,8 @@ reviewer = "high"
 [profiles.knowledge]
 why = "a note, report or study material in a knowledge repo; a copy of code until it needs its own limits"
 runtime = "seatbelt"
+domains = ["*"]
+web_search = true
 [profiles.knowledge.models]
 ship-worker = "opus"
 lookup = "sonnet"
@@ -344,6 +359,8 @@ reviewer = "high"
 [profiles.butler]
 why = "maintaining sous itself and the Claude config it runs under: the .claude folders and git hooks of the task's own worktree, which every other profile leaves alone"
 runtime = "seatbelt"
+domains = ["*"]
+web_search = true
 unprotect = ["**/.claude", "**/.husky", "**/.githooks"]
 [profiles.butler.models]
 ship-worker = "opus"
