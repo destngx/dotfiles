@@ -20,6 +20,7 @@ claude/stats-cache.json
 claude/mcp-needs-auth-cache.json
 claude/file-history
 claude/shell-snapshots
+claude/telemetry
 result
 zsh/**
 **/zsh-zimfw
