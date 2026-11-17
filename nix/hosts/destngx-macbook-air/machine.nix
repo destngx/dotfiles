@@ -44,14 +44,12 @@
     ];
     casks = [
       "browserosaurus"
-      "claude"
       "claude-code@latest"
       "codex"
       "gcc-arm-embedded"
       "maccy"
       "mos"
       "session-manager-plugin"
-      "windows-app"
     ];
   };
 }
