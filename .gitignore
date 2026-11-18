@@ -19,6 +19,7 @@ claude/history.jsonl
 claude/stats-cache.json
 claude/mcp-needs-auth-cache.json
 claude/file-history
+claude/feedback
 claude/shell-snapshots
 claude/telemetry
 result
