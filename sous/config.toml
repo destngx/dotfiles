@@ -68,11 +68,6 @@ secret_names = [
   ".netrc", ".npmrc", ".pypirc", ".htpasswd", "credentials", "credentials.json",
   "secrets.*", "*.secret", "service-account*.json",
 ]
-# Folders, relative to a repo, that hold one project each (* is one name). A
-# reviewer is kept from the tracked files of the projects its branch changes
-# and of the rest of the repo; macOS refuses a sandbox profile that names every
-# file of a large monorepo. An empty list keeps it from every tracked file.
-project_folders = ["apps/*"]
 
 # Sous sandbox grants (D62, D-guard-config): everything a worker, reviewer or
 # lookup session may reach beyond the engine's fixed core. The core is not in
