@@ -33,6 +33,7 @@
       "~/projects"
     ]
   },
+  "model": "opus",
   "deniedMcpServers": [
     {
       "serverName": "claude.ai Claude Docs"
@@ -203,17 +204,17 @@
       }
     }
   },
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
   "autoMemoryEnabled": true,
   "autoMemoryDirectory": "~/.local/share/sous/memory",
   "theme": "auto",
   "editorMode": "vim",
   "preferredNotifChannel": "auto",
   "autoCompactEnabled": true,
-  "autoDreamedEnabled": true,
-  "ultracodeKeywordTrigger": false,
   "voiceEnabled": true,
-  "voice": {
-    "enabled": true,
-    "mode": "hold"
-  }
+  "autoDreamedEnabled": true,
+  "ultracodeKeywordTrigger": false
 }
