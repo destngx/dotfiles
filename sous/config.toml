@@ -35,8 +35,11 @@ projects = "~/projects"
 # table every launch fails. apps/sous/internal/guardtest/guard.toml in the
 # monorepo is the tests' copy.
 [guard]
-# Folders no grant, link target or variable reaches: absolute or under ~/.
-hard_limits = ["~/.kube", "~/.aws", "~/.ssh", "~/.claude", "~/Library/Keychains", "/Library/Keychains"]
+# Folders no grant, link target or variable reaches: absolute, under ~/, or
+# under {claude_config}, Claude's config folder wherever the engine finds it
+# (its transcripts, memory and keys). A hard limit inside the projects folder
+# is closed to read too. No session writes Claude's config folder either way.
+hard_limits = ["~/.kube", "~/.aws", "~/.ssh", "~/.claude", "{claude_config}", "~/Library/Keychains", "/Library/Keychains"]
 # Patterns, relative to the projects folder, for what no session writes in any
 # project. **/NAME also protects every NAME folder found at launch. The
 # owner's global skills (dotfiles/agents) run unsandboxed in the mates'
@@ -97,13 +100,14 @@ secret_names = [
 # Paths are absolute or start with a token: {home}, {sys_tmp} (/tmp/claude-UID
 # and its /private name), {task_tmp} (the task's own folder in it), {user_tmp}
 # (the macOS per-user temp folder), {main_root} (the repo's main checkout),
-# {worktree} (the task's worktree) and {sous_config} (config.toml). A token with
-# no value for the task drops the entry. Refused: "/", the home folder, "..",
-# any other wildcard, anything inside .git, the sous state, Claude config and
-# memory folders, a project folder outside the task's own repo, a socket that
+# {worktree} (the task's worktree), {sous_config} (config.toml) and
+# {claude_session} (the session's own folder in Claude's config, read only;
+# the one path inside a hard limit a grant may name). A token with no value for
+# the task drops the entry. Refused: "/", the home folder, "..",
+# any other wildcard, anything inside .git, the sous state and memory folders,
+# a write into Claude's config folder, a project folder outside the task's own repo, a socket that
 # does not exist, a domain that is not a host name. Hard limits (D90), refused
-# for every entry, link target and env value: ~/.kube, ~/.aws, ~/.ssh,
-# ~/.claude, ~/Library/Keychains, /Library/Keychains and Claude's config folder.
+# for every entry, link target and env value: the [guard] hard_limits above.
 
 [grants.toolchains]
 why = "toolchains and their shared caches (the monorepo keeps these global)"
@@ -188,6 +192,11 @@ why = "~/.agents/tools/skills/eval.sh runs claude plugin eval, which calls the A
 decision = "D87"
 write = ["/tmp/e-*"]
 domains = ["api.anthropic.com"]
+
+[grants.own-session-read]
+why = "Claude Code saves a large tool output in the session's own folder in its config and has the session read it back; nothing else of that folder opens"
+decision = "D-guard-config"
+read = ["{claude_session}"]
 
 # Sous capabilities (D63, D-guard-config): the commands a confined session may
 # ask the engine to run for it, outside its sandbox, with the owner's own local
