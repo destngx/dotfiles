@@ -1,0 +1,219 @@
+# Machine config for sous on the Windows laptop (windows-laptop). It is sous/config.toml
+# without what Windows has no use for: nix, the macOS folders and keychains, herdr, and the
+# Mac self-update steps. sous/config.toml explains every table. bin/sous-windows-push copies
+# this file to %USERPROFILE%\.config\sous\config.toml and closes it to everyone but the owner.
+# Agents never edit it.
+
+[engine]
+port = 9696
+machine = ""                  # empty means the Tailscale name, else the host name
+first_mate = "first-mate-machine"
+
+[timing]
+stale_seconds = 240
+heartbeat_seconds = 600
+relaunch_per_hour = 3
+restart_idle_wait_seconds = 300
+block_budget = 3
+
+[workers]
+per_project = 5
+
+[workers.projects]
+
+[models]
+first_mate = "opus"
+intake = "haiku"
+
+[effort]
+first_mate = "high"
+
+[paths]
+projects = "~/projects"
+
+[guard]
+hard_limits = ["~/.kube", "~/.aws", "~/.ssh", "~/.claude", "{claude_config}"]
+protect = ["**/.claude", "dotfiles/agents", "dotfiles/claude"]
+hook_folders = [".husky", ".githooks"]
+hook_inputs = [
+  "package.json", ".lintstagedrc*", "lint-staged.config.*", "lefthook*", ".lefthook*",
+  ".pre-commit-config.yaml", ".simple-git-hooks*", ".huskyrc*", "commitlint.config.*", ".commitlintrc*",
+  "eslint.config.*", ".eslintrc*", ".prettierrc*", "prettier.config.*", "node_modules",
+]
+git_internals = [
+  "config", "hooks", "config.worktree", "commondir",
+  "modules/**/config", "modules/**/hooks",
+  "worktrees/*/commondir", "worktrees/*/gitdir", "worktrees/*/config.worktree",
+]
+secret_names = [
+  ".env*", "*.pem", "*.key", "*.p12", "*.pfx", "*.keystore",
+  "id_rsa*", "id_ed25519*", "id_ecdsa*", "id_dsa*",
+  ".netrc", ".npmrc", ".pypirc", ".htpasswd", "credentials", "credentials.json",
+  "secrets.*", "*.secret", "service-account*.json",
+]
+
+# The Windows places of the Macs' toolchain folders: mise and Go keep theirs under AppData.
+[grants.toolchains]
+why = "toolchains and their shared caches (the monorepo keeps these global)"
+read = [
+  "{home}/.local/bin", "{home}/AppData/Local/mise", "{home}/go",
+  "{home}/AppData/Local/go-build", "{home}/AppData/Roaming/go", "{home}/.config/git",
+]
+write = ["{home}/go/pkg/mod", "{home}/AppData/Local/go-build", "{home}/AppData/Roaming/go"]
+skip_missing = true
+
+[grants.package-registries]
+why = "where packages come from, and GitHub for reading"
+domains = [
+  "files.pythonhosted.org", "github.com", "proxy.golang.org", "pypi.org",
+  "registry.npmjs.org", "sum.golang.org",
+]
+
+[grants.owner-config-files]
+why = "the session reads the owner's git config and the sous config; neither can be rewritten"
+read = [
+  "{home}/.gitconfig", "{home}/.config/git/ignore", "{home}/.config/git/config",
+  "{home}/.config/git/attributes", "{sous_config}",
+]
+follow_links = true
+skip_missing = true
+deny_write = true
+
+[grants.nx-cache-read]
+why = "Nx keeps one cache in the main checkout for every worktree"
+read = ["{main_root}/.nx"]
+
+[grants.nx-cache-write]
+why = "a task with a worktree writes that cache"
+write = ["{main_root}/.nx"]
+only_if_exists = ["{worktree}"]
+
+[grants.session-tmp]
+why = "the system temp folder and the task's own folder in it; sockets (Nx) are made there"
+decision = "D52"
+read = ["{sys_tmp}", "{task_tmp}"]
+write = ["{sys_tmp}", "{task_tmp}"]
+socket_dirs = ["{sys_tmp}", "{task_tmp}"]
+
+[grants.task-tmp-env]
+why = "pnpm's store lock and Nx's socket and native cache go in the task's own folder, so a JavaScript install and build run"
+decision = "D52"
+[grants.task-tmp-env.env]
+TMPDIR = "{task_tmp}"
+XDG_RUNTIME_DIR = "{task_tmp}"
+NX_SOCKET_DIR = "{task_tmp}/nx"
+NX_NATIVE_FILE_CACHE_DIRECTORY = "{task_tmp}/nx-native"
+
+[grants.global-agents-read]
+why = "the owner's global skills and tools (~/.agents); sessions read them and write nothing there"
+decision = "D79"
+read = ["{home}/.agents"]
+follow_links = true
+skip_missing = true
+deny_write = true
+
+[grants.own-session-read]
+why = "Claude Code saves a large tool output in the session's own folder in its config and has the session read it back; nothing else of that folder opens"
+decision = "D-guard-config"
+read = ["{claude_session}"]
+
+[capabilities.git-ls-remote]
+why = "a worker's sandbox reaches no git credential; this reads a ref from origin of the task's repo"
+decision = "D62"
+argv = ["git", "ls-remote", "--", "origin", "{ref}"]
+cwd = "repo"
+timeout = "60s"
+max_output = 1048576
+rate = "30/minute"
+roles = ["ship-worker", "reviewer", "lookup"]
+states = ["starting", "running", "stale", "reviewing"]
+[capabilities.git-ls-remote.args.ref]
+type = "ref"
+optional = true
+
+[capabilities.pr-manage]
+why = "read and manage the PRs of sous tasks, through an action argument. view, diff, checks, list, runs and run-view read GitHub, each one fixed gh command in the repo of the sous task named with task=ID, and change nothing; they are how the machine mate reads GitHub, since its session holds no gh. create opens a PR from a task's branch (it must be on origin, with no open PR) against that task's base, with a title and optional body. edit changes the title or body of a task's open PR, or adds a comment. rerun reruns the failed jobs of a finished workflow run whose branch is a sous task's branch (gh run rerun RUN --failed, 3 per branch per hour). delete-branch deletes a finished sous task's branch on origin once every commit on it is on the task's base (git cherry shows no '+'), never a trunk, base, default or protected branch or one no sous task owns, with a lease on the checked commit. close closes a PR with one fixed comment, and only when it is stored on a cancelled sous task; or, for a PR no task stores, when the owner's OK for that number is recorded (sous pr-ok N --words ...; 24 hours, one use). Every action refuses unless the PR is in the repo of that task's origin, from that task's own branch, and still open"
+decision = "D73"
+builtin = "pr-manage"
+timeout = "60s"
+max_output = 65536
+rate = "20/minute"
+roles = ["helper"]
+
+[capabilities.land]
+why = "land a task the engine cleared after a land decision, from the repo's landing runbook: the engine checks everything again (the review PASS at the head, every check met, one commit beyond the base, the owner's gates while away) and lands it with rebase-merge in the background; a landed event, or the question the task parks on, follows"
+decision = "D-guard-config"
+builtin = "land"
+timeout = "60s"
+max_output = 4096
+rate = "30/hour"
+roles = ["helper"]
+
+[roles.ship-worker]
+why = "the worker of a ship task: it writes a branch in its own worktree"
+capabilities = ["git-ls-remote"]
+tools = ["Agent", "Bash", "Edit", "Glob", "Grep", "Monitor", "NotebookEdit", "Read", "Skill", "Write"]
+
+[roles.reviewer]
+why = "the fresh reviewer of a ready ship task: it runs the checks and writes tmp, build output and caches, but changes no tracked file and makes no commit (D-guard-config)"
+write_source = false
+capabilities = ["git-ls-remote"]
+tools = ["Agent", "Bash", "Edit", "Glob", "Grep", "Monitor", "NotebookEdit", "Read", "Skill", "Write"]
+
+[roles.lookup]
+why = "the worker of an investigate or review task: it reads and reports; with no tools line it gets the default tools plus WebFetch and WebSearch (D74)"
+capabilities = ["git-ls-remote"]
+
+# claude-rules: Claude Code's OS sandbox is off on Windows, and Claude permission rules built
+# from [guard] and the grants confine the file tools. Bash is not confined by the OS.
+[profiles.code]
+why = "a change to code, tests or docs in a repo"
+runtime = "claude-rules"
+domains = ["*"]
+web_search = true
+[profiles.code.models]
+ship-worker = "opus"
+lookup = "sonnet"
+reviewer = "opus"
+[profiles.code.effort]
+ship-worker = "high"
+lookup = "medium"
+reviewer = "high"
+
+[profiles.knowledge]
+why = "a note, report or study material in a knowledge repo; a copy of code until it needs its own limits"
+runtime = "claude-rules"
+domains = ["*"]
+web_search = true
+[profiles.knowledge.models]
+ship-worker = "opus"
+lookup = "sonnet"
+reviewer = "opus"
+[profiles.knowledge.effort]
+ship-worker = "high"
+lookup = "medium"
+reviewer = "high"
+
+[profiles.butler]
+why = "maintaining sous itself and the Claude config it runs under: the .claude folders and git hooks of the task's own worktree, which every other profile leaves alone"
+runtime = "claude-rules"
+domains = ["*"]
+web_search = true
+unprotect = ["**/.claude", "**/.husky", "**/.githooks"]
+[profiles.butler.models]
+ship-worker = "opus"
+lookup = "sonnet"
+reviewer = "opus"
+[profiles.butler.effort]
+ship-worker = "high"
+lookup = "medium"
+reviewer = "high"
+
+# A Mac builds sous.exe and copies it here (bin/sous-windows-push), so the machine mate runs
+# no self-update step and has only the fetch for a worker past sous and the read tools.
+[helper]
+why = "the machine mate: it supervises this machine's workers, cleans up after finished tasks and fetches for workers"
+model = "opus"
+effort = "high"
+tools = ["Bash(sous *)", "Read", "Glob", "Grep", "Bash(git fetch origin)"]
+capabilities = ["pr-manage", "land"]

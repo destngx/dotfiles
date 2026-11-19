@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  echo "Usage: ${0##*/} [ssh-host]" >&2
+  echo "Example: ${0##*/} windows-host" >&2
+  echo "  Builds sous.exe from the monorepo's main checkout and copies it, with" >&2
+  echo "  sous/config.windows.toml, to the Windows machine at ssh-host (default windows-host)," >&2
+  echo "  then restarts the engine from its logon task (sous/windows-install.ps1)." >&2
+  echo "  SOUS_MONOREPO names the checkout (default ~/projects/monorepo)." >&2
+  exit 2
+}
+
+[[ $# -le 1 ]] || usage
+[[ ${1:-} != -h && ${1:-} != --help ]] || usage
+host=${1:-windows-host}
+
+repo_dir=$(cd -- "$(dirname -- "$0")/.." && pwd)
+config="$repo_dir/sous/config.windows.toml"
+monorepo=${SOUS_MONOREPO:-$HOME/projects/monorepo}
+app="$monorepo/apps/sous"
+
+[[ -f "$config" ]] || { echo "No Windows config at $config" >&2; exit 1; }
+[[ -d "$app" ]] || { echo "No sous source at $app (set SOUS_MONOREPO)" >&2; exit 1; }
+
+branch=$(git -C "$monorepo" rev-parse --abbrev-ref HEAD)
+[[ "$branch" == main ]] || { echo "The monorepo is on $branch; sous for Windows builds from main" >&2; exit 1; }
+rev=$(git -C "$monorepo" rev-parse --short HEAD)
+modified=false
+[[ -z $(git -C "$monorepo" status --porcelain -- apps/sous) ]] || modified=true
+
+out=$(mktemp -d)
+trap 'rm -rf "$out"' EXIT
+
+echo "Building sous.exe at $rev (modified=$modified)"
+(cd "$app" && GOOS=windows GOARCH=amd64 go build \
+  -ldflags "-X apps/sous/internal/cli.buildRevision=$rev -X apps/sous/internal/cli.buildModified=$modified" \
+  -o "$out/sous.exe" .)
+
+remote() { ssh -o BatchMode=yes "$host" 'powershell -NoProfile -Command -'; }
+
+remote <<'EOF'
+$ErrorActionPreference = "Stop"
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.local\bin", "$env:USERPROFILE\.config\sous" | Out-Null
+EOF
+
+echo "Copying to $host"
+scp -q "$out/sous.exe" "$host:.local/bin/sous.exe.new"
+scp -q "$config" "$host:.config/sous/config.toml.new"
+
+scp -q "$repo_dir/sous/windows-install.ps1" "$host:.local/bin/sous-install.ps1"
+
+ssh -o BatchMode=yes "$host" \
+  'powershell -NoProfile -ExecutionPolicy Bypass -File "$env:USERPROFILE\.local\bin\sous-install.ps1"' \
+  | tr -d '\r' > "$out/result"
+
+field() { sed -n "s/^$1=//p" "$out/result"; }
+want_bin=$(shasum -a 256 "$out/sous.exe" | cut -d' ' -f1)
+want_cfg=$(shasum -a 256 "$config" | cut -d' ' -f1)
+[[ "$(field bin)" == "$want_bin" ]] || { echo "sous.exe on $host does not match the build" >&2; cat "$out/result" >&2; exit 1; }
+[[ "$(field config)" == "$want_cfg" ]] || { echo "config.toml on $host does not match $config" >&2; exit 1; }
+
+echo "Installed sous $(field version) and the Windows config on $host"
+case "$(field engine)" in
+  running) echo "The engine runs from the logon task sous" ;;
+  *) echo "The engine did not start; the logon task sous starts it when the owner logs on to $host" ;;
+esac
+case "$(field published)" in
+  yes) echo "The tailnet port 9697 is published" ;;
+  refused) echo "Port 9697 let in a caller who is not the owner, so it was not published" >&2; exit 1 ;;
+esac
