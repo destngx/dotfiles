@@ -5,7 +5,7 @@ usage() {
   echo "Usage: ${0##*/} [ssh-host]" >&2
   echo "Example: ${0##*/} windows-host" >&2
   echo "  Builds sous.exe from the monorepo's main checkout and copies it, with" >&2
-  echo "  sous/config.windows.toml, to the Windows machine at ssh-host (default windows-host)," >&2
+  echo "  sous/config.windows.toml and agents/ (as ~/.agents), to the Windows machine at ssh-host (default windows-host)," >&2
   echo "  then restarts the engine from its logon task (sous/windows-install.ps1)." >&2
   echo "  SOUS_MONOREPO names the checkout (default ~/projects/monorepo)." >&2
   exit 2
@@ -47,6 +47,11 @@ EOF
 echo "Copying to $host"
 scp -q "$out/sous.exe" "$host:.local/bin/sous.exe.new"
 scp -q "$config" "$host:.config/sous/config.toml.new"
+# The global skills, tools and routines the mates load from ~/.agents. COPYFILE_DISABLE keeps
+# macOS tar from adding ._ metadata files.
+COPYFILE_DISABLE=1 tar --exclude .DS_Store -C "$repo_dir" -cf "$out/agents.tar" agents
+want_agents=$(tar -tf "$out/agents.tar" | grep -c -v '/$')
+scp -q "$out/agents.tar" "$host:sous-agents.tar"
 
 scp -q "$repo_dir/sous/windows-install.ps1" "$host:.local/bin/sous-install.ps1"
 
@@ -59,8 +64,9 @@ want_bin=$(shasum -a 256 "$out/sous.exe" | cut -d' ' -f1)
 want_cfg=$(shasum -a 256 "$config" | cut -d' ' -f1)
 [[ "$(field bin)" == "$want_bin" ]] || { echo "sous.exe on $host does not match the build" >&2; cat "$out/result" >&2; exit 1; }
 [[ "$(field config)" == "$want_cfg" ]] || { echo "config.toml on $host does not match $config" >&2; exit 1; }
+[[ "$(field agents)" == "$want_agents" ]] || { echo "~/.agents on $host has $(field agents) files, the dotfiles $want_agents" >&2; exit 1; }
 
-echo "Installed sous $(field version) and the Windows config on $host"
+echo "Installed sous $(field version), the Windows config and $want_agents ~/.agents files on $host"
 case "$(field engine)" in
   running) echo "The engine runs from the logon task sous" ;;
   *) echo "The engine did not start; the logon task sous starts it when the owner logs on to $host" ;;

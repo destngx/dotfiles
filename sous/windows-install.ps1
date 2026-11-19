@@ -1,5 +1,5 @@
 # Runs on the Windows machine, copied there and started by bin/sous-windows-push after it copies
-# sous.exe.new and config.toml.new. It stops the engine, puts the new files in place, registers the
+# sous.exe.new, config.toml.new and sous-agents.tar. It stops the engine, puts the new files in place, registers the
 # logon task that runs the engine (W-service option A in the monorepo's docs/sous/windows-port.md),
 # starts it, and publishes the tailnet port once the port refuses a caller who is not the owner.
 # It prints key=value lines for the push script to check.
@@ -26,6 +26,17 @@ Start-Sleep -Seconds 2
 Move-Item "$bin\sous.exe.new" "$bin\sous.exe" -Force
 Move-Item "$cfg\config.toml.new" "$cfg\config.toml" -Force
 icacls "$cfg\config.toml" /inheritance:r /grant:r "${env:USERNAME}:F" "SYSTEM:F" "Administrators:F" | Out-Null
+
+# ~/.agents is the owner's global skills, tools and routines, a link into the dotfiles on the Macs.
+# Here it is a copy, replaced whole from agents.tar so a file removed in the dotfiles goes too.
+$agents = "$env:USERPROFILE\.agents"
+Remove-Item "$agents.new" -Recurse -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force "$agents.new" | Out-Null
+tar.exe -xf "$env:USERPROFILE\sous-agents.tar" -C "$agents.new" --strip-components 1
+if ($LASTEXITCODE -ne 0) { throw "tar could not unpack sous-agents.tar" }
+Remove-Item $agents -Recurse -Force -ErrorAction SilentlyContinue
+Move-Item "$agents.new" $agents
+Remove-Item "$env:USERPROFILE\sous-agents.tar" -Force
 
 # Task Scheduler keeps no output, so the task runs this wrapper, which appends the engine's
 # stdout and stderr to serve.log in the state folder, as launchd.log does on the Macs.
@@ -74,6 +85,7 @@ if ($up) {
 
 "bin=" + (Get-FileHash "$bin\sous.exe").Hash.ToLower()
 "config=" + (Get-FileHash "$cfg\config.toml").Hash.ToLower()
+"agents=" + (Get-ChildItem $agents -Recurse -File).Count
 "version=" + (& "$bin\sous.exe" version)
 "engine=" + $(if ($up) { "running" } else { "stopped" })
 "published=$published"
