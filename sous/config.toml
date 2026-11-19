@@ -417,6 +417,7 @@ tools = [
   "Bash(sous *)", "Read", "Glob", "Grep",
   "Bash(git fetch origin main)", "Bash(git merge --ff-only origin/main)", "Bash(git merge-base --is-ancestor *)",
   "Bash(pnpm install --frozen-lockfile)", "Bash(pnpx nx run sous:install)", "Bash(pnpx nx run sous:load-agent)",
+  "Bash(pnpx nx run herdr-glance:load-agent)",
   "Bash(git fetch origin)",
 ]
 capabilities = ["pr-manage", "land"]
