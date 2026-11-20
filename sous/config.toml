@@ -18,6 +18,14 @@ per_project = 5
 
 [workers.projects]
 
+# Which Mac pushes, opens the PR for and lands each repo (D-split-work-and-land):
+# the key is the origin remote in lower case, with no scheme, user or .git, and
+# the value a machine name as sous status lists it. Any Mac works and reviews;
+# when a task passes review elsewhere, its engine hands the reviewed head to the
+# Mac named here. Each Mac's index.json must list the repo with its origin remote.
+[land.on]
+"github.com/destngx/monorepo" = "destnguyxns-macbook-air"
+
 # The sous mate's and intake's models and effort; a worker's and a reviewer's are
 # its profile's, and the machine mate's is [helper]'s, below.
 [models]
