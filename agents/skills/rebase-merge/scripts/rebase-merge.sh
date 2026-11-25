@@ -11,6 +11,7 @@
 #
 # The base defaults to origin's default branch (refs/remotes/origin/HEAD), or main when origin/HEAD is not set.
 # prepare, land and cleanup print base=<branch> first. The keys old_main and main hold the base's old and new tips.
+# land prints sous_update=<sha> when the landing changed sous on the default branch.
 #
 # Exit codes:
 #   0 done            1 usage or unexpected error   2 precondition not met   3 rebase conflict
@@ -207,6 +208,15 @@ cmd_land() {
   kv pr_state "${pr%% *}"
   [[ "$pr" != *" "* ]] || kv pr_detail "${pr#* }"
   kv vercel_apps "$(vercel_apps_at "$tip" | paste -sd ' ' -)"
+  if sous_changed "$wt" "$old_main" "$tip"; then kv sous_update "$tip"; fi
+}
+
+# True when a landing on the default branch changed sous: apps/sous in the repo whose apps/sous/go.mod declares
+# module apps/sous. Every machine then updates sous; a landing sous made itself starts that on its own.
+sous_changed() {
+  [[ "$base" == "$(default_base)" ]] || return 1
+  git -C "$1" show "$3:apps/sous/go.mod" 2>/dev/null | grep -qx 'module apps/sous' || return 1
+  [[ -n "$(git -C "$1" diff --name-only "$2" "$3" -- apps/sous)" ]]
 }
 
 # Polls the production deployment of one app for a commit until it reaches a final state. Prints the state and URL.

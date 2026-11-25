@@ -94,6 +94,12 @@ changing the script.
    - `pr_state=OPEN` after the retries usually means GitHub is slow. Check again with
      `gh pr view <branch> --json state` before reporting it.
 
+   - `sous_update=<sha>` means the landing changed sous on the default branch. A merge made outside a sous task
+     asks no machine to update, so start the update now, from the primary checkout:
+     `sous update start <sha> --words "<the user's words that asked for this merge>"`. It prints `started:` (this
+     Mac's machine mate updates, then the other machines are asked) or `current:` (nothing to update); both are
+     fine. Any other answer is a refusal with its reason: report it, and never run the self-update steps by hand.
+
    Keep `old_main` and `vercel_apps` from the output for the next steps.
 
 4. **Watch the deploy.** If `vercel_apps` is empty, go to step 5.
@@ -152,7 +158,7 @@ changing the script.
    whether to delete it.
 
 6. **Report.** The new `main` SHA, the one landed commit (`git log --oneline <old_main>..origin/main`), the PR state,
-   the deploy URL and status, what the live check covered, what was cleaned up, and whether the primary checkout was
+   the `sous update start` answer when there was one, the deploy URL and status, what the live check covered, what was cleaned up, and whether the primary checkout was
    pulled.
 
 ## Done when

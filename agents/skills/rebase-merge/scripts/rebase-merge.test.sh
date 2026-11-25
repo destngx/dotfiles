@@ -246,6 +246,39 @@ test_land_fast_forwards_main() {
   assert_eq "$(git -C "$T/wt" branch --show-current)" "feat/x" "worktree still on the branch"
 }
 
+test_land_names_a_sous_change() {
+  setup land-sous
+  mkdir -p "$T/wt/apps/sous"
+  echo "module apps/sous" >"$T/wt/apps/sous/go.mod"
+  git -C "$T/wt" add -A
+  git -C "$T/wt" commit -qm "feat(sous): y"
+  run "$T/wt" prepare
+  run "$T/wt" land
+  assert_eq "$code" 0 "exit code" || return
+  assert_contains "$out" "sous_update=$(git -C "$T/wt" rev-parse feat/x)" "sous update"
+}
+
+test_land_names_no_sous_change_elsewhere() {
+  setup land-no-sous
+  run "$T/wt" prepare
+  run "$T/wt" land
+  assert_eq "$code" 0 "exit code" || return
+  [[ "$out" != *sous_update=* ]] || fail "no sous change, got: $out"
+}
+
+test_land_names_no_sous_change_off_the_default_branch() {
+  setup land-sous-other-base
+  git -C "$T/primary" push -q origin main:release
+  mkdir -p "$T/wt/apps/sous"
+  echo "module apps/sous" >"$T/wt/apps/sous/go.mod"
+  git -C "$T/wt" add -A
+  git -C "$T/wt" commit -qm "feat(sous): y"
+  run "$T/wt" prepare --base release
+  run "$T/wt" land --base release
+  assert_eq "$code" 0 "exit code" || return
+  [[ "$out" != *sous_update=* ]] || fail "landing on release, got: $out"
+}
+
 test_land_without_pr() {
   setup land-no-pr
   run "$T/wt" prepare
