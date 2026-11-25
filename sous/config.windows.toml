@@ -211,7 +211,7 @@ reviewer = "high"
 
 [profiles.strategy]
 why = "an owner-approved change to a project's STRATEGY.md, the principles and non-goals that every other profile only reads"
-runtime = "seatbelt"
+runtime = "claude-rules"
 domains = ["*"]
 web_search = true
 unprotect = ["**/STRATEGY.md"]
