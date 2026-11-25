@@ -1,0 +1,24 @@
+{
+  "fire": [
+    { "name": "setup-strategy-sous", "prompt": "let set up the strategy for sous" },
+    {
+      "name": "what-goes-in",
+      "context": "We agreed each app gets a STRATEGY.md next to its AGENTS.md.",
+      "prompt": "i not know what to put in STRATEGY.md for health-watcher, help me find it"
+    },
+    { "name": "vision-for-project", "prompt": "write a vision for the wealth-management project, ask me questions to find it" },
+    { "name": "review-strategy", "prompt": "review the strategy of sous, has the project drifted from it?" },
+    {
+      "name": "update-strategy",
+      "context": "The reviewer refused a change citing principle 3 and the owner overruled it.",
+      "prompt": "update the strategy so this does not get refused again"
+    }
+  ],
+  "no_fire": [
+    { "name": "grill-plan", "prompt": "grill me on this plan: move health-watcher to Postgres" },
+    { "name": "write-spec", "prompt": "write the requirements for the CSV export in wealth-management" },
+    { "name": "edit-agents-md", "prompt": "add the new test command to the wealth-management AGENTS.md" },
+    { "name": "image-vision", "prompt": "add computer vision to read the receipt photo in the capture inbox" },
+    { "name": "trading-strategy", "prompt": "backtest a moving average trading strategy on VNM in market-data-server" }
+  ]
+}

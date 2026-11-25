@@ -1,0 +1,9 @@
+{
+  "phrases": [
+    "\\bstrategy (for|of)\\b(?! .*\\b(trading|backtest))",
+    "\\bSTRATEGY\\.md\\b",
+    "\\bvision for\\b",
+    "\\bupdate the strategy\\b",
+    "\\bdrifted\\b"
+  ]
+}

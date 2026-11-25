@@ -51,8 +51,10 @@ hard_limits = ["~/.kube", "~/.aws", "~/.ssh", "~/.claude", "{claude_config}", "~
 # Patterns, relative to the projects folder, for what no session writes in any
 # project. **/NAME also protects every NAME folder found at launch. The
 # owner's global skills (dotfiles/agents) run unsandboxed in the mates'
-# sessions, and dotfiles/claude is Claude's own config.
-protect = ["**/.claude", "dotfiles/agents", "dotfiles/claude"]
+# sessions, and dotfiles/claude is Claude's own config. A project's
+# STRATEGY.md changes only with the owner's approval, through the strategy
+# profile.
+protect = ["**/.claude", "dotfiles/agents", "dotfiles/claude", "**/STRATEGY.md"]
 # Folders that hold a repo's git hooks: protected everywhere, and the files
 # their scripts name are protected in every checkout but the session's own.
 hook_folders = [".husky", ".githooks"]
@@ -393,6 +395,21 @@ ship-worker = "opus"
 lookup = "sonnet"
 reviewer = "opus"
 [profiles.butler.effort]
+ship-worker = "high"
+lookup = "medium"
+reviewer = "high"
+
+[profiles.strategy]
+why = "an owner-approved change to a project's STRATEGY.md, the principles and non-goals that every other profile only reads"
+runtime = "seatbelt"
+domains = ["*"]
+web_search = true
+unprotect = ["**/STRATEGY.md"]
+[profiles.strategy.models]
+ship-worker = "opus"
+lookup = "sonnet"
+reviewer = "opus"
+[profiles.strategy.effort]
 ship-worker = "high"
 lookup = "medium"
 reviewer = "high"

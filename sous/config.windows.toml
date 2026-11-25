@@ -33,7 +33,7 @@ projects = "~/projects"
 
 [guard]
 hard_limits = ["~/.kube", "~/.aws", "~/.ssh", "~/.claude", "{claude_config}"]
-protect = ["**/.claude", "dotfiles/agents", "dotfiles/claude"]
+protect = ["**/.claude", "dotfiles/agents", "dotfiles/claude", "**/STRATEGY.md"]
 hook_folders = [".husky", ".githooks"]
 hook_inputs = [
   "package.json", ".lintstagedrc*", "lint-staged.config.*", "lefthook*", ".lefthook*",
@@ -205,6 +205,21 @@ ship-worker = "opus"
 lookup = "sonnet"
 reviewer = "opus"
 [profiles.butler.effort]
+ship-worker = "high"
+lookup = "medium"
+reviewer = "high"
+
+[profiles.strategy]
+why = "an owner-approved change to a project's STRATEGY.md, the principles and non-goals that every other profile only reads"
+runtime = "seatbelt"
+domains = ["*"]
+web_search = true
+unprotect = ["**/STRATEGY.md"]
+[profiles.strategy.models]
+ship-worker = "opus"
+lookup = "sonnet"
+reviewer = "opus"
+[profiles.strategy.effort]
 ship-worker = "high"
 lookup = "medium"
 reviewer = "high"
