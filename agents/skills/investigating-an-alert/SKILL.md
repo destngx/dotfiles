@@ -1,13 +1,13 @@
 ---
 name: investigating-an-alert
-description: Investigate an alert that a monitor such as dev-cpu-watch raised as a sous task. Confirm the alert is still real, find the cause with read-only checks, and file a report with a recommended fix, without stopping processes or changing code. Use when a sous brief comes from an alert source rather than the owner, such as "alert from dev-cpu-watch, node at 380% CPU for 10 minutes" or "disk-watch says ezmacmini is 96% full". Not for a question the owner asked (writing-a-report) and not for applying the fix, which is a separate ship task.
+description: Investigate an alert that a monitor such as cpu-watch-example raised as a sous task. Confirm the alert is still real, find the cause with read-only checks, and file a report with a recommended fix, without stopping processes or changing code. Use when a sous brief comes from an alert source rather than the owner, such as "alert from cpu-watch-example, node at 380% CPU for 10 minutes" or "disk-watch says ezmacmini is 96% full". Not for a question the owner asked (writing-a-report) and not for applying the fix, which is a separate ship task.
 ---
 
 <!-- Adapted from the scout-completion and diagnostic-reasoning skills in firstmate, https://github.com/kunchenguid/firstmate, MIT License, Copyright (c) 2026 Kun Chen. -->
 
 # investigating-an-alert
 
-A monitor, such as `dev-cpu-watch`, raises an alert with `sous task add --source <tool> --key <fingerprint>`. Sous turns every alert into an investigate task. A sous worker finds out whether the alert is real and what caused it, and files a report with a recommended fix. The worker never applies the fix, not even to stop a runaway process. A fix is a separate task under the normal rules, and the owner approves it.
+A monitor, such as `cpu-watch-example`, raises an alert with `sous task add --source <tool> --key <fingerprint>`. Sous turns every alert into an investigate task. A sous worker finds out whether the alert is real and what caused it, and files a report with a recommended fix. The worker never applies the fix, not even to stop a runaway process. A fix is a separate task under the normal rules, and the owner approves it.
 
 ## When to use it
 
